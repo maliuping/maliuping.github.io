@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>MLP 技术博客</title>
+<meta name="keywords" content="">
+<meta name="description" content="1 下载源码
+git clone https://github.com/FreeRTOS/FreeRTOS-Kernel.git
+clone后路径情况如下：
+.
+├── CMakeLists.txt
+├── croutine.c
+├── cspell.config.yaml
+├── event_groups.c
+├── examples
+│   ├── cmake_example
+│   ├── coverity
+│   ├── README.md
+│   └── template_configuration
+├── GitHub-FreeRTOS-Kernel-Home.url
+├── History.txt
+├── include
+│   ├── atomic.h
+│   ├── CMakeLists.txt
+│   ├── croutine.h
+│   ├── deprecated_definitions.h
+│   ├── event_groups.h
+│   ├── FreeRTOS.h
+│   ├── list.h
+│   ├── message_buffer.h
+│   ├── mpu_prototypes.h
+│   ├── mpu_syscall_numbers.h
+│   ├── mpu_wrappers.h
+│   ├── newlib-freertos.h
+│   ├── picolibc-freertos.h
+│   ├── portable.h
+│   ├── projdefs.h
+│   ├── queue.h
+│   ├── semphr.h
+│   ├── stack_macros.h
+│   ├── StackMacros.h
+│   ├── stdint.readme
+│   ├── stream_buffer.h
+│   ├── task.h
+│   └── timers.h
+├── LICENSE.md
+├── list.c
+├── manifest.yml
+├── MISRA.md
+├── portable
+│   ├── ARMClang
+│   ├── ARMv8M
+│   ├── BCC
+│   ├── CCRH
+│   ├── CCS
+│   ├── CMakeLists.txt
+│   ├── CodeWarrior
+│   ├── Common
+│   ├── GCC
+│   ├── IAR
+│   ├── Keil
+│   ├── MemMang
+│   ├── MikroC
+│   ├── MPLAB
+│   ├── MSVC-MingW
+│   ├── oWatcom
+│   ├── Paradigm
+│   ├── readme.txt
+│   ├── Renesas
+│   ├── Rowley
+│   ├── RVDS
+│   ├── SDCC
+│   ├── Softune
+│   ├── Tasking
+│   ├── template
+│   ├── ThirdParty
+│   └── WizC
+├── queue.c
+├── Quick_Start_Guide.url
+├── README.md
+├── stream_buffer.c
+├── tasks.c
+└── timers.c
+2 删除和riscv无关的code">
+<meta name="author" content="MLP">
+<link rel="canonical" href="http://localhost:1313/riscv-interrubt/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.cd9298b33628769aa1bc1acebbbfd7aa11ce81dfe03484d479e1907760249a1d.css" integrity="sha256-zZKYszYodpqhvBrOu7/XqhHOgd/gNITUeeGQd2Akmh0=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/riscv-interrubt/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="header-nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="MLP 技术博客 (Alt + H)">MLP 技术博客</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu" class="menu">
+            <li>
+                <a href="http://localhost:1313/archives/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="搜索 (Alt &#43; /)" accesskey=/>
+                    <span>搜索</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="标签">
+                    <span>标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="关于">
+                    <span>关于</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <nav class="breadcrumbs" role="navigation" aria-label="Breadcrumb">
+            <a href="/">Home</a>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+</nav>
+    <h1 class="post-title entry-hint-parent">
+      
+    </h1>
+    <div class="post-meta">
+
+<span>4 min</span>&nbsp;·&nbsp;<span>MLP</span>
+
+</div>
+  </header> 
+  <div class="post-content md-content"><p>1 下载源码
+git clone <a href="https://github.com/FreeRTOS/FreeRTOS-Kernel.git">https://github.com/FreeRTOS/FreeRTOS-Kernel.git</a>
+clone后路径情况如下：
+.
+├── CMakeLists.txt
+├── croutine.c
+├── cspell.config.yaml
+├── event_groups.c
+├── examples
+│   ├── cmake_example
+│   ├── coverity
+│   ├── README.md
+│   └── template_configuration
+├── GitHub-FreeRTOS-Kernel-Home.url
+├── History.txt
+├── include
+│   ├── atomic.h
+│   ├── CMakeLists.txt
+│   ├── croutine.h
+│   ├── deprecated_definitions.h
+│   ├── event_groups.h
+│   ├── FreeRTOS.h
+│   ├── list.h
+│   ├── message_buffer.h
+│   ├── mpu_prototypes.h
+│   ├── mpu_syscall_numbers.h
+│   ├── mpu_wrappers.h
+│   ├── newlib-freertos.h
+│   ├── picolibc-freertos.h
+│   ├── portable.h
+│   ├── projdefs.h
+│   ├── queue.h
+│   ├── semphr.h
+│   ├── stack_macros.h
+│   ├── StackMacros.h
+│   ├── stdint.readme
+│   ├── stream_buffer.h
+│   ├── task.h
+│   └── timers.h
+├── LICENSE.md
+├── list.c
+├── manifest.yml
+├── MISRA.md
+├── portable
+│   ├── ARMClang
+│   ├── ARMv8M
+│   ├── BCC
+│   ├── CCRH
+│   ├── CCS
+│   ├── CMakeLists.txt
+│   ├── CodeWarrior
+│   ├── Common
+│   ├── GCC
+│   ├── IAR
+│   ├── Keil
+│   ├── MemMang
+│   ├── MikroC
+│   ├── MPLAB
+│   ├── MSVC-MingW
+│   ├── oWatcom
+│   ├── Paradigm
+│   ├── readme.txt
+│   ├── Renesas
+│   ├── Rowley
+│   ├── RVDS
+│   ├── SDCC
+│   ├── Softune
+│   ├── Tasking
+│   ├── template
+│   ├── ThirdParty
+│   └── WizC
+├── queue.c
+├── Quick_Start_Guide.url
+├── README.md
+├── stream_buffer.c
+├── tasks.c
+└── timers.c
+2 删除和riscv无关的code</p>
+<ul>
+<li>Freertos 核心代码包含在三个文件中，分别称为 task.c、queue.c 和 list.c。 这三个文件位于 FreeRTOS/Source 目录中。同一目录包含两个 名为 timers.c 和 croutine.c 的可选文件，分别实现软件计时器和协程功能。</li>
+<li>每个处理器架构都需要少量的架构特定 RTOS 代码。这是 RTOS 可移植层，位于 FreeRTOS/Source/Portable/[compiler]/[architecture] 子目录，其中 [compiler] 和 [architecture] 分别是用于创建移植的编译器 和移植运行的架构。</li>
+<li>出于 内存管理页面上所述的原因， 示例堆分配方案也位于可移植层中。各种示例 heap_x.c 文件位于 FreeRTOS/Source/portable/MemMang 目录中。这里选择heap_4
+基于以上综述：</li>
+</ul>
+<ol>
+<li>删除portable下GCC以外的所有目录；删除portable/GCC 下 RISC-V以外的所有目录；</li>
+<li>拷贝examples/template_configuration/FreeRTOSConfig.h 到根目录</li>
+<li>删除croutine.c， event_groups.c， include/， list.c， queue.c， stream_buffer.c， tasks.c， timers.c以外的所有文件和目录
+最终如下：
+暂时无法在飞书文档外展示此内容
+3 port 层
+portable/GCC/RISC-V目录下，主要是port.c、portASM.S、portmacro.h文件
+3.1 port.c
+port.c中vPortSetupTimerInterrupt主要是基于riscv clint实现一个硬件定时器中断。用于调度task。
+这里在M模式下，要修改的不多。主要是根据你的硬件修改configMTIME_BASE_ADDRESS， configMTIMECMP_BASE_ADDRESS。
+[图片]</li>
+</ol>
+<p>configMTIME_BASE_ADDRESS 和 configMTIMECMP_BASE_ADDRESS 必须在 FreeRTOSConfig.h 中定义。</p>
+<p>3.2 portASM.S
+portASM用于处理中断和异常，所有的异常和中断入口均从freertos_risc_v_trap_handler进入。进行相关的压栈操作后检查mcause寄存器，根据寄存器相关bit可以区分异常，timer中断，software中断和其他外部中断。</p>
+<p>4 编写启动测试代码
+4.1 FreeRTOSConfig.h
+如果目标 RISC-V 芯片包含一个机器计时器（MTIME），则将 configMTIME_BASE_ADDRESS 设置为 MTIME 的基地址，将 configMTIMECMP_BASE_ADDRESS 设置为 MTIME 的比较寄存器（MTIMECMP）的地址。
+否则，将这两个定义都设置为 0。
+因为我们打算移植的板子是virt, 如下：
+[图片]
+#define configMTIME_BASE_ADDRESS        (0x0200BFF8UL)
+#define configMTIMECMP_BASE_ADDRESS     (0x02004000UL)
+4.2 start.s
+启动文件配置栈指针，加载data段，初始化bss段，跳转main
+#include &ldquo;platform.h&rdquo;</p>
+<pre><code>.section .init
+.globl _start
+.type _start,@function
+</code></pre>
+<p>_start:
+.cfi_startproc
+.cfi_undefined ra
+.option push
+.option norelax
+la  gp, __global_pointer$
+.option pop</p>
+<pre><code>// Continue primary hart
+csrr a0, mhartid
+li   a1, PRIM_HART
+bne  a0, a1, secondary
+
+// Primary hart
+la sp, _stack_top
+
+// Load data section
+la a0, _data_lma
+la a1, _data
+la a2, _edata
+bgeu a1, a2, 2f
+</code></pre>
+<p>1:
+LOAD t0, (a0)
+STOR t0, (a1)
+addi a0, a0, REGSIZE
+addi a1, a1, REGSIZE
+bltu a1, a2, 1b
+2:</p>
+<pre><code>// Clear bss section
+la a0, _bss
+la a1, _ebss
+bgeu a0, a1, 2f
+</code></pre>
+<p>1:
+STOR zero, (a0)
+addi a0, a0, REGSIZE
+bltu a0, a1, 1b
+2:
+mde:
+// argc, argv, envp is 0
+li  a0, 0
+li  a1, 0
+li  a2, 0
+jal main
+1:
+wfi
+j 1b</p>
+<p>secondary:
+// TODO: Multicore is not supported
+wfi
+j secondary
+.cfi_endproc
+4.3 linker.ld
+OUTPUT_ARCH( &ldquo;riscv&rdquo; )
+ENTRY( _start )</p>
+<p>__stack_size = 0x4000;</p>
+<p>MEMORY
+{
+/* Fake ROM area */
+rom (rxa) : ORIGIN = 0x80000000, LENGTH = 512K
+ram (wxa) : ORIGIN = 0x80080000, LENGTH = 512K
+}</p>
+<p>SECTIONS
+{
+__stack_size = DEFINED(__stack_size) ? __stack_size : 2K;</p>
+<pre><code>    .init :
+    {
+            _text = .;
+            KEEP (*(SORT_NONE(.init)))
+    } &gt;rom AT&gt;rom
+
+    .text :
+    {
+            *(.text.unlikely .text.unlikely.*)
+            *(.text.startup .text.startup.*)
+            *(.text .text.*)
+            *(.gnu.linkonce.t.*)
+    } &gt;rom AT&gt;rom
+
+    .fini :
+    {
+            KEEP (*(SORT_NONE(.fini)))
+            _etext = .;
+    } &gt;rom AT&gt;rom
+
+    .rodata.align ALIGN(4):
+    {
+            _rodata = .;
+    } &gt;rom AT&gt;rom
+
+    .rodata.start :
+    {
+            _rodata_lma = LOADADDR(.rodata.start);
+    } &gt;rom AT&gt;rom
+
+    .rodata :
+    {
+            *(.rdata)
+            *(.rodata .rodata.*)
+            *(.gnu.linkonce.r.*)
+
+            . = ALIGN(4);
+            _erodata = .;
+    } &gt;rom AT&gt;rom
+
+    .data.align :
+    {
+            . = ALIGN(4);
+            _data = .;
+    } &gt;ram AT&gt;rom
+
+    .data.start :
+    {
+            _data_lma = LOADADDR(.data.start);
+    } &gt;ram AT&gt;rom
+
+    .data :
+    {
+            *(.data .data.*)
+            *(.gnu.linkonce.d.*)
+            . = ALIGN(8);
+            PROVIDE( __global_pointer$ = . + 0x800 );
+            *(.sdata .sdata.*)
+            *(.sdata2 .sdata2.*)
+            *(.gnu.linkonce.s.*)
+            . = ALIGN(8);
+            *(.srodata.cst16)
+            *(.srodata.cst8)
+            *(.srodata.cst4)
+            *(.srodata.cst2)
+            *(.srodata .srodata.*)
+
+            . = ALIGN(4);
+            _edata = .;
+    } &gt;ram AT&gt;rom
+
+    .tdata : {
+            *(.tdata .tdata.*)
+    } &gt;rom AT&gt;rom
+
+    .tbss (NOLOAD) : {
+            *(.tbss .tbss.* .gnu.linkonce.tb.*)
+            *(.tcommon)
+            PROVIDE( __tbss_end = . );
+            PROVIDE( __tls_end = . );
+    } &gt;rom AT&gt;rom
+    PROVIDE( __tdata_source = LOADADDR(.tdata) );
+    PROVIDE( __tdata_source_end = LOADADDR(.tdata) + SIZEOF(.tdata) );
+    PROVIDE( __tdata_size = SIZEOF(.tdata) );
+    PROVIDE( __tbss_offset = ADDR(.tbss) - ADDR(.tdata) );
+    PROVIDE( __tbss_start = ADDR(.tbss) );
+    PROVIDE( __tbss_size = SIZEOF(.tbss) );
+    PROVIDE( __tls_size = __tls_end - ADDR(.tdata) );
+    PROVIDE( __tls_align = MAX(ALIGNOF(.tdata), ALIGNOF(.tbss)) );
+
+    .bss.align :
+    {
+            . = ALIGN(4);
+            _bss = .;
+    } &gt;ram AT&gt;rom
+
+    .bss.start :
+    {
+            _bss_lma = LOADADDR(.bss.start);
+    } &gt;ram AT&gt;rom
+
+    .bss :
+    {
+            *(.sbss*)
+            *(.gnu.linkonce.sb.*)
+            *(.bss .bss.*)
+            *(.gnu.linkonce.b.*)
+            *(COMMON)
+
+            . = ALIGN(4);
+            _ebss = .;
+    } &gt;ram AT&gt;rom
+
+    . = ALIGN(8);
+    _end = .;
+
+    .stack :
+    {
+            . = ALIGN(16);
+            . += __stack_size;
+            _stack_top = .;
+            __freertos_irq_stack_top = .;
+    } &gt;ram AT&gt;ram
+</code></pre>
+<p>}</p>
+<p>参考：
+源码组织
+内存分配
+RISC-V QEMU sifive demo</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">MLP 技术博客</a></span> · 
+
+    
+    
+    <span>
+        Powered by
+        <a href="https://gohugo.io/?utm_source=papermod" rel="noopener" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" id="top-link" class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up">
+        <polyline points="17 11 12 6 7 11"></polyline>
+        <polyline points="17 18 12 13 7 18"></polyline>
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var toplink = document.getElementById("top-link");
+    window.onscroll = function () {
+        const scrollThreshold = window.innerHeight;
+        if (document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold) {
+            toplink.classList.remove("hidden");
+        } else {
+            toplink.classList.add("hidden");
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
