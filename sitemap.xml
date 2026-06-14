@@ -2,23 +2,18 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:1313/</loc>
-    <lastmod>2026-06-11T00:21:53+08:00</lastmod>
+    <loc>https://maliuping.github.io/archives/</loc>
   </url><url>
-    <loc>http://localhost:1313/posts/</loc>
-    <lastmod>2026-06-11T00:21:53+08:00</lastmod>
+    <loc>https://maliuping.github.io/categories/</loc>
   </url><url>
-    <loc>http://localhost:1313/posts/riscv/interrubt/</loc>
-    <lastmod>2026-06-11T00:21:53+08:00</lastmod>
+    <loc>https://maliuping.github.io/</loc>
   </url><url>
-    <loc>http://localhost:1313/archives/</loc>
+    <loc>https://maliuping.github.io/posts/</loc>
   </url><url>
-    <loc>http://localhost:1313/categories/</loc>
+    <loc>https://maliuping.github.io/search/</loc>
   </url><url>
-    <loc>http://localhost:1313/search/</loc>
+    <loc>https://maliuping.github.io/tags/</loc>
   </url><url>
-    <loc>http://localhost:1313/tags/</loc>
-  </url><url>
-    <loc>http://localhost:1313/about/</loc>
+    <loc>https://maliuping.github.io/about/</loc>
   </url>
 </urlset>
