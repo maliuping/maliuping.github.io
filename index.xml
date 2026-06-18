@@ -6,7 +6,79 @@
     <description>Recent content on Logan&#39;s blog</description>
     <generator>Hugo</generator>
     <language>zh-cn</language>
+    <lastBuildDate>Thu, 18 Jun 2026 07:41:14 +0800</lastBuildDate>
     <atom:link href="https://maliuping.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Aux</title>
+      <link>https://maliuping.github.io/posts/display/dp/aux/</link>
+      <pubDate>Thu, 18 Jun 2026 07:41:14 +0800</pubDate>
+      <guid>https://maliuping.github.io/posts/display/dp/aux/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Dpcd</title>
+      <link>https://maliuping.github.io/posts/display/dp/dpcd/</link>
+      <pubDate>Sun, 14 Jun 2026 21:19:57 +0800</pubDate>
+      <guid>https://maliuping.github.io/posts/display/dp/dpcd/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Riscv Interrubt</title>
+      <link>https://maliuping.github.io/posts/riscv/interrupt/</link>
+      <pubDate>Thu, 11 Jun 2026 00:21:53 +0800</pubDate>
+      <guid>https://maliuping.github.io/posts/riscv/interrupt/</guid>
+      <description>&lt;p&gt;1 中断概念
+在riscv中，中断属于异常的一种，其处理过程与异常处理类似。大多数riscv处理器同时支持M模式和S模式下的中断。在默认情况下，中断会在M模式下处理。如处理器支持S模式，那么可以有选择的把部分中断委托给S模式来处理。
+1.1 中断类型
+借mcause寄存器中 中断ID的描述，中断可分为定时器中断，软件中断，外部中断。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;软件中断：
+&lt;ul&gt;
+&lt;li&gt;用于处理器内核之间的通信，处理器核间中断（IPI）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;定时器中断：
+&lt;ul&gt;
+&lt;li&gt;用于操作系统的时钟中断&lt;/li&gt;
+&lt;li&gt;riscv体系规定处理器必须有一个定时器，通常实现在M模式。&lt;/li&gt;
+&lt;li&gt;riscv体系结构为定时器定义了两个64位的寄存器mtime和mtimecmp。它们通常实现在CLINT中&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;外部中断：
+&lt;ul&gt;
+&lt;li&gt;通常是指来自处理器外部设备的中断。
+[图片]&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;通常将软件中断和定时器中断概括为本地中断(CLINT)， 将外部中断称为全局中断。通过sifive FU740-C000可以理解下，FU740-C000的中断架构如下。
+本地中断直接发送到特定的hart，并具有专用的中断值。这种方式可以减少中断延迟，因为不需要仲裁来确定哪个hart处理给定的请求，也不需要额外的内存访问来确定中断原因。
+软件和定时器中断是由Core-Local Interruptor（CLINT）生成的本地中断。FU740-C000不包含其他本地中断源。
+相比之下，全局中断通过平台级中断控制器（PLIC）路由，可以将中断导向系统中的任何hart。将全局中断与hart(s)解耦，允许设计PLIC以适应平台需求，从而支持广泛的属性，如中断数量、优先级和路由方案。
+默认情况下，所有中断都在机器模式下处理。对于支持特权模式的hart，可以选择将中断委托给特权模式处理。
+[图片]&lt;/p&gt;
+&lt;p&gt;1.2 中断处理过程&lt;/p&gt;
+&lt;p&gt;1.3 中断处理相关寄存器
+寄存器
+含义
+mtvec（Machine Trap-Vector Base-Address）
+它保存发生异常时处理器需要跳转到的地址
+mepc（Machine Exception Program Counter）
+当 trap 发生时，hart 会将发生 trap 所对应的指令的地址值（pc）保存在 mepc 中
+mcause（Machine Cause)
+当 trap 发生时，hart 会设置该寄存器通知我们 trap 发生的原因
+mtval（Machine Trap value)
+它保存了 exception 发生时的附加信息：譬如访问地址出错时 的地址信息、或者执行非法指令时的指令本身，对于其他异常，它的值为 0。
+mstatus（Machine Status)
+用于跟踪和控制 hart 的当前操作状态（特别地，包括关闭和打开全局中断）。
+mscratch（Machine Scratch)
+Machine 模式下专用寄存器，可以自己定义其用法
+mie（Machine Interrupt Enable)
+用于进一步控制（打开和关闭）software interrupt/timer interrupt/external interrupt
+mip（Machine Interrupt Pending)
+它列出目前已发生等待处理的中断
+mideleg&lt;/p&gt;</description>
+    </item>
     <item>
       <title>关于</title>
       <link>https://maliuping.github.io/about/</link>
