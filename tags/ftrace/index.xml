@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Ftrace on Logan&#39;s blog</title>
+    <link>https://maliuping.github.io/tags/ftrace/</link>
+    <description>Recent content in Ftrace on Logan&#39;s blog</description>
+    <generator>Hugo</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Tue, 23 Jun 2026 09:56:33 +0800</lastBuildDate>
+    <atom:link href="https://maliuping.github.io/tags/ftrace/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Linux 内核调试：ftrace 通用方法（以DRM/显示子系统为例）</title>
+      <link>https://maliuping.github.io/posts/linux/ftrace/kernel_debugging_with_ftrace/</link>
+      <pubDate>Tue, 23 Jun 2026 09:56:33 +0800</pubDate>
+      <guid>https://maliuping.github.io/posts/linux/ftrace/kernel_debugging_with_ftrace/</guid>
+      <description>&lt;h2 id=&#34;1-为什么要学-ftrace&#34;&gt;1. 为什么要学 ftrace&lt;/h2&gt;
+&lt;p&gt;在内核调试里，经常会遇到这样的问题：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;这个 callback 到底是谁调的？&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;某个函数有没有真正执行到？&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;一次 ioctl / probe / 中断 / commit 的完整调用链是什么？&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;多个回调的执行顺序是什么？&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;某个驱动回调是在 probe 阶段调用，还是运行时 atomic/stream on 阶段调用？&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这类问题，如果只靠 &lt;code&gt;grep&lt;/code&gt; 源码，通常只能知道“&lt;strong&gt;理论上谁可能会调用&lt;/strong&gt;”；但实际运行时到底走了哪条路径、有没有进入某个分支、调用顺序是否符合预期，还是需要&lt;strong&gt;运行时观测&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;而 &lt;strong&gt;ftrace&lt;/strong&gt; 是 Linux 内核里最通用、最实用的一套函数级 tracing 机制，适合做以下事情：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;跟踪函数是否被调用&lt;/li&gt;
+&lt;li&gt;观察函数调用顺序&lt;/li&gt;
+&lt;li&gt;观察“谁调用了谁”&lt;/li&gt;
+&lt;li&gt;从一个入口函数出发，查看整条调用树&lt;/li&gt;
+&lt;li&gt;分析 probe / bind / irq / workqueue / atomic commit / stream on 等流程&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这篇文章整理一套 &lt;strong&gt;ftrace 的通用使用模板&lt;/strong&gt;，并以 &lt;strong&gt;DRM 显示子系统&lt;/strong&gt;中的 bridge / atomic callback 为例，说明如何用它排查问题。后续切换到其他子系统时，只需要替换过滤函数名即可。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h1 id=&#34;2-先回答一个常见疑问ftrace-需要写钩子函数吗&#34;&gt;2. 先回答一个常见疑问：ftrace 需要写“钩子函数”吗？&lt;/h1&gt;
+&lt;p&gt;&lt;strong&gt;通常不需要。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;这是很多人第一次接触 ftrace 时最容易混淆的地方。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

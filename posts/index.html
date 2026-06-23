@@ -162,6 +162,26 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">Linux 内核调试：ftrace 通用方法（以DRM/显示子系统为例）
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>1. 为什么要学 ftrace 在内核调试里，经常会遇到这样的问题：
+这个 callback 到底是谁调的？ 某个函数有没有真正执行到？ 一次 ioctl / probe / 中断 / commit 的完整调用链是什么？ 多个回调的执行顺序是什么？ 某个驱动回调是在 probe 阶段调用，还是运行时 atomic/stream on 阶段调用？ 这类问题，如果只靠 grep 源码，通常只能知道“理论上谁可能会调用”；但实际运行时到底走了哪条路径、有没有进入某个分支、调用顺序是否符合预期，还是需要运行时观测。
+而 ftrace 是 Linux 内核里最通用、最实用的一套函数级 tracing 机制，适合做以下事情：
+跟踪函数是否被调用 观察函数调用顺序 观察“谁调用了谁” 从一个入口函数出发，查看整条调用树 分析 probe / bind / irq / workqueue / atomic commit / stream on 等流程 这篇文章整理一套 ftrace 的通用使用模板，并以 DRM 显示子系统中的 bridge / atomic callback 为例，说明如何用它排查问题。后续切换到其他子系统时，只需要替换过滤函数名即可。
+2. 先回答一个常见疑问：ftrace 需要写“钩子函数”吗？ 通常不需要。
+这是很多人第一次接触 ftrace 时最容易混淆的地方。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-06-23 09:56:33 +0800 +0800'>June 23, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>Logan</span></footer>
+  <a class="entry-link" aria-label="post link to Linux 内核调试：ftrace 通用方法（以DRM/显示子系统为例）" href="https://maliuping.github.io/posts/linux/ftrace/kernel_debugging_with_ftrace/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">Aux
     </h2>
   </header>

@@ -2,6 +2,24 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://maliuping.github.io/tags/ftrace/</loc>
+    <lastmod>2026-06-23T09:56:33+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/tags/linux/</loc>
+    <lastmod>2026-06-23T09:56:33+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/posts/linux/ftrace/kernel_debugging_with_ftrace/</loc>
+    <lastmod>2026-06-23T09:56:33+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/</loc>
+    <lastmod>2026-06-23T09:56:33+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/posts/</loc>
+    <lastmod>2026-06-23T09:56:33+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/tags/</loc>
+    <lastmod>2026-06-23T09:56:33+08:00</lastmod>
+  </url><url>
     <loc>https://maliuping.github.io/posts/display/dp/aux/</loc>
     <lastmod>2026-06-18T07:41:14+08:00</lastmod>
   </url><url>
@@ -12,15 +30,6 @@
     <lastmod>2026-06-18T07:41:14+08:00</lastmod>
   </url><url>
     <loc>https://maliuping.github.io/categories/display/</loc>
-    <lastmod>2026-06-18T07:41:14+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/</loc>
-    <lastmod>2026-06-18T07:41:14+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/posts/</loc>
-    <lastmod>2026-06-18T07:41:14+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/tags/</loc>
     <lastmod>2026-06-18T07:41:14+08:00</lastmod>
   </url><url>
     <loc>https://maliuping.github.io/tags/displayport/</loc>
