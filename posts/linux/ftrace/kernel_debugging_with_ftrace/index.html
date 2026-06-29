@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
-<title>Linux 内核调试：ftrace 通用方法（以DRM/显示子系统为例） | Logan&#39;s blog</title>
+<title>Linux 内核调试：ftrace 通用方法（以DRM/显示子系统为例） | Logan&#39;s Lab</title>
 <meta name="keywords" content="Linux, Ftrace">
 <meta name="description" content="1. 为什么要学 ftrace
 在内核调试里，经常会遇到这样的问题：
@@ -87,7 +87,7 @@
     }
 
 </script><meta property="og:url" content="https://maliuping.github.io/posts/linux/ftrace/kernel_debugging_with_ftrace/">
-  <meta property="og:site_name" content="Logan&#39;s blog">
+  <meta property="og:site_name" content="Logan&#39;s Lab">
   <meta property="og:title" content="Linux 内核调试：ftrace 通用方法（以DRM/显示子系统为例）">
   <meta property="og:description" content="1. 为什么要学 ftrace 在内核调试里，经常会遇到这样的问题：
 这个 callback 到底是谁调的？ 某个函数有没有真正执行到？ 一次 ioctl / probe / 中断 / commit 的完整调用链是什么？ 多个回调的执行顺序是什么？ 某个驱动回调是在 probe 阶段调用，还是运行时 atomic/stream on 阶段调用？ 这类问题，如果只靠 grep 源码，通常只能知道“理论上谁可能会调用”；但实际运行时到底走了哪条路径、有没有进入某个分支、调用顺序是否符合预期，还是需要运行时观测。
@@ -158,7 +158,7 @@
   },
   "publisher": {
     "@type": "Organization",
-    "name": "Logan's blog",
+    "name": "Logan's Lab",
     "logo": {
       "@type": "ImageObject",
       "url": "https://maliuping.github.io/favicon.ico"
@@ -171,7 +171,7 @@
     <header class="header">
     <nav class="header-nav">
         <div class="logo">
-            <a href="https://maliuping.github.io/" accesskey="h" title="Logan&#39;s blog (Alt + H)">Logan&#39;s blog</a>
+            <a href="https://maliuping.github.io/" accesskey="h" title="Logan&#39;s Lab (Alt + H)">Logan&#39;s Lab</a>
             <div class="logo-switches">
                 <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
                     <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
@@ -1213,7 +1213,7 @@ CONFIG_KALLSYMS_ALL=y
     </main>
     
 <footer class="footer">
-        <span>&copy; 2026 <a href="https://maliuping.github.io/">Logan&#39;s blog</a></span> · 
+        <span>&copy; 2026 <a href="https://maliuping.github.io/">Logan&#39;s Lab</a></span> · 
 
     
     

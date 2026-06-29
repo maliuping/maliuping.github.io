@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>Logan&#39;s blog</title>
+    <title>Logan&#39;s Lab</title>
     <link>https://maliuping.github.io/</link>
-    <description>Recent content on Logan&#39;s blog</description>
+    <description>Recent content on Logan&#39;s Lab</description>
     <generator>Hugo</generator>
     <language>zh-cn</language>
     <lastBuildDate>Tue, 23 Jun 2026 09:56:33 +0800</lastBuildDate>
@@ -113,8 +113,8 @@ mideleg&lt;/p&gt;</description>
       <link>https://maliuping.github.io/about/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       <guid>https://maliuping.github.io/about/</guid>
-      <description>&lt;p&gt;嵌入式 Linux 开发工程师&lt;/p&gt;
-&lt;p&gt;研究方向：&lt;/p&gt;
+      <description>&lt;p&gt;一个嵌入式软件工程师，一直在路上&amp;hellip;&lt;/p&gt;
+&lt;p&gt;曾经或未来将涉及的领域：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Linux&lt;/li&gt;
 &lt;li&gt;DRM/KMS&lt;/li&gt;
@@ -123,7 +123,8 @@ mideleg&lt;/p&gt;</description>
 &lt;li&gt;RISC-V&lt;/li&gt;
 &lt;li&gt;U-Boot&lt;/li&gt;
 &lt;li&gt;FPGA&lt;/li&gt;
-&lt;/ul&gt;</description>
+&lt;/ul&gt;
+&lt;p&gt;Email: &lt;a href=&#34;mailto:maliuping.270@foxmail.com&#34;&gt;maliuping.270@foxmail.com&lt;/a&gt;&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>

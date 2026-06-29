@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
-<title>Riscv Interrubt | Logan&#39;s blog</title>
+<title>Riscv Interrubt | Logan&#39;s Lab</title>
 <meta name="keywords" content="RISC-V, Interrupt">
 <meta name="description" content="1 中断概念
 在riscv中，中断属于异常的一种，其处理过程与异常处理类似。大多数riscv处理器同时支持M模式和S模式下的中断。在默认情况下，中断会在M模式下处理。如处理器支持S模式，那么可以有选择的把部分中断委托给S模式来处理。
@@ -115,7 +115,7 @@ mideleg">
     }
 
 </script><meta property="og:url" content="https://maliuping.github.io/posts/riscv/interrupt/">
-  <meta property="og:site_name" content="Logan&#39;s blog">
+  <meta property="og:site_name" content="Logan&#39;s Lab">
   <meta property="og:title" content="Riscv Interrubt">
   <meta property="og:description" content="1 中断概念 在riscv中，中断属于异常的一种，其处理过程与异常处理类似。大多数riscv处理器同时支持M模式和S模式下的中断。在默认情况下，中断会在M模式下处理。如处理器支持S模式，那么可以有选择的把部分中断委托给S模式来处理。 1.1 中断类型 借mcause寄存器中 中断ID的描述，中断可分为定时器中断，软件中断，外部中断。
 软件中断： 用于处理器内核之间的通信，处理器核间中断（IPI） 定时器中断： 用于操作系统的时钟中断 riscv体系规定处理器必须有一个定时器，通常实现在M模式。 riscv体系结构为定时器定义了两个64位的寄存器mtime和mtimecmp。它们通常实现在CLINT中 外部中断： 通常是指来自处理器外部设备的中断。 [图片] 通常将软件中断和定时器中断概括为本地中断(CLINT)， 将外部中断称为全局中断。通过sifive FU740-C000可以理解下，FU740-C000的中断架构如下。 本地中断直接发送到特定的hart，并具有专用的中断值。这种方式可以减少中断延迟，因为不需要仲裁来确定哪个hart处理给定的请求，也不需要额外的内存访问来确定中断原因。 软件和定时器中断是由Core-Local Interruptor（CLINT）生成的本地中断。FU740-C000不包含其他本地中断源。 相比之下，全局中断通过平台级中断控制器（PLIC）路由，可以将中断导向系统中的任何hart。将全局中断与hart(s)解耦，允许设计PLIC以适应平台需求，从而支持广泛的属性，如中断数量、优先级和路由方案。 默认情况下，所有中断都在机器模式下处理。对于支持特权模式的hart，可以选择将中断委托给特权模式处理。 [图片]
@@ -182,7 +182,7 @@ mideleg">
   },
   "publisher": {
     "@type": "Organization",
-    "name": "Logan's blog",
+    "name": "Logan's Lab",
     "logo": {
       "@type": "ImageObject",
       "url": "https://maliuping.github.io/favicon.ico"
@@ -195,7 +195,7 @@ mideleg">
     <header class="header">
     <nav class="header-nav">
         <div class="logo">
-            <a href="https://maliuping.github.io/" accesskey="h" title="Logan&#39;s blog (Alt + H)">Logan&#39;s blog</a>
+            <a href="https://maliuping.github.io/" accesskey="h" title="Logan&#39;s Lab (Alt + H)">Logan&#39;s Lab</a>
             <div class="logo-switches">
                 <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
                     <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
@@ -550,7 +550,7 @@ riscv-plic-spec</li>
     </main>
     
 <footer class="footer">
-        <span>&copy; 2026 <a href="https://maliuping.github.io/">Logan&#39;s blog</a></span> · 
+        <span>&copy; 2026 <a href="https://maliuping.github.io/">Logan&#39;s Lab</a></span> · 
 
     
     
