@@ -32,7 +32,7 @@
 这是很多人第一次接触 ftrace 时最容易混淆的地方。">
 <meta name="author" content="Logan">
 <link rel="canonical" href="https://maliuping.github.io/posts/linux/ftrace/kernel_debugging_with_ftrace/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.1616a23359a6fae7c990527422bec49a0ca1c1970d7b51fb86ea1e4089716daf.css" integrity="sha256-FhaiM1mm&#43;ufJkFJ0Ir7EmgyhwZcNe1H7huoeQIlxba8=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.2a8c9da18ecd8f60e3a36cef4c5c02256c41738a2e5a283f1288d4489b487696.css" integrity="sha256-KoydoY7Nj2Djo2zvTFwCJWxBc4ouWig/EojUSJtIdpY=" rel="preload stylesheet" as="style">
 <link rel="icon" href="https://maliuping.github.io/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="https://maliuping.github.io/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="https://maliuping.github.io/favicon-32x32.png">
@@ -143,8 +143,8 @@
   "keywords": [
     "Linux", "Ftrace"
   ],
-  "articleBody": "1. 为什么要学 ftrace 在内核调试里，经常会遇到这样的问题：\n这个 callback 到底是谁调的？ 某个函数有没有真正执行到？ 一次 ioctl / probe / 中断 / commit 的完整调用链是什么？ 多个回调的执行顺序是什么？ 某个驱动回调是在 probe 阶段调用，还是运行时 atomic/stream on 阶段调用？ 这类问题，如果只靠 grep 源码，通常只能知道“理论上谁可能会调用”；但实际运行时到底走了哪条路径、有没有进入某个分支、调用顺序是否符合预期，还是需要运行时观测。\n而 ftrace 是 Linux 内核里最通用、最实用的一套函数级 tracing 机制，适合做以下事情：\n跟踪函数是否被调用 观察函数调用顺序 观察“谁调用了谁” 从一个入口函数出发，查看整条调用树 分析 probe / bind / irq / workqueue / atomic commit / stream on 等流程 这篇文章整理一套 ftrace 的通用使用模板，并以 DRM 显示子系统中的 bridge / atomic callback 为例，说明如何用它排查问题。后续切换到其他子系统时，只需要替换过滤函数名即可。\n2. 先回答一个常见疑问：ftrace 需要写“钩子函数”吗？ 通常不需要。\n这是很多人第一次接触 ftrace 时最容易混淆的地方。\n2.1 ftrace 和“写钩子”的区别 ftrace（function / function_graph） 不需要改内核代码 不需要写 hook 函数 直接通过 /sys/kernel/tracing/（或 /sys/kernel/debug/tracing/）配置 让内核去跟踪指定函数的调用 你自己写 pr_info() / dump_stack() 需要改驱动源码 适合快速定位某个点 tracepoint 需要内核本身提供 tracepoint，或者自己在代码里加 tracepoint kprobe / kretprobe 可以不改源码动态挂到函数入口/返回 但比 ftrace 更偏“可编程”，使用复杂度更高 2.2 自己驱动里的 static 函数也能 trace 吗？ 可以。\n例如驱动里有：\nstatic void im_mipi_tx_bridge_mode_set(struct drm_bridge *bridge, const struct drm_display_mode *mode, const struct drm_display_mode *adjusted_mode) { ... } 或者：\nstatic int im_mipi_tx_bridge_attach(struct drm_bridge *bridge, enum drm_bridge_attach_flags flags) { ... } 这种函数虽然是 static，但只要：\n编译进内核/模块 没有被完全优化掉 内核开启了 function tracing 相关配置 就可以被 ftrace 跟踪。\nftrace 跟踪的是“编译后的函数入口”，不是“导出符号”的概念。\n3. ftrace 能解决什么问题 我一般把 ftrace 的用途归纳成下面几类：\n3.1 确认某个函数有没有被调用 比如：\nim_mipi_tx_bridge_mode_set() 有没有走到？ drm_atomic_bridge_chain_enable() 有没有被执行？ clk_set_rate() 是否真的被某个路径调用？ 3.2 看调用顺序 比如：\nmode_set -\u003e pre_enable -\u003e enable 的顺序是不是这样？ disable 和 post_disable 谁先谁后？ probe -\u003e component bind -\u003e drm_bridge_attach 的顺序是什么？ 3.3 看“谁调用了谁” 比如：\nim_mipi_tx_bridge_mode_set() 是谁调的？ 是 drm_atomic_bridge_chain_mode_set() 调的，还是别的 helper？ 某个中断处理函数是硬中断上下文进来的，还是 threaded irq？ 3.4 从入口函数出发，看一整条调用链 比如：\n从 drm_atomic_commit() 出发，到底会走哪些 bridge / encoder / connector 回调？ 从 spi_sync() 出发，控制器驱动里哪些函数被调用？ 从 regulator_enable() 出发，底层 PMIC 驱动怎么走？ 4. 内核配置要求 要使用 function / function_graph tracer，内核通常至少需要这些配置：\nCONFIG_DEBUG_FS=y CONFIG_TRACING=y CONFIG_FTRACE=y CONFIG_FUNCTION_TRACER=y CONFIG_FUNCTION_GRAPH_TRACER=y CONFIG_DYNAMIC_FTRACE=y 建议再打开：\nCONFIG_STACKTRACE=y CONFIG_KALLSYMS=y CONFIG_KALLSYMS_ALL=y 这样输出会更完整。\n4.1 查看当前内核配置 如果系统支持 /proc/config.gz：\nzcat /proc/config.gz | egrep 'CONFIG_(FTRACE|FUNCTION_TRACER|FUNCTION_GRAPH_TRACER|DEBUG_FS|TRACING|DYNAMIC_FTRACE)' 5. tracing 目录在哪里 新内核通常在：\n/sys/kernel/tracing 有些系统也可能在：\n/sys/kernel/debug/tracing 建议统一用一个变量：\nTR=/sys/kernel/tracing [ -d \"$TR\" ] || TR=/sys/kernel/debug/tracing echo \"$TR\" 如果 tracefs/debugfs 没挂载，可以手动挂载：\nmount -t tracefs nodev /sys/kernel/tracing 2\u003e/dev/null || true mount -t debugfs none /sys/kernel/debug 2\u003e/dev/null || true 6. ftrace 两种最常用模式 ftrace 里我最常用的是两种 tracer：\nfunction function_graph 7. function tracer：看“有没有被调、谁调了它” 7.1 适用场景 适合回答：\n某个函数到底有没有执行 某个 callback 是谁直接调的 多个关键函数的粗略顺序是什么 例如在 DRM 里排查：\nim_mipi_tx_bridge_mode_set im_mipi_tx_bridge_atomic_enable drm_atomic_commit 7.2 基本步骤 第一步：准备 tracing 环境 TR=/sys/kernel/tracing [ -d \"$TR\" ] || TR=/sys/kernel/debug/tracing echo 0 \u003e $TR/tracing_on echo nop \u003e $TR/current_tracer echo \u003e $TR/trace echo \u003e $TR/set_ftrace_filter 第二步：写入要跟踪的函数列表 例如以 DRM bridge callback 为例：\ncat \u003e /tmp/ftrace_filter.txt \u003c\u003c'EOF' drm_atomic_commit drm_atomic_helper_commit_tail drm_atomic_helper_commit_modeset_disables drm_atomic_helper_commit_modeset_enables drm_atomic_bridge_chain_pre_enable drm_atomic_bridge_chain_enable drm_atomic_bridge_chain_disable drm_atomic_bridge_chain_post_disable drm_bridge_attach devm_drm_of_get_bridge im_mipi_tx_chan_attach im_mipi_tx_bridge_attach im_mipi_tx_bridge_mode_set im_mipi_tx_bridge_atomic_pre_enable im_mipi_tx_bridge_atomic_enable im_mipi_tx_bridge_atomic_disable EOF cat /tmp/ftrace_filter.txt \u003e $TR/set_ftrace_filter 第三步：打开 function tracer echo function \u003e $TR/current_tracer echo 1 \u003e $TR/tracing_on 第四步：触发你要观察的流程 例如：\n跑一次 modetest 让 Weston 切一个显示模式 插拔显示器 触发某个驱动的 stream on/off 第五步：停止 tracing 并读取结果 echo 0 \u003e $TR/tracing_on cat $TR/trace 7.3 输出怎么看 你可能看到类似这样的内容：\n# tracer: function # # entries-in-buffer/entries-written: 20/20 #P:4 # # _-----=\u003e irqs-off/BH-disabled # / _----=\u003e need-resched # | / _---=\u003e hardirq/softirq # || / _--=\u003e preempt-depth # ||| / _-=\u003e migrate-disable # |||| / delay # TASK-PID CPU# ||||| TIMESTAMP FUNCTION # | | | ||||| | | modetest-22892 [000] ...1. 405429.747737: drm_atomic_commit \u003c-drm_atomic_helper_set_config modetest-22892 [000] ...1. 405429.747995: drm_atomic_helper_commit_modeset_disables \u003c-linlondp_kms_commit_tail modetest-22892 [000] ...1. 405429.748016: im_mipi_tx_bridge_mode_set \u003c-drm_bridge_chain_mode_set modetest-22892 [000] ...1. 405429.748028: drm_atomic_bridge_chain_pre_enable \u003c-linlondp_atomic_helper_commit_modeset_enables modetest-22892 [000] ...1. 405429.748034: im_mipi_tx_bridge_atomic_pre_enable \u003c-drm_atomic_bridge_call_pre_enable modetest-22892 [000] ...1. 405429.912283: drm_atomic_bridge_chain_enable \u003c-linlondp_atomic_helper_commit_modeset_enables modetest-22892 [000] ...1. 405429.912300: im_mipi_tx_bridge_atomic_enable \u003c-drm_atomic_bridge_chain_enable modetest-22892 [000] ...1. 405429.913302: drm_atomic_commit \u003c-drm_mode_obj_set_property_ioctl modetest-22892 [000] ...1. 405429.913503: drm_atomic_helper_commit_modeset_disables \u003c-linlondp_kms_commit_tail modetest-22892 [000] ...1. 405430.004372: drm_atomic_commit \u003c-drm_mode_obj_set_property_ioctl modetest-22892 [000] ...1. 405430.004573: drm_atomic_helper_commit_modeset_disables \u003c-linlondp_kms_commit_tail modetest-22892 [000] ...1. 405430.095519: drm_atomic_commit \u003c-drm_mode_obj_set_property_ioctl modetest-22892 [000] ...1. 405430.095690: drm_atomic_helper_commit_modeset_disables \u003c-linlondp_kms_commit_tail kworker/3:1-142 [003] ...1. 405431.995661: drm_atomic_commit \u003c-drm_framebuffer_remove kworker/3:1-142 [003] ...1. 405431.995815: drm_atomic_helper_commit_modeset_disables \u003c-linlondp_kms_commit_tail modetest-22892 [003] ...1. 405432.013936: drm_atomic_commit \u003c-drm_atomic_helper_disable_all modetest-22892 [003] ...1. 405432.014079: drm_atomic_helper_commit_modeset_disables \u003c-linlondp_kms_commit_tail modetest-22892 [003] ...1. 405432.014091: drm_atomic_bridge_chain_disable \u003c-disable_outputs modetest-22892 [003] ...1. 405432.014249: im_mipi_tx_bridge_atomic_disable \u003c-drm_atomic_bridge_chain_disable modetest-22892 [003] ...1. 405432.014368: drm_atomic_bridge_chain_post_disable \u003c-disable_outputs 这个输出至少能回答三件事：\nim_mipi_tx_bridge_mode_set() 确实被调用了 它的直接调用者是 drm_bridge_chain_mode_set() mode_set 发生在 enable 之前 8. function_graph tracer：看完整调用树 如果你不只是想看“有没有调用”，而是想看：\n从某个入口函数开始，到底一路调用了哪些函数、层级关系是什么\n那我更推荐 function_graph。\n8.1 适用场景 特别适合排查：\ndrm_atomic_commit() 的完整 commit 时序 probe / bind / attach 流程 某个 ioctl 进来后，内核里走了哪些 helper / callback 某个子系统的 enable / disable / runtime PM 调用链 8.2 基本步骤 第一步：清理现场 TR=/sys/kernel/tracing [ -d \"$TR\" ] || TR=/sys/kernel/debug/tracing echo 0 \u003e $TR/tracing_on echo nop \u003e $TR/current_tracer echo \u003e $TR/trace echo \u003e $TR/set_ftrace_filter echo \u003e $TR/set_graph_function 第二步：设置“调用树入口” 比如想看一次 DRM atomic commit：\necho drm_atomic_commit \u003e $TR/set_graph_function 这表示： 从 drm_atomic_commit() 开始，画调用树。\n第三步：设置过滤函数 如果不加过滤，输出可能会非常大。 例如只保留 DRM bridge / atomic 主线 + 自己驱动函数：\ncat \u003e $TR/set_ftrace_filter \u003c\u003c'EOF' drm_atomic_commit drm_atomic_helper_commit_tail drm_atomic_helper_commit_modeset_disables drm_atomic_helper_commit_modeset_enables drm_atomic_bridge_chain_pre_enable drm_atomic_bridge_chain_enable drm_atomic_bridge_chain_disable drm_atomic_bridge_chain_post_disable drm_bridge_attach devm_drm_of_get_bridge im_mipi_tx_chan_attach im_mipi_tx_bridge_attach im_mipi_tx_bridge_mode_set im_mipi_tx_bridge_atomic_pre_enable im_mipi_tx_bridge_atomic_enable im_mipi_tx_bridge_atomic_disable EOF 第四步：启用 function_graph tracer echo function_graph \u003e $TR/current_tracer echo 1 \u003e $TR/tracing_on 第五步：触发显示流程并查看结果 echo 0 \u003e $TR/tracing_on cat $TR/trace 8.3 典型输出示意 你会看到类似这样的层级结构：\n# tracer: function_graph # # CPU DURATION FUNCTION CALLS # | | | | | | | 0) | drm_atomic_commit() { 0) | drm_atomic_helper_commit_modeset_disables() { 0) 6.250 us | im_mipi_tx_bridge_mode_set [im_mipi_tx](); 0) + 40.364 us | } 0) | drm_atomic_bridge_chain_pre_enable() { 0) | im_mipi_tx_bridge_atomic_pre_enable [im_mipi_tx]() { 1) * 16769.01 us | } /* im_mipi_tx_bridge_atomic_pre_enable [im_mipi_tx] */ 0) @ 164444.2 us | } 0) | drm_atomic_bridge_chain_enable() { 0) ! 147.656 us | im_mipi_tx_bridge_atomic_enable [im_mipi_tx](); 0) ! 220.052 us | } 0) @ 165581.7 us | } 0) | drm_atomic_commit() { 0) + 19.270 us | drm_atomic_helper_commit_modeset_disables(); 0) * 90886.71 us | } 0) | drm_atomic_commit() { 0) + 19.270 us | drm_atomic_helper_commit_modeset_disables(); 0) * 90976.82 us | } 0) | drm_atomic_commit() { 0) + 24.739 us | drm_atomic_helper_commit_modeset_disables(); 0) * 91021.61 us | } ------------------------------------------ 1) modetes-22861 =\u003e kworker-27127 ------------------------------------------ 1) | drm_atomic_commit() { 1) + 19.271 us | drm_atomic_helper_commit_modeset_disables(); 1) * 20695.83 us | } ------------------------------------------ 1) kworker-27127 =\u003e modetes-22861 ------------------------------------------ 1) | drm_atomic_commit() { 1) | drm_atomic_helper_commit_modeset_disables() { 1) | drm_atomic_bridge_chain_disable() { 1) + 68.229 us | im_mipi_tx_bridge_atomic_disable [im_mipi_tx](); 1) ! 231.771 us | } 1) * 28403.12 us | drm_atomic_bridge_chain_post_disable(); 2) @ 182573.1 us | } /* drm_atomic_helper_commit_modeset_disables */ 2) @ 182787.7 us | } /* drm_atomic_commit */ 这个输出可以非常直观地回答：\nmode_set / pre_enable / enable 的顺序 disable / post_disable 在哪个阶段 某个 callback 是在 atomic helper 的哪个阶段触发的 9. 一个非常重要的技巧：先看 available_filter_functions 很多时候你写进 set_ftrace_filter 的函数名不生效，不是 ftrace 坏了，而是：\n函数名写错了 内核里实际名字和你想的不一样 函数被编译优化成别的形式 模块还没加载，函数暂时不可见 所以我一般都会先查一下：\ngrep im_mipi_tx /sys/kernel/debug/tracing/available_filter_functions grep drm_atomic_bridge_chain /sys/kernel/debug/tracing/available_filter_functions 如果你在调别的子系统，就换成：\ngrep spi_ /sys/kernel/debug/tracing/available_filter_functions grep clk_ /sys/kernel/debug/tracing/available_filter_functions grep regulator_ /sys/kernel/debug/tracing/available_filter_functions 这个步骤非常重要，它能帮你确认：这个函数到底能不能被 ftrace 追踪。\n10. 一套通用排查思路：从“阶段”切 trace，而不是一口气全追 这是我最推荐的工作流。\n不要一上来就把整个子系统全 trace 了，否则输出量会非常大，而且难以看出重点。\n更好的方法是：\n10.1 先把问题拆成阶段 例如 DRM 显示链路，可以拆成：\n阶段 A：probe / bind / attach 关注：\n设备 probe component bind, component_bind_all devm_drm_of_get_bridge drm_bridge_attach 阶段 B：mode 校验 / atomic check 关注：\ndrm_atomic_check_only drm_atomic_helper_check_modeset bridge / encoder 的 mode_valid、atomic_check 阶段 C：mode_set / pre_enable / enable 关注：\ndrm_atomic_commit drm_atomic_bridge_chain_mode_set drm_atomic_bridge_chain_pre_enable drm_atomic_bridge_chain_enable 阶段 D：disable / post_disable 关注：\ndrm_atomic_helper_commit_modeset_disables drm_atomic_bridge_chain_disable drm_atomic_bridge_chain_post_disable 10.2 其他子系统也可以这样拆 比如 SPI 控制器：\nprobe 阶段 spi_setup spi_sync / transfer_one_message DMA / IRQ 完成 runtime PM suspend/resume 比如时钟子系统：\nprobe / clk_hw_register clk_prepare_enable clk_set_rate 父时钟切换 disable/unprepare 比如 regulator：\nprobe regulator_get regulator_enable set_voltage disable 核心思路都是一样的：按阶段缩小观察范围。\n11. 一个通用 ftrace 模板脚本 下面这个脚本可以作为通用模板，适合以后迁移到别的子系统。 思路是：\n统一清理 tracing 环境 按函数列表写 filter 选择 function 或 function_graph 可选设置 graph 入口函数 启动 tracing 11.1 通用脚本 trace_template.sh #!/bin/sh TR=/sys/kernel/tracing if [ ! -d \"$TR\" ]; then TR=/sys/kernel/debug/tracing fi TR=/sys/kernel/debug/tracing MODE=\"${1:-graph}\" # function / graph ENTRY=\"${2:-}\" # function_graph 的入口函数，可为空 FILTER_FILE=\"${3:-/tmp/ftrace_filter.txt}\" echo \"[trace] using tracing path: $TR\" echo \"[trace] mode=$MODE entry=$ENTRY filter=$FILTER_FILE\" echo 0 \u003e $TR/tracing_on echo nop \u003e $TR/current_tracer echo \u003e $TR/trace echo \u003e $TR/set_ftrace_filter echo \u003e $TR/set_graph_function if [ -f \"$FILTER_FILE\" ]; then cat \"$FILTER_FILE\" \u003e $TR/set_ftrace_filter fi case \"$MODE\" in function) echo function \u003e $TR/current_tracer ;; graph) echo function_graph \u003e $TR/current_tracer if [ -n \"$ENTRY\" ]; then echo \"$ENTRY\" \u003e $TR/set_graph_function fi ;; *) echo \"Unknown mode: $MODE\" exit 1 ;; esac echo 1 \u003e $TR/tracing_on echo echo \"Tracing started.\" echo \"Do your test now, then stop with:\" echo \" echo 0 \u003e $TR/tracing_on\" echo \"Dump trace with:\" echo \" cat $TR/trace \u003e /tmp/trace.log\" 12. 以 DRM 显示子系统为例：三套常用 filter 下面给三套我实际会用的 filter 文件示例。\n13. 示例一：追 bridge attach / 拓扑搭建阶段 适合排查：\ndevm_drm_of_get_bridge() 找到了谁 drm_bridge_attach() 有没有执行 自己的 bridge_attach() 是谁调的 13.1 drm_attach_filter.txt drm_bridge_attach drm_bridge_attach_next_bridge devm_drm_of_get_bridge im_mipi_tx_chan_attach im_mipi_tx_bridge_attach 13.2 使用方式 ./trace_template.sh graph drm_bridge_attach /tmp/drm_attach_filter.txt 然后触发：\n驱动 probe component bind connector 初始化 你的 channel attach 流程 14. 示例二：追 atomic modeset 主线 适合排查：\nmode_set / pre_enable / enable callback 的执行顺序 自己的 bridge callback 是谁调的 14.1 drm_atomic_filter.txt drm_atomic_commit drm_atomic_helper_commit_tail drm_atomic_helper_commit_modeset_disables drm_atomic_helper_commit_modeset_enables drm_atomic_bridge_chain_mode_set drm_atomic_bridge_chain_pre_enable drm_atomic_bridge_chain_enable drm_atomic_bridge_chain_disable drm_atomic_bridge_chain_post_disable im_mipi_tx_bridge_mode_set im_mipi_tx_bridge_atomic_pre_enable im_mipi_tx_bridge_atomic_enable im_mipi_tx_bridge_atomic_disable 14.2 使用方式 ./trace_template.sh graph drm_atomic_commit /tmp/drm_atomic_filter.txt 然后触发：\nmodetest 桌面环境切换分辨率 屏幕开关 / 热插拔 / modeset 15. 示例三：只看“有没有被调用” 适合快速验证：\n某个 callback 到底有没有走到 不关心整棵调用树，只想知道顺序和直接调用者 15.1 drm_quick_filter.txt drm_atomic_commit drm_atomic_bridge_chain_mode_set drm_atomic_bridge_chain_enable im_mipi_tx_bridge_mode_set im_mipi_tx_bridge_atomic_enable 15.2 使用方式 ./trace_template.sh function \"\" /tmp/drm_quick_filter.txt 16. 如何把这个模板迁移到其他子系统 真正需要替换的，通常只有两样东西：\n入口函数 过滤函数列表 17. 迁移示例：SPI 子系统 如果你要排查 SPI 传输，可以把入口函数换成：\nspi_sync 过滤函数可以换成类似：\nspi_sync __spi_sync spi_transfer_one_message xxx_spi_transfer_one xxx_spi_irq 然后：\n./trace_template.sh graph spi_sync /tmp/spi_filter.txt 18. 迁移示例：Clock 子系统 如果你要看时钟 enable / set_rate 路径，可以尝试：\n入口函数：\nclk_set_rate 或者：\nclk_prepare_enable 过滤函数示例：\nclk_prepare_enable clk_core_prepare clk_core_enable clk_set_rate clk_change_rate xxx_clk_set_rate 19. 迁移示例：Regulator 子系统 入口函数：\nregulator_enable 过滤函数示例：\nregulator_enable _regulator_enable regulator_set_voltage xxx_regulator_enable 20. function 与 function_graph 如何选择 我自己的经验是：\n用 function 的场景 想快速确认某个函数有没有执行 想知道某个 callback 的直接调用者 想看少量关键函数的调用顺序 希望输出尽量简单 用 function_graph 的场景 想看完整调用树 想看一个 ioctl / commit / transfer / enable 的整条路径 想搞清楚多个 helper / callback 的层级关系 在分析一个子系统的主流程 如果拿不准，建议优先用 function_graph，然后通过 缩小 filter 控制输出规模。\n21. 调试时的实战建议 21.1 先用 available_filter_functions 确认函数名 这个步骤很关键，能避免很多无效折腾。\n21.2 不要一次 trace 整个子系统 先拆阶段，再 trace。\n21.3 先看 attach / probe，再看 runtime 流程 很多问题其实在拓扑搭建阶段就已经埋下了，运行时只是“表现出来”。\n21.4 function_graph 输出太大时，先缩小入口函数 比如只从：\ndrm_atomic_commit spi_sync clk_set_rate 开始画。\n21.5 必要时和 dump_stack() 联合使用 如果某个 callback 你只想知道“这一处到底是谁调的”，在驱动里临时加：\npr_info(\"%s\\n\", __func__); dump_stack(); 通常比大面积 trace 更快出答案。\n22. 以 DRM bridge callback 为例的典型问题与解法 问题 1：im_mipi_tx_bridge_mode_set() 是谁调的？ 方法 function 模式\nfilter 加：\ndrm_atomic_bridge_chain_mode_set im_mipi_tx_bridge_mode_set 观察点 看输出中：\nim_mipi_tx_bridge_mode_set \u003c- drm_atomic_bridge_chain_mode_set 问题 2：mode_set / pre_enable / enable 顺序是什么？ 方法 function_graph\n入口：drm_atomic_commit\nfilter 加：\ndrm_atomic_bridge_chain_mode_set drm_atomic_bridge_chain_pre_enable drm_atomic_bridge_chain_enable 自己的 bridge callback 观察点 确认顺序是否为：\nmode_set -\u003e pre_enable -\u003e enable 问题 3：im_mipi_tx_bridge_attach() 是在 probe 阶段还是 commit 阶段调用？ 方法 单独追 attach 阶段\n入口：drm_bridge_attach\nfilter 加：\nim_mipi_tx_bridge_attach im_mipi_tx_chan_attach devm_drm_of_get_bridge 观察点 看 attach 是在：\n驱动 probe / bind 时调用 还是某个 connector 初始化阶段调用 23. 总结 ftrace 是 Linux 内核里非常适合“学习调用链”和“定位 callback 实际调用路径”的工具。 相比单纯看源码，它最大的价值在于：\n能告诉你实际运行时走了哪条路径 能确认某个函数到底有没有被调用 能看清楚回调的执行顺序 能把复杂子系统拆成若干阶段逐步观察 在使用上，我建议把它当成一个通用模板，而不是“只给某个子系统用的技巧”：\n先确定阶段（probe / attach / check / enable / disable） 再确定入口函数 最后列出少量关键 filter 函数 优先用 function_graph 看主线 必要时再配合 dump_stack() 或 dynamic debug 对于 DRM 显示、SPI、I2C、Clock、Regulator、IRQ、Net 等子系统，这套方法都适用。 真正变化的只是：你要追踪的入口函数和过滤函数列表。\n如果把它用熟了，后面你在看一个陌生子系统时，效率会高很多： 不是先陷在源码里翻半天，而是先用 ftrace 把“活的调用链”跑出来，再回过头去看代码，就会清楚很多。\n",
-  "wordCount" : "1567",
+  "articleBody": "1. 为什么要学 ftrace 在内核调试里，经常会遇到这样的问题：\n这个 callback 到底是谁调的？ 某个函数有没有真正执行到？ 一次 ioctl / probe / 中断 / commit 的完整调用链是什么？ 多个回调的执行顺序是什么？ 某个驱动回调是在 probe 阶段调用，还是运行时 atomic/stream on 阶段调用？ 这类问题，如果只靠 grep 源码，通常只能知道“理论上谁可能会调用”；但实际运行时到底走了哪条路径、有没有进入某个分支、调用顺序是否符合预期，还是需要运行时观测。\n而 ftrace 是 Linux 内核里最通用、最实用的一套函数级 tracing 机制，适合做以下事情：\n跟踪函数是否被调用 观察函数调用顺序 观察“谁调用了谁” 从一个入口函数出发，查看整条调用树 分析 probe / bind / irq / workqueue / atomic commit / stream on 等流程 这篇文章整理一套 ftrace 的通用使用模板，并以 DRM 显示子系统中的 bridge / atomic callback 为例，说明如何用它排查问题。后续切换到其他子系统时，只需要替换过滤函数名即可。\n2. 先回答一个常见疑问：ftrace 需要写“钩子函数”吗？ 通常不需要。\n这是很多人第一次接触 ftrace 时最容易混淆的地方。\n2.1 ftrace 和“写钩子”的区别 ftrace（function / function_graph） 不需要改内核代码 不需要写 hook 函数 直接通过 /sys/kernel/tracing/（或 /sys/kernel/debug/tracing/）配置 让内核去跟踪指定函数的调用 你自己写 pr_info() / dump_stack() 需要改驱动源码 适合快速定位某个点 tracepoint 需要内核本身提供 tracepoint，或者自己在代码里加 tracepoint kprobe / kretprobe 可以不改源码动态挂到函数入口/返回 但比 ftrace 更偏“可编程”，使用复杂度更高 2.2 自己驱动里的 static 函数也能 trace 吗？ 可以。\n例如驱动里有：\n1 2 3 4 5 6 static void im_mipi_tx_bridge_mode_set(struct drm_bridge *bridge, const struct drm_display_mode *mode, const struct drm_display_mode *adjusted_mode) { ... } 或者：\n1 2 3 4 5 static int im_mipi_tx_bridge_attach(struct drm_bridge *bridge, enum drm_bridge_attach_flags flags) { ... } 这种函数虽然是 static，但只要：\n编译进内核/模块 没有被完全优化掉 内核开启了 function tracing 相关配置 就可以被 ftrace 跟踪。\nftrace 跟踪的是“编译后的函数入口”，不是“导出符号”的概念。\n3. ftrace 能解决什么问题 我一般把 ftrace 的用途归纳成下面几类：\n3.1 确认某个函数有没有被调用 比如：\nim_mipi_tx_bridge_mode_set() 有没有走到？ drm_atomic_bridge_chain_enable() 有没有被执行？ clk_set_rate() 是否真的被某个路径调用？ 3.2 看调用顺序 比如：\nmode_set -\u003e pre_enable -\u003e enable 的顺序是不是这样？ disable 和 post_disable 谁先谁后？ probe -\u003e component bind -\u003e drm_bridge_attach 的顺序是什么？ 3.3 看“谁调用了谁” 比如：\nim_mipi_tx_bridge_mode_set() 是谁调的？ 是 drm_atomic_bridge_chain_mode_set() 调的，还是别的 helper？ 某个中断处理函数是硬中断上下文进来的，还是 threaded irq？ 3.4 从入口函数出发，看一整条调用链 比如：\n从 drm_atomic_commit() 出发，到底会走哪些 bridge / encoder / connector 回调？ 从 spi_sync() 出发，控制器驱动里哪些函数被调用？ 从 regulator_enable() 出发，底层 PMIC 驱动怎么走？ 4. 内核配置要求 要使用 function / function_graph tracer，内核通常至少需要这些配置：\n1 2 3 4 5 6 CONFIG_DEBUG_FS=y CONFIG_TRACING=y CONFIG_FTRACE=y CONFIG_FUNCTION_TRACER=y CONFIG_FUNCTION_GRAPH_TRACER=y CONFIG_DYNAMIC_FTRACE=y 建议再打开：\n1 2 3 CONFIG_STACKTRACE=y CONFIG_KALLSYMS=y CONFIG_KALLSYMS_ALL=y 这样输出会更完整。\n4.1 查看当前内核配置 如果系统支持 /proc/config.gz：\n1 zcat /proc/config.gz | egrep 'CONFIG_(FTRACE|FUNCTION_TRACER|FUNCTION_GRAPH_TRACER|DEBUG_FS|TRACING|DYNAMIC_FTRACE)' 5. tracing 目录在哪里 新内核通常在：\n1 /sys/kernel/tracing 有些系统也可能在：\n1 /sys/kernel/debug/tracing 建议统一用一个变量：\n1 2 3 TR=/sys/kernel/tracing [ -d \"$TR\" ] || TR=/sys/kernel/debug/tracing echo \"$TR\" 如果 tracefs/debugfs 没挂载，可以手动挂载：\n1 2 mount -t tracefs nodev /sys/kernel/tracing 2\u003e/dev/null || true mount -t debugfs none /sys/kernel/debug 2\u003e/dev/null || true 6. ftrace 两种最常用模式 ftrace 里我最常用的是两种 tracer：\nfunction function_graph 7. function tracer：看“有没有被调、谁调了它” 7.1 适用场景 适合回答：\n某个函数到底有没有执行 某个 callback 是谁直接调的 多个关键函数的粗略顺序是什么 例如在 DRM 里排查：\nim_mipi_tx_bridge_mode_set im_mipi_tx_bridge_atomic_enable drm_atomic_commit 7.2 基本步骤 第一步：准备 tracing 环境 1 2 3 4 5 6 7 TR=/sys/kernel/tracing [ -d \"$TR\" ] || TR=/sys/kernel/debug/tracing echo 0 \u003e $TR/tracing_on echo nop \u003e $TR/current_tracer echo \u003e $TR/trace echo \u003e $TR/set_ftrace_filter 第二步：写入要跟踪的函数列表 例如以 DRM bridge callback 为例：\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 cat \u003e /tmp/ftrace_filter.txt \u003c\u003c'EOF' drm_atomic_commit drm_atomic_helper_commit_tail drm_atomic_helper_commit_modeset_disables drm_atomic_helper_commit_modeset_enables drm_atomic_bridge_chain_pre_enable drm_atomic_bridge_chain_enable drm_atomic_bridge_chain_disable drm_atomic_bridge_chain_post_disable drm_bridge_attach devm_drm_of_get_bridge im_mipi_tx_chan_attach im_mipi_tx_bridge_attach im_mipi_tx_bridge_mode_set im_mipi_tx_bridge_atomic_pre_enable im_mipi_tx_bridge_atomic_enable im_mipi_tx_bridge_atomic_disable EOF cat /tmp/ftrace_filter.txt \u003e $TR/set_ftrace_filter 第三步：打开 function tracer 1 2 echo function \u003e $TR/current_tracer echo 1 \u003e $TR/tracing_on 第四步：触发你要观察的流程 例如：\n跑一次 modetest 让 Weston 切一个显示模式 插拔显示器 触发某个驱动的 stream on/off 第五步：停止 tracing 并读取结果 1 2 echo 0 \u003e $TR/tracing_on cat $TR/trace 7.3 输出怎么看 你可能看到类似这样的内容：\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 # tracer: function # # entries-in-buffer/entries-written: 20/20 #P:4 # # _-----=\u003e irqs-off/BH-disabled # / _----=\u003e need-resched # | / _---=\u003e hardirq/softirq # || / _--=\u003e preempt-depth # ||| / _-=\u003e migrate-disable # |||| / delay # TASK-PID CPU# ||||| TIMESTAMP FUNCTION # | | | ||||| | | modetest-22892 [000] ...1. 405429.747737: drm_atomic_commit \u003c-drm_atomic_helper_set_config modetest-22892 [000] ...1. 405429.747995: drm_atomic_helper_commit_modeset_disables \u003c-linlondp_kms_commit_tail modetest-22892 [000] ...1. 405429.748016: im_mipi_tx_bridge_mode_set \u003c-drm_bridge_chain_mode_set modetest-22892 [000] ...1. 405429.748028: drm_atomic_bridge_chain_pre_enable \u003c-linlondp_atomic_helper_commit_modeset_enables modetest-22892 [000] ...1. 405429.748034: im_mipi_tx_bridge_atomic_pre_enable \u003c-drm_atomic_bridge_call_pre_enable modetest-22892 [000] ...1. 405429.912283: drm_atomic_bridge_chain_enable \u003c-linlondp_atomic_helper_commit_modeset_enables modetest-22892 [000] ...1. 405429.912300: im_mipi_tx_bridge_atomic_enable \u003c-drm_atomic_bridge_chain_enable modetest-22892 [000] ...1. 405429.913302: drm_atomic_commit \u003c-drm_mode_obj_set_property_ioctl modetest-22892 [000] ...1. 405429.913503: drm_atomic_helper_commit_modeset_disables \u003c-linlondp_kms_commit_tail modetest-22892 [000] ...1. 405430.004372: drm_atomic_commit \u003c-drm_mode_obj_set_property_ioctl modetest-22892 [000] ...1. 405430.004573: drm_atomic_helper_commit_modeset_disables \u003c-linlondp_kms_commit_tail modetest-22892 [000] ...1. 405430.095519: drm_atomic_commit \u003c-drm_mode_obj_set_property_ioctl modetest-22892 [000] ...1. 405430.095690: drm_atomic_helper_commit_modeset_disables \u003c-linlondp_kms_commit_tail kworker/3:1-142 [003] ...1. 405431.995661: drm_atomic_commit \u003c-drm_framebuffer_remove kworker/3:1-142 [003] ...1. 405431.995815: drm_atomic_helper_commit_modeset_disables \u003c-linlondp_kms_commit_tail modetest-22892 [003] ...1. 405432.013936: drm_atomic_commit \u003c-drm_atomic_helper_disable_all modetest-22892 [003] ...1. 405432.014079: drm_atomic_helper_commit_modeset_disables \u003c-linlondp_kms_commit_tail modetest-22892 [003] ...1. 405432.014091: drm_atomic_bridge_chain_disable \u003c-disable_outputs modetest-22892 [003] ...1. 405432.014249: im_mipi_tx_bridge_atomic_disable \u003c-drm_atomic_bridge_chain_disable modetest-22892 [003] ...1. 405432.014368: drm_atomic_bridge_chain_post_disable \u003c-disable_outputs 这个输出至少能回答三件事：\nim_mipi_tx_bridge_mode_set() 确实被调用了 它的直接调用者是 drm_bridge_chain_mode_set() mode_set 发生在 enable 之前 8. function_graph tracer：看完整调用树 如果你不只是想看“有没有调用”，而是想看：\n从某个入口函数开始，到底一路调用了哪些函数、层级关系是什么\n那我更推荐 function_graph。\n8.1 适用场景 特别适合排查：\ndrm_atomic_commit() 的完整 commit 时序 probe / bind / attach 流程 某个 ioctl 进来后，内核里走了哪些 helper / callback 某个子系统的 enable / disable / runtime PM 调用链 8.2 基本步骤 第一步：清理现场 1 2 3 4 5 6 7 8 TR=/sys/kernel/tracing [ -d \"$TR\" ] || TR=/sys/kernel/debug/tracing echo 0 \u003e $TR/tracing_on echo nop \u003e $TR/current_tracer echo \u003e $TR/trace echo \u003e $TR/set_ftrace_filter echo \u003e $TR/set_graph_function 第二步：设置“调用树入口” 比如想看一次 DRM atomic commit：\n1 echo drm_atomic_commit \u003e $TR/set_graph_function 这表示： 从 drm_atomic_commit() 开始，画调用树。\n第三步：设置过滤函数 如果不加过滤，输出可能会非常大。 例如只保留 DRM bridge / atomic 主线 + 自己驱动函数：\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 cat \u003e $TR/set_ftrace_filter \u003c\u003c'EOF' drm_atomic_commit drm_atomic_helper_commit_tail drm_atomic_helper_commit_modeset_disables drm_atomic_helper_commit_modeset_enables drm_atomic_bridge_chain_pre_enable drm_atomic_bridge_chain_enable drm_atomic_bridge_chain_disable drm_atomic_bridge_chain_post_disable drm_bridge_attach devm_drm_of_get_bridge im_mipi_tx_chan_attach im_mipi_tx_bridge_attach im_mipi_tx_bridge_mode_set im_mipi_tx_bridge_atomic_pre_enable im_mipi_tx_bridge_atomic_enable im_mipi_tx_bridge_atomic_disable EOF 第四步：启用 function_graph tracer 1 2 echo function_graph \u003e $TR/current_tracer echo 1 \u003e $TR/tracing_on 第五步：触发显示流程并查看结果 1 2 echo 0 \u003e $TR/tracing_on cat $TR/trace 8.3 典型输出示意 你会看到类似这样的层级结构：\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 # tracer: function_graph # # CPU DURATION FUNCTION CALLS # | | | | | | | 0) | drm_atomic_commit() { 0) | drm_atomic_helper_commit_modeset_disables() { 0) 6.250 us | im_mipi_tx_bridge_mode_set [im_mipi_tx](); 0) + 40.364 us | } 0) | drm_atomic_bridge_chain_pre_enable() { 0) | im_mipi_tx_bridge_atomic_pre_enable [im_mipi_tx]() { 1) * 16769.01 us | } /* im_mipi_tx_bridge_atomic_pre_enable [im_mipi_tx] */ 0) @ 164444.2 us | } 0) | drm_atomic_bridge_chain_enable() { 0) ! 147.656 us | im_mipi_tx_bridge_atomic_enable [im_mipi_tx](); 0) ! 220.052 us | } 0) @ 165581.7 us | } 0) | drm_atomic_commit() { 0) + 19.270 us | drm_atomic_helper_commit_modeset_disables(); 0) * 90886.71 us | } 0) | drm_atomic_commit() { 0) + 19.270 us | drm_atomic_helper_commit_modeset_disables(); 0) * 90976.82 us | } 0) | drm_atomic_commit() { 0) + 24.739 us | drm_atomic_helper_commit_modeset_disables(); 0) * 91021.61 us | } ------------------------------------------ 1) modetes-22861 =\u003e kworker-27127 ------------------------------------------ 1) | drm_atomic_commit() { 1) + 19.271 us | drm_atomic_helper_commit_modeset_disables(); 1) * 20695.83 us | } ------------------------------------------ 1) kworker-27127 =\u003e modetes-22861 ------------------------------------------ 1) | drm_atomic_commit() { 1) | drm_atomic_helper_commit_modeset_disables() { 1) | drm_atomic_bridge_chain_disable() { 1) + 68.229 us | im_mipi_tx_bridge_atomic_disable [im_mipi_tx](); 1) ! 231.771 us | } 1) * 28403.12 us | drm_atomic_bridge_chain_post_disable(); 2) @ 182573.1 us | } /* drm_atomic_helper_commit_modeset_disables */ 2) @ 182787.7 us | } /* drm_atomic_commit */ 这个输出可以非常直观地回答：\nmode_set / pre_enable / enable 的顺序 disable / post_disable 在哪个阶段 某个 callback 是在 atomic helper 的哪个阶段触发的 9. 一个非常重要的技巧：先看 available_filter_functions 很多时候你写进 set_ftrace_filter 的函数名不生效，不是 ftrace 坏了，而是：\n函数名写错了 内核里实际名字和你想的不一样 函数被编译优化成别的形式 模块还没加载，函数暂时不可见 所以我一般都会先查一下：\n1 2 grep im_mipi_tx /sys/kernel/debug/tracing/available_filter_functions grep drm_atomic_bridge_chain /sys/kernel/debug/tracing/available_filter_functions 如果你在调别的子系统，就换成：\n1 2 3 grep spi_ /sys/kernel/debug/tracing/available_filter_functions grep clk_ /sys/kernel/debug/tracing/available_filter_functions grep regulator_ /sys/kernel/debug/tracing/available_filter_functions 这个步骤非常重要，它能帮你确认：这个函数到底能不能被 ftrace 追踪。\n10. 一套通用排查思路：从“阶段”切 trace，而不是一口气全追 这是我最推荐的工作流。\n不要一上来就把整个子系统全 trace 了，否则输出量会非常大，而且难以看出重点。\n更好的方法是：\n10.1 先把问题拆成阶段 例如 DRM 显示链路，可以拆成：\n阶段 A：probe / bind / attach 关注：\n设备 probe component bind, component_bind_all devm_drm_of_get_bridge drm_bridge_attach 阶段 B：mode 校验 / atomic check 关注：\ndrm_atomic_check_only drm_atomic_helper_check_modeset bridge / encoder 的 mode_valid、atomic_check 阶段 C：mode_set / pre_enable / enable 关注：\ndrm_atomic_commit drm_atomic_bridge_chain_mode_set drm_atomic_bridge_chain_pre_enable drm_atomic_bridge_chain_enable 阶段 D：disable / post_disable 关注：\ndrm_atomic_helper_commit_modeset_disables drm_atomic_bridge_chain_disable drm_atomic_bridge_chain_post_disable 10.2 其他子系统也可以这样拆 比如 SPI 控制器：\nprobe 阶段 spi_setup spi_sync / transfer_one_message DMA / IRQ 完成 runtime PM suspend/resume 比如时钟子系统：\nprobe / clk_hw_register clk_prepare_enable clk_set_rate 父时钟切换 disable/unprepare 比如 regulator：\nprobe regulator_get regulator_enable set_voltage disable 核心思路都是一样的：按阶段缩小观察范围。\n11. 一个通用 ftrace 模板脚本 下面这个脚本可以作为通用模板，适合以后迁移到别的子系统。 思路是：\n统一清理 tracing 环境 按函数列表写 filter 选择 function 或 function_graph 可选设置 graph 入口函数 启动 tracing 11.1 通用脚本 trace_template.sh 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 #!/bin/sh TR=/sys/kernel/tracing if [ ! -d \"$TR\" ]; then TR=/sys/kernel/debug/tracing fi TR=/sys/kernel/debug/tracing MODE=\"${1:-graph}\" # function / graph ENTRY=\"${2:-}\" # function_graph 的入口函数，可为空 FILTER_FILE=\"${3:-/tmp/ftrace_filter.txt}\" echo \"[trace] using tracing path: $TR\" echo \"[trace] mode=$MODE entry=$ENTRY filter=$FILTER_FILE\" echo 0 \u003e $TR/tracing_on echo nop \u003e $TR/current_tracer echo \u003e $TR/trace echo \u003e $TR/set_ftrace_filter echo \u003e $TR/set_graph_function if [ -f \"$FILTER_FILE\" ]; then cat \"$FILTER_FILE\" \u003e $TR/set_ftrace_filter fi case \"$MODE\" in function) echo function \u003e $TR/current_tracer ;; graph) echo function_graph \u003e $TR/current_tracer if [ -n \"$ENTRY\" ]; then echo \"$ENTRY\" \u003e $TR/set_graph_function fi ;; *) echo \"Unknown mode: $MODE\" exit 1 ;; esac echo 1 \u003e $TR/tracing_on echo echo \"Tracing started.\" echo \"Do your test now, then stop with:\" echo \" echo 0 \u003e $TR/tracing_on\" echo \"Dump trace with:\" echo \" cat $TR/trace \u003e /tmp/trace.log\" 12. 以 DRM 显示子系统为例：三套常用 filter 下面给三套我实际会用的 filter 文件示例。\n13. 示例一：追 bridge attach / 拓扑搭建阶段 适合排查：\ndevm_drm_of_get_bridge() 找到了谁 drm_bridge_attach() 有没有执行 自己的 bridge_attach() 是谁调的 13.1 drm_attach_filter.txt 1 2 3 4 5 drm_bridge_attach drm_bridge_attach_next_bridge devm_drm_of_get_bridge im_mipi_tx_chan_attach im_mipi_tx_bridge_attach 13.2 使用方式 1 ./trace_template.sh graph drm_bridge_attach /tmp/drm_attach_filter.txt 然后触发：\n驱动 probe component bind connector 初始化 你的 channel attach 流程 14. 示例二：追 atomic modeset 主线 适合排查：\nmode_set / pre_enable / enable callback 的执行顺序 自己的 bridge callback 是谁调的 14.1 drm_atomic_filter.txt 1 2 3 4 5 6 7 8 9 10 11 12 13 drm_atomic_commit drm_atomic_helper_commit_tail drm_atomic_helper_commit_modeset_disables drm_atomic_helper_commit_modeset_enables drm_atomic_bridge_chain_mode_set drm_atomic_bridge_chain_pre_enable drm_atomic_bridge_chain_enable drm_atomic_bridge_chain_disable drm_atomic_bridge_chain_post_disable im_mipi_tx_bridge_mode_set im_mipi_tx_bridge_atomic_pre_enable im_mipi_tx_bridge_atomic_enable im_mipi_tx_bridge_atomic_disable 14.2 使用方式 1 ./trace_template.sh graph drm_atomic_commit /tmp/drm_atomic_filter.txt 然后触发：\nmodetest 桌面环境切换分辨率 屏幕开关 / 热插拔 / modeset 15. 示例三：只看“有没有被调用” 适合快速验证：\n某个 callback 到底有没有走到 不关心整棵调用树，只想知道顺序和直接调用者 15.1 drm_quick_filter.txt 1 2 3 4 5 drm_atomic_commit drm_atomic_bridge_chain_mode_set drm_atomic_bridge_chain_enable im_mipi_tx_bridge_mode_set im_mipi_tx_bridge_atomic_enable 15.2 使用方式 1 ./trace_template.sh function \"\" /tmp/drm_quick_filter.txt 16. 如何把这个模板迁移到其他子系统 真正需要替换的，通常只有两样东西：\n入口函数 过滤函数列表 17. 迁移示例：SPI 子系统 如果你要排查 SPI 传输，可以把入口函数换成：\n1 spi_sync 过滤函数可以换成类似：\n1 2 3 4 5 spi_sync __spi_sync spi_transfer_one_message xxx_spi_transfer_one xxx_spi_irq 然后：\n1 ./trace_template.sh graph spi_sync /tmp/spi_filter.txt 18. 迁移示例：Clock 子系统 如果你要看时钟 enable / set_rate 路径，可以尝试：\n入口函数：\n1 clk_set_rate 或者：\n1 clk_prepare_enable 过滤函数示例：\n1 2 3 4 5 6 clk_prepare_enable clk_core_prepare clk_core_enable clk_set_rate clk_change_rate xxx_clk_set_rate 19. 迁移示例：Regulator 子系统 入口函数：\n1 regulator_enable 过滤函数示例：\n1 2 3 4 regulator_enable _regulator_enable regulator_set_voltage xxx_regulator_enable 20. function 与 function_graph 如何选择 我自己的经验是：\n用 function 的场景 想快速确认某个函数有没有执行 想知道某个 callback 的直接调用者 想看少量关键函数的调用顺序 希望输出尽量简单 用 function_graph 的场景 想看完整调用树 想看一个 ioctl / commit / transfer / enable 的整条路径 想搞清楚多个 helper / callback 的层级关系 在分析一个子系统的主流程 如果拿不准，建议优先用 function_graph，然后通过 缩小 filter 控制输出规模。\n21. 调试时的实战建议 21.1 先用 available_filter_functions 确认函数名 这个步骤很关键，能避免很多无效折腾。\n21.2 不要一次 trace 整个子系统 先拆阶段，再 trace。\n21.3 先看 attach / probe，再看 runtime 流程 很多问题其实在拓扑搭建阶段就已经埋下了，运行时只是“表现出来”。\n21.4 function_graph 输出太大时，先缩小入口函数 比如只从：\ndrm_atomic_commit spi_sync clk_set_rate 开始画。\n21.5 必要时和 dump_stack() 联合使用 如果某个 callback 你只想知道“这一处到底是谁调的”，在驱动里临时加：\n1 2 pr_info(\"%s\\n\", __func__); dump_stack(); 通常比大面积 trace 更快出答案。\n22. 以 DRM bridge callback 为例的典型问题与解法 问题 1：im_mipi_tx_bridge_mode_set() 是谁调的？ 方法 function 模式\nfilter 加：\ndrm_atomic_bridge_chain_mode_set im_mipi_tx_bridge_mode_set 观察点 看输出中：\n1 im_mipi_tx_bridge_mode_set \u003c- drm_atomic_bridge_chain_mode_set 问题 2：mode_set / pre_enable / enable 顺序是什么？ 方法 function_graph\n入口：drm_atomic_commit\nfilter 加：\ndrm_atomic_bridge_chain_mode_set drm_atomic_bridge_chain_pre_enable drm_atomic_bridge_chain_enable 自己的 bridge callback 观察点 确认顺序是否为：\n1 mode_set -\u003e pre_enable -\u003e enable 问题 3：im_mipi_tx_bridge_attach() 是在 probe 阶段还是 commit 阶段调用？ 方法 单独追 attach 阶段\n入口：drm_bridge_attach\nfilter 加：\nim_mipi_tx_bridge_attach im_mipi_tx_chan_attach devm_drm_of_get_bridge 观察点 看 attach 是在：\n驱动 probe / bind 时调用 还是某个 connector 初始化阶段调用 23. 总结 ftrace 是 Linux 内核里非常适合“学习调用链”和“定位 callback 实际调用路径”的工具。 相比单纯看源码，它最大的价值在于：\n能告诉你实际运行时走了哪条路径 能确认某个函数到底有没有被调用 能看清楚回调的执行顺序 能把复杂子系统拆成若干阶段逐步观察 在使用上，我建议把它当成一个通用模板，而不是“只给某个子系统用的技巧”：\n先确定阶段（probe / attach / check / enable / disable） 再确定入口函数 最后列出少量关键 filter 函数 优先用 function_graph 看主线 必要时再配合 dump_stack() 或 dynamic debug 对于 DRM 显示、SPI、I2C、Clock、Regulator、IRQ、Net 等子系统，这套方法都适用。 真正变化的只是：你要追踪的入口函数和过滤函数列表。\n如果把它用熟了，后面你在看一个陌生子系统时，效率会高很多： 不是先陷在源码里翻半天，而是先用 ftrace 把“活的调用链”跑出来，再回过头去看代码，就会清楚很多。\n",
+  "wordCount" : "1836",
   "inLanguage": "en",
   "datePublished": "2026-06-23T09:56:33+08:00",
   "dateModified": "2026-06-23T09:56:33+08:00",
@@ -245,7 +245,7 @@
     </h1>
     <div class="post-meta">
 
-<span title='2026-06-23 09:56:33 +0800 +0800'>June 23, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>Logan</span>
+<span title='2026-06-23 09:56:33 +0800 +0800'>June 23, 2026</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>Logan</span>
 
 </div>
   </header> <details class="toc"  open>
@@ -507,19 +507,42 @@
 <h2 id="22-自己驱动里的-static-函数也能-trace-吗">2.2 自己驱动里的 <code>static</code> 函数也能 trace 吗？<a hidden class="anchor" aria-hidden="true" href="#22-自己驱动里的-static-函数也能-trace-吗">#</a></h2>
 <p><strong>可以。</strong></p>
 <p>例如驱动里有：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">im_mipi_tx_bridge_mode_set</span>(<span style="color:#66d9ef">struct</span> drm_bridge <span style="color:#f92672">*</span>bridge,
-</span></span><span style="display:flex;"><span>				       <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">struct</span> drm_display_mode <span style="color:#f92672">*</span>mode,
-</span></span><span style="display:flex;"><span>				       <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">struct</span> drm_display_mode <span style="color:#f92672">*</span>adjusted_mode)
-</span></span><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>	...
-</span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><p>或者：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">im_mipi_tx_bridge_attach</span>(<span style="color:#66d9ef">struct</span> drm_bridge <span style="color:#f92672">*</span>bridge,
-</span></span><span style="display:flex;"><span>				    <span style="color:#66d9ef">enum</span> drm_bridge_attach_flags flags)
-</span></span><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>	...
-</span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><p>这种函数虽然是 <code>static</code>，但只要：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">im_mipi_tx_bridge_mode_set</span><span class="p">(</span><span class="k">struct</span> <span class="n">drm_bridge</span> <span class="o">*</span><span class="n">bridge</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">				       <span class="k">const</span> <span class="k">struct</span> <span class="n">drm_display_mode</span> <span class="o">*</span><span class="n">mode</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">				       <span class="k">const</span> <span class="k">struct</span> <span class="n">drm_display_mode</span> <span class="o">*</span><span class="n">adjusted_mode</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="p">...</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>或者：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="nf">im_mipi_tx_bridge_attach</span><span class="p">(</span><span class="k">struct</span> <span class="n">drm_bridge</span> <span class="o">*</span><span class="n">bridge</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">				    <span class="k">enum</span> <span class="n">drm_bridge_attach_flags</span> <span class="n">flags</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="p">...</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这种函数虽然是 <code>static</code>，但只要：</p>
 <ul>
 <li>编译进内核/模块</li>
 <li>没有被完全优化掉</li>
@@ -561,34 +584,93 @@
 <hr>
 <h1 id="4-内核配置要求">4. 内核配置要求<a hidden class="anchor" aria-hidden="true" href="#4-内核配置要求">#</a></h1>
 <p>要使用 function / function_graph tracer，内核通常至少需要这些配置：</p>
-<pre tabindex="0"><code class="language-config" data-lang="config">CONFIG_DEBUG_FS=y
-CONFIG_TRACING=y
-CONFIG_FTRACE=y
-CONFIG_FUNCTION_TRACER=y
-CONFIG_FUNCTION_GRAPH_TRACER=y
-CONFIG_DYNAMIC_FTRACE=y
-</code></pre><p>建议再打开：</p>
-<pre tabindex="0"><code class="language-config" data-lang="config">CONFIG_STACKTRACE=y
-CONFIG_KALLSYMS=y
-CONFIG_KALLSYMS_ALL=y
-</code></pre><p>这样输出会更完整。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">CONFIG_DEBUG_FS=y
+</span></span><span class="line"><span class="cl">CONFIG_TRACING=y
+</span></span><span class="line"><span class="cl">CONFIG_FTRACE=y
+</span></span><span class="line"><span class="cl">CONFIG_FUNCTION_TRACER=y
+</span></span><span class="line"><span class="cl">CONFIG_FUNCTION_GRAPH_TRACER=y
+</span></span><span class="line"><span class="cl">CONFIG_DYNAMIC_FTRACE=y
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>建议再打开：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">CONFIG_STACKTRACE=y
+</span></span><span class="line"><span class="cl">CONFIG_KALLSYMS=y
+</span></span><span class="line"><span class="cl">CONFIG_KALLSYMS_ALL=y
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这样输出会更完整。</p>
 <h2 id="41-查看当前内核配置">4.1 查看当前内核配置<a hidden class="anchor" aria-hidden="true" href="#41-查看当前内核配置">#</a></h2>
 <p>如果系统支持 <code>/proc/config.gz</code>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>zcat /proc/config.gz | egrep <span style="color:#e6db74">&#39;CONFIG_(FTRACE|FUNCTION_TRACER|FUNCTION_GRAPH_TRACER|DEBUG_FS|TRACING|DYNAMIC_FTRACE)&#39;</span>
-</span></span></code></pre></div><hr>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">zcat /proc/config.gz <span class="p">|</span> egrep <span class="s1">&#39;CONFIG_(FTRACE|FUNCTION_TRACER|FUNCTION_GRAPH_TRACER|DEBUG_FS|TRACING|DYNAMIC_FTRACE)&#39;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
 <h1 id="5-tracing-目录在哪里">5. tracing 目录在哪里<a hidden class="anchor" aria-hidden="true" href="#5-tracing-目录在哪里">#</a></h1>
 <p>新内核通常在：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>/sys/kernel/tracing
-</span></span></code></pre></div><p>有些系统也可能在：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>/sys/kernel/debug/tracing
-</span></span></code></pre></div><p>建议统一用一个变量：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>TR<span style="color:#f92672">=</span>/sys/kernel/tracing
-</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span> -d <span style="color:#e6db74">&#34;</span>$TR<span style="color:#e6db74">&#34;</span> <span style="color:#f92672">]</span> <span style="color:#f92672">||</span> TR<span style="color:#f92672">=</span>/sys/kernel/debug/tracing
-</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;</span>$TR<span style="color:#e6db74">&#34;</span>
-</span></span></code></pre></div><p>如果 tracefs/debugfs 没挂载，可以手动挂载：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>mount -t tracefs nodev /sys/kernel/tracing 2&gt;/dev/null <span style="color:#f92672">||</span> true
-</span></span><span style="display:flex;"><span>mount -t debugfs none /sys/kernel/debug 2&gt;/dev/null <span style="color:#f92672">||</span> true
-</span></span></code></pre></div><hr>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">/sys/kernel/tracing
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>有些系统也可能在：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">/sys/kernel/debug/tracing
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>建议统一用一个变量：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nv">TR</span><span class="o">=</span>/sys/kernel/tracing
+</span></span><span class="line"><span class="cl"><span class="o">[</span> -d <span class="s2">&#34;</span><span class="nv">$TR</span><span class="s2">&#34;</span> <span class="o">]</span> <span class="o">||</span> <span class="nv">TR</span><span class="o">=</span>/sys/kernel/debug/tracing
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> <span class="s2">&#34;</span><span class="nv">$TR</span><span class="s2">&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>如果 tracefs/debugfs 没挂载，可以手动挂载：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">mount -t tracefs nodev /sys/kernel/tracing 2&gt;/dev/null <span class="o">||</span> <span class="nb">true</span>
+</span></span><span class="line"><span class="cl">mount -t debugfs none /sys/kernel/debug 2&gt;/dev/null <span class="o">||</span> <span class="nb">true</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
 <h1 id="6-ftrace-两种最常用模式">6. ftrace 两种最常用模式<a hidden class="anchor" aria-hidden="true" href="#6-ftrace-两种最常用模式">#</a></h1>
 <p>ftrace 里我最常用的是两种 tracer：</p>
 <ol>
@@ -613,39 +695,86 @@ CONFIG_KALLSYMS_ALL=y
 <hr>
 <h2 id="72-基本步骤">7.2 基本步骤<a hidden class="anchor" aria-hidden="true" href="#72-基本步骤">#</a></h2>
 <h3 id="第一步准备-tracing-环境">第一步：准备 tracing 环境<a hidden class="anchor" aria-hidden="true" href="#第一步准备-tracing-环境">#</a></h3>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>TR<span style="color:#f92672">=</span>/sys/kernel/tracing
-</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span> -d <span style="color:#e6db74">&#34;</span>$TR<span style="color:#e6db74">&#34;</span> <span style="color:#f92672">]</span> <span style="color:#f92672">||</span> TR<span style="color:#f92672">=</span>/sys/kernel/debug/tracing
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>echo <span style="color:#ae81ff">0</span> &gt; $TR/tracing_on
-</span></span><span style="display:flex;"><span>echo nop &gt; $TR/current_tracer
-</span></span><span style="display:flex;"><span>echo &gt; $TR/trace
-</span></span><span style="display:flex;"><span>echo &gt; $TR/set_ftrace_filter
-</span></span></code></pre></div><h3 id="第二步写入要跟踪的函数列表">第二步：写入要跟踪的函数列表<a hidden class="anchor" aria-hidden="true" href="#第二步写入要跟踪的函数列表">#</a></h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nv">TR</span><span class="o">=</span>/sys/kernel/tracing
+</span></span><span class="line"><span class="cl"><span class="o">[</span> -d <span class="s2">&#34;</span><span class="nv">$TR</span><span class="s2">&#34;</span> <span class="o">]</span> <span class="o">||</span> <span class="nv">TR</span><span class="o">=</span>/sys/kernel/debug/tracing
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> <span class="m">0</span> &gt; <span class="nv">$TR</span>/tracing_on
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> nop &gt; <span class="nv">$TR</span>/current_tracer
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> &gt; <span class="nv">$TR</span>/trace
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> &gt; <span class="nv">$TR</span>/set_ftrace_filter
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="第二步写入要跟踪的函数列表">第二步：写入要跟踪的函数列表<a hidden class="anchor" aria-hidden="true" href="#第二步写入要跟踪的函数列表">#</a></h3>
 <p>例如以 DRM bridge callback 为例：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cat &gt; /tmp/ftrace_filter.txt <span style="color:#e6db74">&lt;&lt;&#39;EOF&#39;
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">drm_atomic_commit
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">drm_atomic_helper_commit_tail
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">drm_atomic_helper_commit_modeset_disables
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">drm_atomic_helper_commit_modeset_enables
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">drm_atomic_bridge_chain_pre_enable
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">drm_atomic_bridge_chain_enable
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">drm_atomic_bridge_chain_disable
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">drm_atomic_bridge_chain_post_disable
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">drm_bridge_attach
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">devm_drm_of_get_bridge
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">im_mipi_tx_chan_attach
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">im_mipi_tx_bridge_attach
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">im_mipi_tx_bridge_mode_set
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">im_mipi_tx_bridge_atomic_pre_enable
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">im_mipi_tx_bridge_atomic_enable
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">im_mipi_tx_bridge_atomic_disable
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">EOF</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>cat /tmp/ftrace_filter.txt &gt; $TR/set_ftrace_filter
-</span></span></code></pre></div><h3 id="第三步打开-function-tracer">第三步：打开 function tracer<a hidden class="anchor" aria-hidden="true" href="#第三步打开-function-tracer">#</a></h3>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>echo <span style="color:#66d9ef">function</span> &gt; $TR/current_tracer
-</span></span><span style="display:flex;"><span>echo <span style="color:#ae81ff">1</span> &gt; $TR/tracing_on
-</span></span></code></pre></div><h3 id="第四步触发你要观察的流程">第四步：触发你要观察的流程<a hidden class="anchor" aria-hidden="true" href="#第四步触发你要观察的流程">#</a></h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cat &gt; /tmp/ftrace_filter.txt <span class="s">&lt;&lt;&#39;EOF&#39;
+</span></span></span><span class="line"><span class="cl"><span class="s">drm_atomic_commit
+</span></span></span><span class="line"><span class="cl"><span class="s">drm_atomic_helper_commit_tail
+</span></span></span><span class="line"><span class="cl"><span class="s">drm_atomic_helper_commit_modeset_disables
+</span></span></span><span class="line"><span class="cl"><span class="s">drm_atomic_helper_commit_modeset_enables
+</span></span></span><span class="line"><span class="cl"><span class="s">drm_atomic_bridge_chain_pre_enable
+</span></span></span><span class="line"><span class="cl"><span class="s">drm_atomic_bridge_chain_enable
+</span></span></span><span class="line"><span class="cl"><span class="s">drm_atomic_bridge_chain_disable
+</span></span></span><span class="line"><span class="cl"><span class="s">drm_atomic_bridge_chain_post_disable
+</span></span></span><span class="line"><span class="cl"><span class="s">drm_bridge_attach
+</span></span></span><span class="line"><span class="cl"><span class="s">devm_drm_of_get_bridge
+</span></span></span><span class="line"><span class="cl"><span class="s">im_mipi_tx_chan_attach
+</span></span></span><span class="line"><span class="cl"><span class="s">im_mipi_tx_bridge_attach
+</span></span></span><span class="line"><span class="cl"><span class="s">im_mipi_tx_bridge_mode_set
+</span></span></span><span class="line"><span class="cl"><span class="s">im_mipi_tx_bridge_atomic_pre_enable
+</span></span></span><span class="line"><span class="cl"><span class="s">im_mipi_tx_bridge_atomic_enable
+</span></span></span><span class="line"><span class="cl"><span class="s">im_mipi_tx_bridge_atomic_disable
+</span></span></span><span class="line"><span class="cl"><span class="s">EOF</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">cat /tmp/ftrace_filter.txt &gt; <span class="nv">$TR</span>/set_ftrace_filter
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="第三步打开-function-tracer">第三步：打开 function tracer<a hidden class="anchor" aria-hidden="true" href="#第三步打开-function-tracer">#</a></h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">echo</span> <span class="k">function</span> &gt; <span class="nv">$TR</span>/current_tracer
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> <span class="m">1</span> &gt; <span class="nv">$TR</span>/tracing_on
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="第四步触发你要观察的流程">第四步：触发你要观察的流程<a hidden class="anchor" aria-hidden="true" href="#第四步触发你要观察的流程">#</a></h3>
 <p>例如：</p>
 <ul>
 <li>跑一次 <code>modetest</code></li>
@@ -654,44 +783,90 @@ CONFIG_KALLSYMS_ALL=y
 <li>触发某个驱动的 stream on/off</li>
 </ul>
 <h3 id="第五步停止-tracing-并读取结果">第五步：停止 tracing 并读取结果<a hidden class="anchor" aria-hidden="true" href="#第五步停止-tracing-并读取结果">#</a></h3>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>echo <span style="color:#ae81ff">0</span> &gt; $TR/tracing_on
-</span></span><span style="display:flex;"><span>cat $TR/trace
-</span></span></code></pre></div><hr>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">echo</span> <span class="m">0</span> &gt; <span class="nv">$TR</span>/tracing_on
+</span></span><span class="line"><span class="cl">cat <span class="nv">$TR</span>/trace
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
 <h2 id="73-输出怎么看">7.3 输出怎么看<a hidden class="anchor" aria-hidden="true" href="#73-输出怎么看">#</a></h2>
 <p>你可能看到类似这样的内容：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span># tracer: function
-</span></span><span style="display:flex;"><span>#
-</span></span><span style="display:flex;"><span># entries-in-buffer/entries-written: 20/20   #P:4
-</span></span><span style="display:flex;"><span>#
-</span></span><span style="display:flex;"><span>#                                _-----=&gt; irqs-off/BH-disabled
-</span></span><span style="display:flex;"><span>#                               / _----=&gt; need-resched
-</span></span><span style="display:flex;"><span>#                              | / _---=&gt; hardirq/softirq
-</span></span><span style="display:flex;"><span>#                              || / _--=&gt; preempt-depth
-</span></span><span style="display:flex;"><span>#                              ||| / _-=&gt; migrate-disable
-</span></span><span style="display:flex;"><span>#                              |||| /     delay
-</span></span><span style="display:flex;"><span>#           TASK-PID     CPU#  |||||  TIMESTAMP  FUNCTION
-</span></span><span style="display:flex;"><span>#              | |         |   |||||     |         |
-</span></span><span style="display:flex;"><span>        modetest-22892   [000] ...1. 405429.747737: drm_atomic_commit &lt;-drm_atomic_helper_set_config
-</span></span><span style="display:flex;"><span>        modetest-22892   [000] ...1. 405429.747995: drm_atomic_helper_commit_modeset_disables &lt;-linlondp_kms_commit_tail
-</span></span><span style="display:flex;"><span>        modetest-22892   [000] ...1. 405429.748016: im_mipi_tx_bridge_mode_set &lt;-drm_bridge_chain_mode_set
-</span></span><span style="display:flex;"><span>        modetest-22892   [000] ...1. 405429.748028: drm_atomic_bridge_chain_pre_enable &lt;-linlondp_atomic_helper_commit_modeset_enables
-</span></span><span style="display:flex;"><span>        modetest-22892   [000] ...1. 405429.748034: im_mipi_tx_bridge_atomic_pre_enable &lt;-drm_atomic_bridge_call_pre_enable
-</span></span><span style="display:flex;"><span>        modetest-22892   [000] ...1. 405429.912283: drm_atomic_bridge_chain_enable &lt;-linlondp_atomic_helper_commit_modeset_enables
-</span></span><span style="display:flex;"><span>        modetest-22892   [000] ...1. 405429.912300: im_mipi_tx_bridge_atomic_enable &lt;-drm_atomic_bridge_chain_enable
-</span></span><span style="display:flex;"><span>        modetest-22892   [000] ...1. 405429.913302: drm_atomic_commit &lt;-drm_mode_obj_set_property_ioctl
-</span></span><span style="display:flex;"><span>        modetest-22892   [000] ...1. 405429.913503: drm_atomic_helper_commit_modeset_disables &lt;-linlondp_kms_commit_tail
-</span></span><span style="display:flex;"><span>        modetest-22892   [000] ...1. 405430.004372: drm_atomic_commit &lt;-drm_mode_obj_set_property_ioctl
-</span></span><span style="display:flex;"><span>        modetest-22892   [000] ...1. 405430.004573: drm_atomic_helper_commit_modeset_disables &lt;-linlondp_kms_commit_tail
-</span></span><span style="display:flex;"><span>        modetest-22892   [000] ...1. 405430.095519: drm_atomic_commit &lt;-drm_mode_obj_set_property_ioctl
-</span></span><span style="display:flex;"><span>        modetest-22892   [000] ...1. 405430.095690: drm_atomic_helper_commit_modeset_disables &lt;-linlondp_kms_commit_tail
-</span></span><span style="display:flex;"><span>     kworker/3:1-142     [003] ...1. 405431.995661: drm_atomic_commit &lt;-drm_framebuffer_remove
-</span></span><span style="display:flex;"><span>     kworker/3:1-142     [003] ...1. 405431.995815: drm_atomic_helper_commit_modeset_disables &lt;-linlondp_kms_commit_tail
-</span></span><span style="display:flex;"><span>        modetest-22892   [003] ...1. 405432.013936: drm_atomic_commit &lt;-drm_atomic_helper_disable_all
-</span></span><span style="display:flex;"><span>        modetest-22892   [003] ...1. 405432.014079: drm_atomic_helper_commit_modeset_disables &lt;-linlondp_kms_commit_tail
-</span></span><span style="display:flex;"><span>        modetest-22892   [003] ...1. 405432.014091: drm_atomic_bridge_chain_disable &lt;-disable_outputs
-</span></span><span style="display:flex;"><span>        modetest-22892   [003] ...1. 405432.014249: im_mipi_tx_bridge_atomic_disable &lt;-drm_atomic_bridge_chain_disable
-</span></span><span style="display:flex;"><span>        modetest-22892   [003] ...1. 405432.014368: drm_atomic_bridge_chain_post_disable &lt;-disable_outputs
-</span></span></code></pre></div><p>这个输出至少能回答三件事：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl"># tracer: function
+</span></span><span class="line"><span class="cl">#
+</span></span><span class="line"><span class="cl"># entries-in-buffer/entries-written: 20/20   #P:4
+</span></span><span class="line"><span class="cl">#
+</span></span><span class="line"><span class="cl">#                                _-----=&gt; irqs-off/BH-disabled
+</span></span><span class="line"><span class="cl">#                               / _----=&gt; need-resched
+</span></span><span class="line"><span class="cl">#                              | / _---=&gt; hardirq/softirq
+</span></span><span class="line"><span class="cl">#                              || / _--=&gt; preempt-depth
+</span></span><span class="line"><span class="cl">#                              ||| / _-=&gt; migrate-disable
+</span></span><span class="line"><span class="cl">#                              |||| /     delay
+</span></span><span class="line"><span class="cl">#           TASK-PID     CPU#  |||||  TIMESTAMP  FUNCTION
+</span></span><span class="line"><span class="cl">#              | |         |   |||||     |         |
+</span></span><span class="line"><span class="cl">        modetest-22892   [000] ...1. 405429.747737: drm_atomic_commit &lt;-drm_atomic_helper_set_config
+</span></span><span class="line"><span class="cl">        modetest-22892   [000] ...1. 405429.747995: drm_atomic_helper_commit_modeset_disables &lt;-linlondp_kms_commit_tail
+</span></span><span class="line"><span class="cl">        modetest-22892   [000] ...1. 405429.748016: im_mipi_tx_bridge_mode_set &lt;-drm_bridge_chain_mode_set
+</span></span><span class="line"><span class="cl">        modetest-22892   [000] ...1. 405429.748028: drm_atomic_bridge_chain_pre_enable &lt;-linlondp_atomic_helper_commit_modeset_enables
+</span></span><span class="line"><span class="cl">        modetest-22892   [000] ...1. 405429.748034: im_mipi_tx_bridge_atomic_pre_enable &lt;-drm_atomic_bridge_call_pre_enable
+</span></span><span class="line"><span class="cl">        modetest-22892   [000] ...1. 405429.912283: drm_atomic_bridge_chain_enable &lt;-linlondp_atomic_helper_commit_modeset_enables
+</span></span><span class="line"><span class="cl">        modetest-22892   [000] ...1. 405429.912300: im_mipi_tx_bridge_atomic_enable &lt;-drm_atomic_bridge_chain_enable
+</span></span><span class="line"><span class="cl">        modetest-22892   [000] ...1. 405429.913302: drm_atomic_commit &lt;-drm_mode_obj_set_property_ioctl
+</span></span><span class="line"><span class="cl">        modetest-22892   [000] ...1. 405429.913503: drm_atomic_helper_commit_modeset_disables &lt;-linlondp_kms_commit_tail
+</span></span><span class="line"><span class="cl">        modetest-22892   [000] ...1. 405430.004372: drm_atomic_commit &lt;-drm_mode_obj_set_property_ioctl
+</span></span><span class="line"><span class="cl">        modetest-22892   [000] ...1. 405430.004573: drm_atomic_helper_commit_modeset_disables &lt;-linlondp_kms_commit_tail
+</span></span><span class="line"><span class="cl">        modetest-22892   [000] ...1. 405430.095519: drm_atomic_commit &lt;-drm_mode_obj_set_property_ioctl
+</span></span><span class="line"><span class="cl">        modetest-22892   [000] ...1. 405430.095690: drm_atomic_helper_commit_modeset_disables &lt;-linlondp_kms_commit_tail
+</span></span><span class="line"><span class="cl">     kworker/3:1-142     [003] ...1. 405431.995661: drm_atomic_commit &lt;-drm_framebuffer_remove
+</span></span><span class="line"><span class="cl">     kworker/3:1-142     [003] ...1. 405431.995815: drm_atomic_helper_commit_modeset_disables &lt;-linlondp_kms_commit_tail
+</span></span><span class="line"><span class="cl">        modetest-22892   [003] ...1. 405432.013936: drm_atomic_commit &lt;-drm_atomic_helper_disable_all
+</span></span><span class="line"><span class="cl">        modetest-22892   [003] ...1. 405432.014079: drm_atomic_helper_commit_modeset_disables &lt;-linlondp_kms_commit_tail
+</span></span><span class="line"><span class="cl">        modetest-22892   [003] ...1. 405432.014091: drm_atomic_bridge_chain_disable &lt;-disable_outputs
+</span></span><span class="line"><span class="cl">        modetest-22892   [003] ...1. 405432.014249: im_mipi_tx_bridge_atomic_disable &lt;-drm_atomic_bridge_chain_disable
+</span></span><span class="line"><span class="cl">        modetest-22892   [003] ...1. 405432.014368: drm_atomic_bridge_chain_post_disable &lt;-disable_outputs
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这个输出至少能回答三件事：</p>
 <ol>
 <li><code>im_mipi_tx_bridge_mode_set()</code> <strong>确实被调用了</strong></li>
 <li>它的直接调用者是 <code>drm_bridge_chain_mode_set()</code></li>
@@ -716,94 +891,205 @@ CONFIG_KALLSYMS_ALL=y
 <hr>
 <h2 id="82-基本步骤">8.2 基本步骤<a hidden class="anchor" aria-hidden="true" href="#82-基本步骤">#</a></h2>
 <h3 id="第一步清理现场">第一步：清理现场<a hidden class="anchor" aria-hidden="true" href="#第一步清理现场">#</a></h3>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>TR<span style="color:#f92672">=</span>/sys/kernel/tracing
-</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span> -d <span style="color:#e6db74">&#34;</span>$TR<span style="color:#e6db74">&#34;</span> <span style="color:#f92672">]</span> <span style="color:#f92672">||</span> TR<span style="color:#f92672">=</span>/sys/kernel/debug/tracing
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>echo <span style="color:#ae81ff">0</span> &gt; $TR/tracing_on
-</span></span><span style="display:flex;"><span>echo nop &gt; $TR/current_tracer
-</span></span><span style="display:flex;"><span>echo &gt; $TR/trace
-</span></span><span style="display:flex;"><span>echo &gt; $TR/set_ftrace_filter
-</span></span><span style="display:flex;"><span>echo &gt; $TR/set_graph_function
-</span></span></code></pre></div><h3 id="第二步设置调用树入口">第二步：设置“调用树入口”<a hidden class="anchor" aria-hidden="true" href="#第二步设置调用树入口">#</a></h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nv">TR</span><span class="o">=</span>/sys/kernel/tracing
+</span></span><span class="line"><span class="cl"><span class="o">[</span> -d <span class="s2">&#34;</span><span class="nv">$TR</span><span class="s2">&#34;</span> <span class="o">]</span> <span class="o">||</span> <span class="nv">TR</span><span class="o">=</span>/sys/kernel/debug/tracing
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> <span class="m">0</span> &gt; <span class="nv">$TR</span>/tracing_on
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> nop &gt; <span class="nv">$TR</span>/current_tracer
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> &gt; <span class="nv">$TR</span>/trace
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> &gt; <span class="nv">$TR</span>/set_ftrace_filter
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> &gt; <span class="nv">$TR</span>/set_graph_function
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="第二步设置调用树入口">第二步：设置“调用树入口”<a hidden class="anchor" aria-hidden="true" href="#第二步设置调用树入口">#</a></h3>
 <p>比如想看一次 DRM atomic commit：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>echo drm_atomic_commit &gt; $TR/set_graph_function
-</span></span></code></pre></div><p>这表示：
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">echo</span> drm_atomic_commit &gt; <span class="nv">$TR</span>/set_graph_function
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这表示：
 <strong>从 <code>drm_atomic_commit()</code> 开始，画调用树。</strong></p>
 <h3 id="第三步设置过滤函数">第三步：设置过滤函数<a hidden class="anchor" aria-hidden="true" href="#第三步设置过滤函数">#</a></h3>
 <p>如果不加过滤，输出可能会非常大。
 例如只保留 DRM bridge / atomic 主线 + 自己驱动函数：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cat &gt; $TR/set_ftrace_filter <span style="color:#e6db74">&lt;&lt;&#39;EOF&#39;
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">drm_atomic_commit
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">drm_atomic_helper_commit_tail
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">drm_atomic_helper_commit_modeset_disables
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">drm_atomic_helper_commit_modeset_enables
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">drm_atomic_bridge_chain_pre_enable
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">drm_atomic_bridge_chain_enable
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">drm_atomic_bridge_chain_disable
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">drm_atomic_bridge_chain_post_disable
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">drm_bridge_attach
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">devm_drm_of_get_bridge
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">im_mipi_tx_chan_attach
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">im_mipi_tx_bridge_attach
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">im_mipi_tx_bridge_mode_set
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">im_mipi_tx_bridge_atomic_pre_enable
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">im_mipi_tx_bridge_atomic_enable
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">im_mipi_tx_bridge_atomic_disable
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">EOF</span>
-</span></span></code></pre></div><h3 id="第四步启用-function_graph-tracer">第四步：启用 function_graph tracer<a hidden class="anchor" aria-hidden="true" href="#第四步启用-function_graph-tracer">#</a></h3>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>echo function_graph &gt; $TR/current_tracer
-</span></span><span style="display:flex;"><span>echo <span style="color:#ae81ff">1</span> &gt; $TR/tracing_on
-</span></span></code></pre></div><h3 id="第五步触发显示流程并查看结果">第五步：触发显示流程并查看结果<a hidden class="anchor" aria-hidden="true" href="#第五步触发显示流程并查看结果">#</a></h3>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>echo <span style="color:#ae81ff">0</span> &gt; $TR/tracing_on
-</span></span><span style="display:flex;"><span>cat $TR/trace
-</span></span></code></pre></div><hr>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cat &gt; <span class="nv">$TR</span>/set_ftrace_filter <span class="s">&lt;&lt;&#39;EOF&#39;
+</span></span></span><span class="line"><span class="cl"><span class="s">drm_atomic_commit
+</span></span></span><span class="line"><span class="cl"><span class="s">drm_atomic_helper_commit_tail
+</span></span></span><span class="line"><span class="cl"><span class="s">drm_atomic_helper_commit_modeset_disables
+</span></span></span><span class="line"><span class="cl"><span class="s">drm_atomic_helper_commit_modeset_enables
+</span></span></span><span class="line"><span class="cl"><span class="s">drm_atomic_bridge_chain_pre_enable
+</span></span></span><span class="line"><span class="cl"><span class="s">drm_atomic_bridge_chain_enable
+</span></span></span><span class="line"><span class="cl"><span class="s">drm_atomic_bridge_chain_disable
+</span></span></span><span class="line"><span class="cl"><span class="s">drm_atomic_bridge_chain_post_disable
+</span></span></span><span class="line"><span class="cl"><span class="s">drm_bridge_attach
+</span></span></span><span class="line"><span class="cl"><span class="s">devm_drm_of_get_bridge
+</span></span></span><span class="line"><span class="cl"><span class="s">im_mipi_tx_chan_attach
+</span></span></span><span class="line"><span class="cl"><span class="s">im_mipi_tx_bridge_attach
+</span></span></span><span class="line"><span class="cl"><span class="s">im_mipi_tx_bridge_mode_set
+</span></span></span><span class="line"><span class="cl"><span class="s">im_mipi_tx_bridge_atomic_pre_enable
+</span></span></span><span class="line"><span class="cl"><span class="s">im_mipi_tx_bridge_atomic_enable
+</span></span></span><span class="line"><span class="cl"><span class="s">im_mipi_tx_bridge_atomic_disable
+</span></span></span><span class="line"><span class="cl"><span class="s">EOF</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="第四步启用-function_graph-tracer">第四步：启用 function_graph tracer<a hidden class="anchor" aria-hidden="true" href="#第四步启用-function_graph-tracer">#</a></h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">echo</span> function_graph &gt; <span class="nv">$TR</span>/current_tracer
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> <span class="m">1</span> &gt; <span class="nv">$TR</span>/tracing_on
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="第五步触发显示流程并查看结果">第五步：触发显示流程并查看结果<a hidden class="anchor" aria-hidden="true" href="#第五步触发显示流程并查看结果">#</a></h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">echo</span> <span class="m">0</span> &gt; <span class="nv">$TR</span>/tracing_on
+</span></span><span class="line"><span class="cl">cat <span class="nv">$TR</span>/trace
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
 <h2 id="83-典型输出示意">8.3 典型输出示意<a hidden class="anchor" aria-hidden="true" href="#83-典型输出示意">#</a></h2>
 <p>你会看到类似这样的层级结构：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span># tracer: function_graph
-</span></span><span style="display:flex;"><span>#
-</span></span><span style="display:flex;"><span># CPU  DURATION                  FUNCTION CALLS
-</span></span><span style="display:flex;"><span># |     |   |                     |   |   |   |
-</span></span><span style="display:flex;"><span> 0)               |  drm_atomic_commit() {
-</span></span><span style="display:flex;"><span> 0)               |    drm_atomic_helper_commit_modeset_disables() {
-</span></span><span style="display:flex;"><span> 0)   6.250 us    |      im_mipi_tx_bridge_mode_set [im_mipi_tx]();
-</span></span><span style="display:flex;"><span> 0) + 40.364 us   |    }
-</span></span><span style="display:flex;"><span> 0)               |    drm_atomic_bridge_chain_pre_enable() {
-</span></span><span style="display:flex;"><span> 0)               |      im_mipi_tx_bridge_atomic_pre_enable [im_mipi_tx]() {
-</span></span><span style="display:flex;"><span> 1) * 16769.01 us |      } /* im_mipi_tx_bridge_atomic_pre_enable [im_mipi_tx] */
-</span></span><span style="display:flex;"><span> 0) @ 164444.2 us |    }
-</span></span><span style="display:flex;"><span> 0)               |    drm_atomic_bridge_chain_enable() {
-</span></span><span style="display:flex;"><span> 0) ! 147.656 us  |      im_mipi_tx_bridge_atomic_enable [im_mipi_tx]();
-</span></span><span style="display:flex;"><span> 0) ! 220.052 us  |    }
-</span></span><span style="display:flex;"><span> 0) @ 165581.7 us |  }
-</span></span><span style="display:flex;"><span> 0)               |  drm_atomic_commit() {
-</span></span><span style="display:flex;"><span> 0) + 19.270 us   |    drm_atomic_helper_commit_modeset_disables();
-</span></span><span style="display:flex;"><span> 0) * 90886.71 us |  }
-</span></span><span style="display:flex;"><span> 0)               |  drm_atomic_commit() {
-</span></span><span style="display:flex;"><span> 0) + 19.270 us   |    drm_atomic_helper_commit_modeset_disables();
-</span></span><span style="display:flex;"><span> 0) * 90976.82 us |  }
-</span></span><span style="display:flex;"><span> 0)               |  drm_atomic_commit() {
-</span></span><span style="display:flex;"><span> 0) + 24.739 us   |    drm_atomic_helper_commit_modeset_disables();
-</span></span><span style="display:flex;"><span> 0) * 91021.61 us |  }
-</span></span><span style="display:flex;"><span> ------------------------------------------
-</span></span><span style="display:flex;"><span> 1) modetes-22861  =&gt; kworker-27127
-</span></span><span style="display:flex;"><span> ------------------------------------------
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span> 1)               |  drm_atomic_commit() {
-</span></span><span style="display:flex;"><span> 1) + 19.271 us   |    drm_atomic_helper_commit_modeset_disables();
-</span></span><span style="display:flex;"><span> 1) * 20695.83 us |  }
-</span></span><span style="display:flex;"><span> ------------------------------------------
-</span></span><span style="display:flex;"><span> 1) kworker-27127  =&gt; modetes-22861
-</span></span><span style="display:flex;"><span> ------------------------------------------
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span> 1)               |  drm_atomic_commit() {
-</span></span><span style="display:flex;"><span> 1)               |    drm_atomic_helper_commit_modeset_disables() {
-</span></span><span style="display:flex;"><span> 1)               |      drm_atomic_bridge_chain_disable() {
-</span></span><span style="display:flex;"><span> 1) + 68.229 us   |        im_mipi_tx_bridge_atomic_disable [im_mipi_tx]();
-</span></span><span style="display:flex;"><span> 1) ! 231.771 us  |      }
-</span></span><span style="display:flex;"><span> 1) * 28403.12 us |      drm_atomic_bridge_chain_post_disable();
-</span></span><span style="display:flex;"><span> 2) @ 182573.1 us |    } /* drm_atomic_helper_commit_modeset_disables */
-</span></span><span style="display:flex;"><span> 2) @ 182787.7 us |  } /* drm_atomic_commit */
-</span></span></code></pre></div><p>这个输出可以非常直观地回答：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl"># tracer: function_graph
+</span></span><span class="line"><span class="cl">#
+</span></span><span class="line"><span class="cl"># CPU  DURATION                  FUNCTION CALLS
+</span></span><span class="line"><span class="cl"># |     |   |                     |   |   |   |
+</span></span><span class="line"><span class="cl"> 0)               |  drm_atomic_commit() {
+</span></span><span class="line"><span class="cl"> 0)               |    drm_atomic_helper_commit_modeset_disables() {
+</span></span><span class="line"><span class="cl"> 0)   6.250 us    |      im_mipi_tx_bridge_mode_set [im_mipi_tx]();
+</span></span><span class="line"><span class="cl"> 0) + 40.364 us   |    }
+</span></span><span class="line"><span class="cl"> 0)               |    drm_atomic_bridge_chain_pre_enable() {
+</span></span><span class="line"><span class="cl"> 0)               |      im_mipi_tx_bridge_atomic_pre_enable [im_mipi_tx]() {
+</span></span><span class="line"><span class="cl"> 1) * 16769.01 us |      } /* im_mipi_tx_bridge_atomic_pre_enable [im_mipi_tx] */
+</span></span><span class="line"><span class="cl"> 0) @ 164444.2 us |    }
+</span></span><span class="line"><span class="cl"> 0)               |    drm_atomic_bridge_chain_enable() {
+</span></span><span class="line"><span class="cl"> 0) ! 147.656 us  |      im_mipi_tx_bridge_atomic_enable [im_mipi_tx]();
+</span></span><span class="line"><span class="cl"> 0) ! 220.052 us  |    }
+</span></span><span class="line"><span class="cl"> 0) @ 165581.7 us |  }
+</span></span><span class="line"><span class="cl"> 0)               |  drm_atomic_commit() {
+</span></span><span class="line"><span class="cl"> 0) + 19.270 us   |    drm_atomic_helper_commit_modeset_disables();
+</span></span><span class="line"><span class="cl"> 0) * 90886.71 us |  }
+</span></span><span class="line"><span class="cl"> 0)               |  drm_atomic_commit() {
+</span></span><span class="line"><span class="cl"> 0) + 19.270 us   |    drm_atomic_helper_commit_modeset_disables();
+</span></span><span class="line"><span class="cl"> 0) * 90976.82 us |  }
+</span></span><span class="line"><span class="cl"> 0)               |  drm_atomic_commit() {
+</span></span><span class="line"><span class="cl"> 0) + 24.739 us   |    drm_atomic_helper_commit_modeset_disables();
+</span></span><span class="line"><span class="cl"> 0) * 91021.61 us |  }
+</span></span><span class="line"><span class="cl"> ------------------------------------------
+</span></span><span class="line"><span class="cl"> 1) modetes-22861  =&gt; kworker-27127
+</span></span><span class="line"><span class="cl"> ------------------------------------------
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"> 1)               |  drm_atomic_commit() {
+</span></span><span class="line"><span class="cl"> 1) + 19.271 us   |    drm_atomic_helper_commit_modeset_disables();
+</span></span><span class="line"><span class="cl"> 1) * 20695.83 us |  }
+</span></span><span class="line"><span class="cl"> ------------------------------------------
+</span></span><span class="line"><span class="cl"> 1) kworker-27127  =&gt; modetes-22861
+</span></span><span class="line"><span class="cl"> ------------------------------------------
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"> 1)               |  drm_atomic_commit() {
+</span></span><span class="line"><span class="cl"> 1)               |    drm_atomic_helper_commit_modeset_disables() {
+</span></span><span class="line"><span class="cl"> 1)               |      drm_atomic_bridge_chain_disable() {
+</span></span><span class="line"><span class="cl"> 1) + 68.229 us   |        im_mipi_tx_bridge_atomic_disable [im_mipi_tx]();
+</span></span><span class="line"><span class="cl"> 1) ! 231.771 us  |      }
+</span></span><span class="line"><span class="cl"> 1) * 28403.12 us |      drm_atomic_bridge_chain_post_disable();
+</span></span><span class="line"><span class="cl"> 2) @ 182573.1 us |    } /* drm_atomic_helper_commit_modeset_disables */
+</span></span><span class="line"><span class="cl"> 2) @ 182787.7 us |  } /* drm_atomic_commit */
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这个输出可以非常直观地回答：</p>
 <ul>
 <li><code>mode_set / pre_enable / enable</code> 的顺序</li>
 <li><code>disable / post_disable</code> 在哪个阶段</li>
@@ -819,13 +1105,30 @@ CONFIG_KALLSYMS_ALL=y
 <li>模块还没加载，函数暂时不可见</li>
 </ul>
 <p>所以我一般都会先查一下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>grep im_mipi_tx /sys/kernel/debug/tracing/available_filter_functions
-</span></span><span style="display:flex;"><span>grep drm_atomic_bridge_chain /sys/kernel/debug/tracing/available_filter_functions
-</span></span></code></pre></div><p>如果你在调别的子系统，就换成：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>grep spi_ /sys/kernel/debug/tracing/available_filter_functions
-</span></span><span style="display:flex;"><span>grep clk_ /sys/kernel/debug/tracing/available_filter_functions
-</span></span><span style="display:flex;"><span>grep regulator_ /sys/kernel/debug/tracing/available_filter_functions
-</span></span></code></pre></div><p>这个步骤非常重要，它能帮你确认：<strong>这个函数到底能不能被 ftrace 追踪。</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">grep im_mipi_tx /sys/kernel/debug/tracing/available_filter_functions
+</span></span><span class="line"><span class="cl">grep drm_atomic_bridge_chain /sys/kernel/debug/tracing/available_filter_functions
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>如果你在调别的子系统，就换成：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">grep spi_ /sys/kernel/debug/tracing/available_filter_functions
+</span></span><span class="line"><span class="cl">grep clk_ /sys/kernel/debug/tracing/available_filter_functions
+</span></span><span class="line"><span class="cl">grep regulator_ /sys/kernel/debug/tracing/available_filter_functions
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这个步骤非常重要，它能帮你确认：<strong>这个函数到底能不能被 ftrace 追踪。</strong></p>
 <hr>
 <h1 id="10-一套通用排查思路从阶段切-trace而不是一口气全追">10. 一套通用排查思路：从“阶段”切 trace，而不是一口气全追<a hidden class="anchor" aria-hidden="true" href="#10-一套通用排查思路从阶段切-trace而不是一口气全追">#</a></h1>
 <p>这是我最推荐的工作流。</p>
@@ -903,55 +1206,109 @@ CONFIG_KALLSYMS_ALL=y
 </ul>
 <hr>
 <h2 id="111-通用脚本-trace_templatesh">11.1 通用脚本 <code>trace_template.sh</code><a hidden class="anchor" aria-hidden="true" href="#111-通用脚本-trace_templatesh">#</a></h2>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/sh
-</span></span></span><span style="display:flex;"><span>TR<span style="color:#f92672">=</span>/sys/kernel/tracing
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> <span style="color:#f92672">[</span> ! -d <span style="color:#e6db74">&#34;</span>$TR<span style="color:#e6db74">&#34;</span> <span style="color:#f92672">]</span>; <span style="color:#66d9ef">then</span>
-</span></span><span style="display:flex;"><span>        TR<span style="color:#f92672">=</span>/sys/kernel/debug/tracing
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">fi</span>
-</span></span><span style="display:flex;"><span>TR<span style="color:#f92672">=</span>/sys/kernel/debug/tracing
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>MODE<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>1<span style="color:#66d9ef">:-</span>graph<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>          <span style="color:#75715e"># function / graph</span>
-</span></span><span style="display:flex;"><span>ENTRY<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>2<span style="color:#66d9ef">:-</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>              <span style="color:#75715e"># function_graph 的入口函数，可为空</span>
-</span></span><span style="display:flex;"><span>FILTER_FILE<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>3<span style="color:#66d9ef">:-</span>/tmp/ftrace_filter.txt<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;[trace] using tracing path: </span>$TR<span style="color:#e6db74">&#34;</span>
-</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;[trace] mode=</span>$MODE<span style="color:#e6db74"> entry=</span>$ENTRY<span style="color:#e6db74"> filter=</span>$FILTER_FILE<span style="color:#e6db74">&#34;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>echo <span style="color:#ae81ff">0</span> &gt; $TR/tracing_on
-</span></span><span style="display:flex;"><span>echo nop &gt; $TR/current_tracer
-</span></span><span style="display:flex;"><span>echo &gt; $TR/trace
-</span></span><span style="display:flex;"><span>echo &gt; $TR/set_ftrace_filter
-</span></span><span style="display:flex;"><span>echo &gt; $TR/set_graph_function
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> <span style="color:#f92672">[</span> -f <span style="color:#e6db74">&#34;</span>$FILTER_FILE<span style="color:#e6db74">&#34;</span> <span style="color:#f92672">]</span>; <span style="color:#66d9ef">then</span>
-</span></span><span style="display:flex;"><span>	cat <span style="color:#e6db74">&#34;</span>$FILTER_FILE<span style="color:#e6db74">&#34;</span> &gt; $TR/set_ftrace_filter
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">fi</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">case</span> <span style="color:#e6db74">&#34;</span>$MODE<span style="color:#e6db74">&#34;</span> in
-</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">function</span><span style="color:#f92672">)</span>
-</span></span><span style="display:flex;"><span>		echo <span style="color:#66d9ef">function</span> &gt; $TR/current_tracer
-</span></span><span style="display:flex;"><span>		;;
-</span></span><span style="display:flex;"><span>	graph<span style="color:#f92672">)</span>
-</span></span><span style="display:flex;"><span>		echo function_graph &gt; $TR/current_tracer
-</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span> <span style="color:#f92672">[</span> -n <span style="color:#e6db74">&#34;</span>$ENTRY<span style="color:#e6db74">&#34;</span> <span style="color:#f92672">]</span>; <span style="color:#66d9ef">then</span>
-</span></span><span style="display:flex;"><span>			echo <span style="color:#e6db74">&#34;</span>$ENTRY<span style="color:#e6db74">&#34;</span> &gt; $TR/set_graph_function
-</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">fi</span>
-</span></span><span style="display:flex;"><span>		;;
-</span></span><span style="display:flex;"><span>	*<span style="color:#f92672">)</span>
-</span></span><span style="display:flex;"><span>		echo <span style="color:#e6db74">&#34;Unknown mode: </span>$MODE<span style="color:#e6db74">&#34;</span>
-</span></span><span style="display:flex;"><span>		exit <span style="color:#ae81ff">1</span>
-</span></span><span style="display:flex;"><span>		;;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">esac</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>echo <span style="color:#ae81ff">1</span> &gt; $TR/tracing_on
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>echo
-</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;Tracing started.&#34;</span>
-</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;Do your test now, then stop with:&#34;</span>
-</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;  echo 0 &gt; </span>$TR<span style="color:#e6db74">/tracing_on&#34;</span>
-</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;Dump trace with:&#34;</span>
-</span></span><span style="display:flex;"><span>echo <span style="color:#e6db74">&#34;  cat </span>$TR<span style="color:#e6db74">/trace &gt; /tmp/trace.log&#34;</span>
-</span></span></code></pre></div><hr>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="cp">#!/bin/sh
+</span></span></span><span class="line"><span class="cl"><span class="nv">TR</span><span class="o">=</span>/sys/kernel/tracing
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="o">[</span> ! -d <span class="s2">&#34;</span><span class="nv">$TR</span><span class="s2">&#34;</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">TR</span><span class="o">=</span>/sys/kernel/debug/tracing
+</span></span><span class="line"><span class="cl"><span class="k">fi</span>
+</span></span><span class="line"><span class="cl"><span class="nv">TR</span><span class="o">=</span>/sys/kernel/debug/tracing
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">MODE</span><span class="o">=</span><span class="s2">&#34;</span><span class="si">${</span><span class="nv">1</span><span class="k">:-</span><span class="nv">graph</span><span class="si">}</span><span class="s2">&#34;</span>          <span class="c1"># function / graph</span>
+</span></span><span class="line"><span class="cl"><span class="nv">ENTRY</span><span class="o">=</span><span class="s2">&#34;</span><span class="si">${</span><span class="nv">2</span><span class="k">:-</span><span class="si">}</span><span class="s2">&#34;</span>              <span class="c1"># function_graph 的入口函数，可为空</span>
+</span></span><span class="line"><span class="cl"><span class="nv">FILTER_FILE</span><span class="o">=</span><span class="s2">&#34;</span><span class="si">${</span><span class="nv">3</span><span class="k">:-</span><span class="p">/tmp/ftrace_filter.txt</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> <span class="s2">&#34;[trace] using tracing path: </span><span class="nv">$TR</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> <span class="s2">&#34;[trace] mode=</span><span class="nv">$MODE</span><span class="s2"> entry=</span><span class="nv">$ENTRY</span><span class="s2"> filter=</span><span class="nv">$FILTER_FILE</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> <span class="m">0</span> &gt; <span class="nv">$TR</span>/tracing_on
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> nop &gt; <span class="nv">$TR</span>/current_tracer
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> &gt; <span class="nv">$TR</span>/trace
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> &gt; <span class="nv">$TR</span>/set_ftrace_filter
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> &gt; <span class="nv">$TR</span>/set_graph_function
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="o">[</span> -f <span class="s2">&#34;</span><span class="nv">$FILTER_FILE</span><span class="s2">&#34;</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">	cat <span class="s2">&#34;</span><span class="nv">$FILTER_FILE</span><span class="s2">&#34;</span> &gt; <span class="nv">$TR</span>/set_ftrace_filter
+</span></span><span class="line"><span class="cl"><span class="k">fi</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">case</span> <span class="s2">&#34;</span><span class="nv">$MODE</span><span class="s2">&#34;</span> in
+</span></span><span class="line"><span class="cl">	<span class="k">function</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">		<span class="nb">echo</span> <span class="k">function</span> &gt; <span class="nv">$TR</span>/current_tracer
+</span></span><span class="line"><span class="cl">		<span class="p">;;</span>
+</span></span><span class="line"><span class="cl">	graph<span class="o">)</span>
+</span></span><span class="line"><span class="cl">		<span class="nb">echo</span> function_graph &gt; <span class="nv">$TR</span>/current_tracer
+</span></span><span class="line"><span class="cl">		<span class="k">if</span> <span class="o">[</span> -n <span class="s2">&#34;</span><span class="nv">$ENTRY</span><span class="s2">&#34;</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">			<span class="nb">echo</span> <span class="s2">&#34;</span><span class="nv">$ENTRY</span><span class="s2">&#34;</span> &gt; <span class="nv">$TR</span>/set_graph_function
+</span></span><span class="line"><span class="cl">		<span class="k">fi</span>
+</span></span><span class="line"><span class="cl">		<span class="p">;;</span>
+</span></span><span class="line"><span class="cl">	*<span class="o">)</span>
+</span></span><span class="line"><span class="cl">		<span class="nb">echo</span> <span class="s2">&#34;Unknown mode: </span><span class="nv">$MODE</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl">		<span class="nb">exit</span> <span class="m">1</span>
+</span></span><span class="line"><span class="cl">		<span class="p">;;</span>
+</span></span><span class="line"><span class="cl"><span class="k">esac</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> <span class="m">1</span> &gt; <span class="nv">$TR</span>/tracing_on
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span>
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> <span class="s2">&#34;Tracing started.&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> <span class="s2">&#34;Do your test now, then stop with:&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> <span class="s2">&#34;  echo 0 &gt; </span><span class="nv">$TR</span><span class="s2">/tracing_on&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> <span class="s2">&#34;Dump trace with:&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nb">echo</span> <span class="s2">&#34;  cat </span><span class="nv">$TR</span><span class="s2">/trace &gt; /tmp/trace.log&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
 <h1 id="12-以-drm-显示子系统为例三套常用-filter">12. 以 DRM 显示子系统为例：三套常用 filter<a hidden class="anchor" aria-hidden="true" href="#12-以-drm-显示子系统为例三套常用-filter">#</a></h1>
 <p>下面给三套我实际会用的 filter 文件示例。</p>
 <hr>
@@ -963,14 +1320,32 @@ CONFIG_KALLSYMS_ALL=y
 <li>自己的 <code>bridge_attach()</code> 是谁调的</li>
 </ul>
 <h2 id="131-drm_attach_filtertxt">13.1 <code>drm_attach_filter.txt</code><a hidden class="anchor" aria-hidden="true" href="#131-drm_attach_filtertxt">#</a></h2>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>drm_bridge_attach
-</span></span><span style="display:flex;"><span>drm_bridge_attach_next_bridge
-</span></span><span style="display:flex;"><span>devm_drm_of_get_bridge
-</span></span><span style="display:flex;"><span>im_mipi_tx_chan_attach
-</span></span><span style="display:flex;"><span>im_mipi_tx_bridge_attach
-</span></span></code></pre></div><h2 id="132-使用方式">13.2 使用方式<a hidden class="anchor" aria-hidden="true" href="#132-使用方式">#</a></h2>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>./trace_template.sh graph drm_bridge_attach /tmp/drm_attach_filter.txt
-</span></span></code></pre></div><p>然后触发：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">drm_bridge_attach
+</span></span><span class="line"><span class="cl">drm_bridge_attach_next_bridge
+</span></span><span class="line"><span class="cl">devm_drm_of_get_bridge
+</span></span><span class="line"><span class="cl">im_mipi_tx_chan_attach
+</span></span><span class="line"><span class="cl">im_mipi_tx_bridge_attach
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="132-使用方式">13.2 使用方式<a hidden class="anchor" aria-hidden="true" href="#132-使用方式">#</a></h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">./trace_template.sh graph drm_bridge_attach /tmp/drm_attach_filter.txt
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>然后触发：</p>
 <ul>
 <li>驱动 probe</li>
 <li>component bind</li>
@@ -986,22 +1361,48 @@ CONFIG_KALLSYMS_ALL=y
 <li>自己的 bridge callback 是谁调的</li>
 </ul>
 <h2 id="141-drm_atomic_filtertxt">14.1 <code>drm_atomic_filter.txt</code><a hidden class="anchor" aria-hidden="true" href="#141-drm_atomic_filtertxt">#</a></h2>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>drm_atomic_commit
-</span></span><span style="display:flex;"><span>drm_atomic_helper_commit_tail
-</span></span><span style="display:flex;"><span>drm_atomic_helper_commit_modeset_disables
-</span></span><span style="display:flex;"><span>drm_atomic_helper_commit_modeset_enables
-</span></span><span style="display:flex;"><span>drm_atomic_bridge_chain_mode_set
-</span></span><span style="display:flex;"><span>drm_atomic_bridge_chain_pre_enable
-</span></span><span style="display:flex;"><span>drm_atomic_bridge_chain_enable
-</span></span><span style="display:flex;"><span>drm_atomic_bridge_chain_disable
-</span></span><span style="display:flex;"><span>drm_atomic_bridge_chain_post_disable
-</span></span><span style="display:flex;"><span>im_mipi_tx_bridge_mode_set
-</span></span><span style="display:flex;"><span>im_mipi_tx_bridge_atomic_pre_enable
-</span></span><span style="display:flex;"><span>im_mipi_tx_bridge_atomic_enable
-</span></span><span style="display:flex;"><span>im_mipi_tx_bridge_atomic_disable
-</span></span></code></pre></div><h2 id="142-使用方式">14.2 使用方式<a hidden class="anchor" aria-hidden="true" href="#142-使用方式">#</a></h2>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>./trace_template.sh graph drm_atomic_commit /tmp/drm_atomic_filter.txt
-</span></span></code></pre></div><p>然后触发：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">drm_atomic_commit
+</span></span><span class="line"><span class="cl">drm_atomic_helper_commit_tail
+</span></span><span class="line"><span class="cl">drm_atomic_helper_commit_modeset_disables
+</span></span><span class="line"><span class="cl">drm_atomic_helper_commit_modeset_enables
+</span></span><span class="line"><span class="cl">drm_atomic_bridge_chain_mode_set
+</span></span><span class="line"><span class="cl">drm_atomic_bridge_chain_pre_enable
+</span></span><span class="line"><span class="cl">drm_atomic_bridge_chain_enable
+</span></span><span class="line"><span class="cl">drm_atomic_bridge_chain_disable
+</span></span><span class="line"><span class="cl">drm_atomic_bridge_chain_post_disable
+</span></span><span class="line"><span class="cl">im_mipi_tx_bridge_mode_set
+</span></span><span class="line"><span class="cl">im_mipi_tx_bridge_atomic_pre_enable
+</span></span><span class="line"><span class="cl">im_mipi_tx_bridge_atomic_enable
+</span></span><span class="line"><span class="cl">im_mipi_tx_bridge_atomic_disable
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="142-使用方式">14.2 使用方式<a hidden class="anchor" aria-hidden="true" href="#142-使用方式">#</a></h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">./trace_template.sh graph drm_atomic_commit /tmp/drm_atomic_filter.txt
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>然后触发：</p>
 <ul>
 <li><code>modetest</code></li>
 <li>桌面环境切换分辨率</li>
@@ -1015,14 +1416,32 @@ CONFIG_KALLSYMS_ALL=y
 <li>不关心整棵调用树，只想知道顺序和直接调用者</li>
 </ul>
 <h2 id="151-drm_quick_filtertxt">15.1 <code>drm_quick_filter.txt</code><a hidden class="anchor" aria-hidden="true" href="#151-drm_quick_filtertxt">#</a></h2>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>drm_atomic_commit
-</span></span><span style="display:flex;"><span>drm_atomic_bridge_chain_mode_set
-</span></span><span style="display:flex;"><span>drm_atomic_bridge_chain_enable
-</span></span><span style="display:flex;"><span>im_mipi_tx_bridge_mode_set
-</span></span><span style="display:flex;"><span>im_mipi_tx_bridge_atomic_enable
-</span></span></code></pre></div><h2 id="152-使用方式">15.2 使用方式<a hidden class="anchor" aria-hidden="true" href="#152-使用方式">#</a></h2>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>./trace_template.sh <span style="color:#66d9ef">function</span> <span style="color:#e6db74">&#34;&#34;</span> /tmp/drm_quick_filter.txt
-</span></span></code></pre></div><hr>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">drm_atomic_commit
+</span></span><span class="line"><span class="cl">drm_atomic_bridge_chain_mode_set
+</span></span><span class="line"><span class="cl">drm_atomic_bridge_chain_enable
+</span></span><span class="line"><span class="cl">im_mipi_tx_bridge_mode_set
+</span></span><span class="line"><span class="cl">im_mipi_tx_bridge_atomic_enable
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="152-使用方式">15.2 使用方式<a hidden class="anchor" aria-hidden="true" href="#152-使用方式">#</a></h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">./trace_template.sh <span class="k">function</span> <span class="s2">&#34;&#34;</span> /tmp/drm_quick_filter.txt
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
 <h1 id="16-如何把这个模板迁移到其他子系统">16. 如何把这个模板迁移到其他子系统<a hidden class="anchor" aria-hidden="true" href="#16-如何把这个模板迁移到其他子系统">#</a></h1>
 <p>真正需要替换的，通常只有两样东西：</p>
 <ol>
@@ -1032,39 +1451,107 @@ CONFIG_KALLSYMS_ALL=y
 <hr>
 <h1 id="17-迁移示例spi-子系统">17. 迁移示例：SPI 子系统<a hidden class="anchor" aria-hidden="true" href="#17-迁移示例spi-子系统">#</a></h1>
 <p>如果你要排查 SPI 传输，可以把入口函数换成：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>spi_sync
-</span></span></code></pre></div><p>过滤函数可以换成类似：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>spi_sync
-</span></span><span style="display:flex;"><span>__spi_sync
-</span></span><span style="display:flex;"><span>spi_transfer_one_message
-</span></span><span style="display:flex;"><span>xxx_spi_transfer_one
-</span></span><span style="display:flex;"><span>xxx_spi_irq
-</span></span></code></pre></div><p>然后：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>./trace_template.sh graph spi_sync /tmp/spi_filter.txt
-</span></span></code></pre></div><hr>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">spi_sync
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>过滤函数可以换成类似：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">spi_sync
+</span></span><span class="line"><span class="cl">__spi_sync
+</span></span><span class="line"><span class="cl">spi_transfer_one_message
+</span></span><span class="line"><span class="cl">xxx_spi_transfer_one
+</span></span><span class="line"><span class="cl">xxx_spi_irq
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>然后：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">./trace_template.sh graph spi_sync /tmp/spi_filter.txt
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
 <h1 id="18-迁移示例clock-子系统">18. 迁移示例：Clock 子系统<a hidden class="anchor" aria-hidden="true" href="#18-迁移示例clock-子系统">#</a></h1>
 <p>如果你要看时钟 enable / set_rate 路径，可以尝试：</p>
 <p>入口函数：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>clk_set_rate
-</span></span></code></pre></div><p>或者：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>clk_prepare_enable
-</span></span></code></pre></div><p>过滤函数示例：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>clk_prepare_enable
-</span></span><span style="display:flex;"><span>clk_core_prepare
-</span></span><span style="display:flex;"><span>clk_core_enable
-</span></span><span style="display:flex;"><span>clk_set_rate
-</span></span><span style="display:flex;"><span>clk_change_rate
-</span></span><span style="display:flex;"><span>xxx_clk_set_rate
-</span></span></code></pre></div><hr>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">clk_set_rate
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>或者：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">clk_prepare_enable
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>过滤函数示例：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">clk_prepare_enable
+</span></span><span class="line"><span class="cl">clk_core_prepare
+</span></span><span class="line"><span class="cl">clk_core_enable
+</span></span><span class="line"><span class="cl">clk_set_rate
+</span></span><span class="line"><span class="cl">clk_change_rate
+</span></span><span class="line"><span class="cl">xxx_clk_set_rate
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
 <h1 id="19-迁移示例regulator-子系统">19. 迁移示例：Regulator 子系统<a hidden class="anchor" aria-hidden="true" href="#19-迁移示例regulator-子系统">#</a></h1>
 <p>入口函数：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>regulator_enable
-</span></span></code></pre></div><p>过滤函数示例：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>regulator_enable
-</span></span><span style="display:flex;"><span>_regulator_enable
-</span></span><span style="display:flex;"><span>regulator_set_voltage
-</span></span><span style="display:flex;"><span>xxx_regulator_enable
-</span></span></code></pre></div><hr>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">regulator_enable
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>过滤函数示例：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">regulator_enable
+</span></span><span class="line"><span class="cl">_regulator_enable
+</span></span><span class="line"><span class="cl">regulator_set_voltage
+</span></span><span class="line"><span class="cl">xxx_regulator_enable
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
 <h1 id="20-function-与-function_graph-如何选择">20. function 与 function_graph 如何选择<a hidden class="anchor" aria-hidden="true" href="#20-function-与-function_graph-如何选择">#</a></h1>
 <p>我自己的经验是：</p>
 <h2 id="用-function-的场景">用 <code>function</code> 的场景<a hidden class="anchor" aria-hidden="true" href="#用-function-的场景">#</a></h2>
@@ -1100,9 +1587,17 @@ CONFIG_KALLSYMS_ALL=y
 <p>开始画。</p>
 <h2 id="215-必要时和-dump_stack-联合使用">21.5 必要时和 <code>dump_stack()</code> 联合使用<a hidden class="anchor" aria-hidden="true" href="#215-必要时和-dump_stack-联合使用">#</a></h2>
 <p>如果某个 callback 你只想知道“这一处到底是谁调的”，在驱动里临时加：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#a6e22e">pr_info</span>(<span style="color:#e6db74">&#34;%s</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, __func__);
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">dump_stack</span>();
-</span></span></code></pre></div><p>通常比大面积 trace 更快出答案。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">pr_info</span><span class="p">(</span><span class="s">&#34;%s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">__func__</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">dump_stack</span><span class="p">();</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>通常比大面积 trace 更快出答案。</p>
 <hr>
 <h1 id="22-以-drm-bridge-callback-为例的典型问题与解法">22. 以 DRM bridge callback 为例的典型问题与解法<a hidden class="anchor" aria-hidden="true" href="#22-以-drm-bridge-callback-为例的典型问题与解法">#</a></h1>
 <h2 id="问题-1im_mipi_tx_bridge_mode_set-是谁调的">问题 1：<code>im_mipi_tx_bridge_mode_set()</code> 是谁调的？<a hidden class="anchor" aria-hidden="true" href="#问题-1im_mipi_tx_bridge_mode_set-是谁调的">#</a></h2>
@@ -1121,8 +1616,15 @@ CONFIG_KALLSYMS_ALL=y
 </ul>
 <h3 id="观察点">观察点<a hidden class="anchor" aria-hidden="true" href="#观察点">#</a></h3>
 <p>看输出中：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>im_mipi_tx_bridge_mode_set &lt;- drm_atomic_bridge_chain_mode_set
-</span></span></code></pre></div><hr>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">im_mipi_tx_bridge_mode_set &lt;- drm_atomic_bridge_chain_mode_set
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
 <h2 id="问题-2mode_set--pre_enable--enable-顺序是什么">问题 2：<code>mode_set / pre_enable / enable</code> 顺序是什么？<a hidden class="anchor" aria-hidden="true" href="#问题-2mode_set--pre_enable--enable-顺序是什么">#</a></h2>
 <h3 id="方法-1">方法<a hidden class="anchor" aria-hidden="true" href="#方法-1">#</a></h3>
 <ul>
@@ -1144,8 +1646,15 @@ CONFIG_KALLSYMS_ALL=y
 </ul>
 <h3 id="观察点-1">观察点<a hidden class="anchor" aria-hidden="true" href="#观察点-1">#</a></h3>
 <p>确认顺序是否为：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>mode_set -&gt; pre_enable -&gt; enable
-</span></span></code></pre></div><hr>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">mode_set -&gt; pre_enable -&gt; enable
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
 <h2 id="问题-3im_mipi_tx_bridge_attach-是在-probe-阶段还是-commit-阶段调用">问题 3：<code>im_mipi_tx_bridge_attach()</code> 是在 probe 阶段还是 commit 阶段调用？<a hidden class="anchor" aria-hidden="true" href="#问题-3im_mipi_tx_bridge_attach-是在-probe-阶段还是-commit-阶段调用">#</a></h2>
 <h3 id="方法-2">方法<a hidden class="anchor" aria-hidden="true" href="#方法-2">#</a></h3>
 <ul>
