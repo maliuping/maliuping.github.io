@@ -2,22 +2,28 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://maliuping.github.io/tags/drm/</loc>
+    <lastmod>2026-06-26T17:35:25+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/posts/linux/drm/how_to_construct_drm_atomic_state/</loc>
+    <lastmod>2026-06-26T17:35:25+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/tags/linux/</loc>
+    <lastmod>2026-06-26T17:35:25+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/</loc>
+    <lastmod>2026-06-26T17:35:25+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/posts/</loc>
+    <lastmod>2026-06-26T17:35:25+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/tags/</loc>
+    <lastmod>2026-06-26T17:35:25+08:00</lastmod>
+  </url><url>
     <loc>https://maliuping.github.io/tags/ftrace/</loc>
     <lastmod>2026-06-23T09:56:33+08:00</lastmod>
   </url><url>
-    <loc>https://maliuping.github.io/tags/linux/</loc>
-    <lastmod>2026-06-23T09:56:33+08:00</lastmod>
-  </url><url>
     <loc>https://maliuping.github.io/posts/linux/ftrace/kernel_debugging_with_ftrace/</loc>
-    <lastmod>2026-06-23T09:56:33+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/</loc>
-    <lastmod>2026-06-23T09:56:33+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/posts/</loc>
-    <lastmod>2026-06-23T09:56:33+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/tags/</loc>
     <lastmod>2026-06-23T09:56:33+08:00</lastmod>
   </url><url>
     <loc>https://maliuping.github.io/posts/display/dp/aux/</loc>
@@ -36,9 +42,6 @@
     <lastmod>2026-06-14T21:19:57+08:00</lastmod>
   </url><url>
     <loc>https://maliuping.github.io/posts/display/dp/dpcd/</loc>
-    <lastmod>2026-06-14T21:19:57+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/tags/drm/</loc>
     <lastmod>2026-06-14T21:19:57+08:00</lastmod>
   </url><url>
     <loc>https://maliuping.github.io/tags/interrupt/</loc>

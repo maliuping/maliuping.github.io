@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Drm_atomic_state如何构造 | Logan&#39;s Lab</title>
+<meta name="keywords" content="Linux, DRM">
+<meta name="description" content="1. 用户态数据构造
+libdrm提供了如下的编程范式：
+drmModeAtomicReq *req = drmModeAtomicAlloc();
+
+drmModeAtomicAddProperty(req, conn_id, prop_conn_crtc, crtc_id);
+
+
+/* crtc enable &#43; mode */
+drmModeAtomicAddProperty(req, crtc_id, prop_crtc_active, 1);
+drmModeAtomicAddProperty(req, crtc_id, prop_crtc_mode, mode_blob);
+
+/* plane setup */
+drmModeAtomicAddProperty(req, plane_id, prop_plane_crtc, crtc_id);
+drmModeAtomicAddProperty(req, plane_id, prop_plane_fb, buf-&gt;fb_id);
+
+drmModeAtomicAddProperty(req, plane_id, prop_crtc_x, 0);
+drmModeAtomicAddProperty(req, plane_id, prop_crtc_y, 0);
+drmModeAtomicAddProperty(req, plane_id, prop_crtc_w, buf-&gt;width);
+drmModeAtomicAddProperty(req, plane_id, prop_crtc_h, buf-&gt;height);
+
+drmModeAtomicAddProperty(req, plane_id, prop_src_x, 0);
+drmModeAtomicAddProperty(req, plane_id, prop_src_y, 0);
+drmModeAtomicAddProperty(req, plane_id, prop_src_w, buf-&gt;width &lt;&lt; 16);
+drmModeAtomicAddProperty(req, plane_id, prop_src_h, buf-&gt;height &lt;&lt; 16);
+最终得到的结果是：
+struct _drmModeAtomicReqItem {
+	uint32_t object_id;
+	uint32_t property_id;
+	uint64_t value;
+	uint32_t cursor;
+};
+struct _drmModeAtomicReq {
+	uint32_t cursor;
+	uint32_t size_items;
+	drmModeAtomicReqItemPtr items;
+};
+typedef struct _drmModeAtomicReq drmModeAtomicReq, *drmModeAtomicReqPtr;
+
+Entry0:
+    object = Connector0
+    property = CRTC_ID
+    value = CRTC0
+
+Entry1:
+    object = CRTC0
+    property = ACTIVE
+    value = 1
+
+Entry2:
+    object = CRTC0
+    property = MODE_ID
+    value = blob
+
+Entry3:
+    object = Plane0
+    property = CRTC_ID
+    value = CRTC0
+
+Entry4:
+    object = Plane0
+    property = FB_ID
+    value = fb0
+
+...
+到这里只有Property, 没有drm_atomic_state .">
+<meta name="author" content="Logan">
+<link rel="canonical" href="https://maliuping.github.io/posts/linux/drm/how_to_construct_drm_atomic_state/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.1616a23359a6fae7c990527422bec49a0ca1c1970d7b51fb86ea1e4089716daf.css" integrity="sha256-FhaiM1mm&#43;ufJkFJ0Ir7EmgyhwZcNe1H7huoeQIlxba8=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://maliuping.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://maliuping.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://maliuping.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://maliuping.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://maliuping.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://maliuping.github.io/posts/linux/drm/how_to_construct_drm_atomic_state/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="https://maliuping.github.io/posts/linux/drm/how_to_construct_drm_atomic_state/">
+  <meta property="og:site_name" content="Logan&#39;s Lab">
+  <meta property="og:title" content="Drm_atomic_state如何构造">
+  <meta property="og:description" content="1. 用户态数据构造 libdrm提供了如下的编程范式：
+drmModeAtomicReq *req = drmModeAtomicAlloc(); drmModeAtomicAddProperty(req, conn_id, prop_conn_crtc, crtc_id); /* crtc enable &#43; mode */ drmModeAtomicAddProperty(req, crtc_id, prop_crtc_active, 1); drmModeAtomicAddProperty(req, crtc_id, prop_crtc_mode, mode_blob); /* plane setup */ drmModeAtomicAddProperty(req, plane_id, prop_plane_crtc, crtc_id); drmModeAtomicAddProperty(req, plane_id, prop_plane_fb, buf-&gt;fb_id); drmModeAtomicAddProperty(req, plane_id, prop_crtc_x, 0); drmModeAtomicAddProperty(req, plane_id, prop_crtc_y, 0); drmModeAtomicAddProperty(req, plane_id, prop_crtc_w, buf-&gt;width); drmModeAtomicAddProperty(req, plane_id, prop_crtc_h, buf-&gt;height); drmModeAtomicAddProperty(req, plane_id, prop_src_x, 0); drmModeAtomicAddProperty(req, plane_id, prop_src_y, 0); drmModeAtomicAddProperty(req, plane_id, prop_src_w, buf-&gt;width &lt;&lt; 16); drmModeAtomicAddProperty(req, plane_id, prop_src_h, buf-&gt;height &lt;&lt; 16); 最终得到的结果是：
+struct _drmModeAtomicReqItem { uint32_t object_id; uint32_t property_id; uint64_t value; uint32_t cursor; }; struct _drmModeAtomicReq { uint32_t cursor; uint32_t size_items; drmModeAtomicReqItemPtr items; }; typedef struct _drmModeAtomicReq drmModeAtomicReq, *drmModeAtomicReqPtr; Entry0: object = Connector0 property = CRTC_ID value = CRTC0 Entry1: object = CRTC0 property = ACTIVE value = 1 Entry2: object = CRTC0 property = MODE_ID value = blob Entry3: object = Plane0 property = CRTC_ID value = CRTC0 Entry4: object = Plane0 property = FB_ID value = fb0 ... 到这里只有Property, 没有drm_atomic_state .">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-06-26T17:35:25+08:00">
+    <meta property="article:modified_time" content="2026-06-26T17:35:25+08:00">
+    <meta property="article:tag" content="Linux">
+    <meta property="article:tag" content="DRM">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Drm_atomic_state如何构造">
+  <meta name="twitter:description" content="1. 用户态数据构造 libdrm提供了如下的编程范式：
+drmModeAtomicReq *req = drmModeAtomicAlloc(); drmModeAtomicAddProperty(req, conn_id, prop_conn_crtc, crtc_id); /* crtc enable &#43; mode */ drmModeAtomicAddProperty(req, crtc_id, prop_crtc_active, 1); drmModeAtomicAddProperty(req, crtc_id, prop_crtc_mode, mode_blob); /* plane setup */ drmModeAtomicAddProperty(req, plane_id, prop_plane_crtc, crtc_id); drmModeAtomicAddProperty(req, plane_id, prop_plane_fb, buf-&gt;fb_id); drmModeAtomicAddProperty(req, plane_id, prop_crtc_x, 0); drmModeAtomicAddProperty(req, plane_id, prop_crtc_y, 0); drmModeAtomicAddProperty(req, plane_id, prop_crtc_w, buf-&gt;width); drmModeAtomicAddProperty(req, plane_id, prop_crtc_h, buf-&gt;height); drmModeAtomicAddProperty(req, plane_id, prop_src_x, 0); drmModeAtomicAddProperty(req, plane_id, prop_src_y, 0); drmModeAtomicAddProperty(req, plane_id, prop_src_w, buf-&gt;width &lt;&lt; 16); drmModeAtomicAddProperty(req, plane_id, prop_src_h, buf-&gt;height &lt;&lt; 16); 最终得到的结果是：
+struct _drmModeAtomicReqItem { uint32_t object_id; uint32_t property_id; uint64_t value; uint32_t cursor; }; struct _drmModeAtomicReq { uint32_t cursor; uint32_t size_items; drmModeAtomicReqItemPtr items; }; typedef struct _drmModeAtomicReq drmModeAtomicReq, *drmModeAtomicReqPtr; Entry0: object = Connector0 property = CRTC_ID value = CRTC0 Entry1: object = CRTC0 property = ACTIVE value = 1 Entry2: object = CRTC0 property = MODE_ID value = blob Entry3: object = Plane0 property = CRTC_ID value = CRTC0 Entry4: object = Plane0 property = FB_ID value = fb0 ... 到这里只有Property, 没有drm_atomic_state .">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://maliuping.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Drm_atomic_state如何构造",
+      "item": "https://maliuping.github.io/posts/linux/drm/how_to_construct_drm_atomic_state/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Drm_atomic_state如何构造",
+  "name": "Drm_atomic_state如何构造",
+  "description": "1. 用户态数据构造 libdrm提供了如下的编程范式：\ndrmModeAtomicReq *req = drmModeAtomicAlloc(); drmModeAtomicAddProperty(req, conn_id, prop_conn_crtc, crtc_id); /* crtc enable + mode */ drmModeAtomicAddProperty(req, crtc_id, prop_crtc_active, 1); drmModeAtomicAddProperty(req, crtc_id, prop_crtc_mode, mode_blob); /* plane setup */ drmModeAtomicAddProperty(req, plane_id, prop_plane_crtc, crtc_id); drmModeAtomicAddProperty(req, plane_id, prop_plane_fb, buf-\u0026gt;fb_id); drmModeAtomicAddProperty(req, plane_id, prop_crtc_x, 0); drmModeAtomicAddProperty(req, plane_id, prop_crtc_y, 0); drmModeAtomicAddProperty(req, plane_id, prop_crtc_w, buf-\u0026gt;width); drmModeAtomicAddProperty(req, plane_id, prop_crtc_h, buf-\u0026gt;height); drmModeAtomicAddProperty(req, plane_id, prop_src_x, 0); drmModeAtomicAddProperty(req, plane_id, prop_src_y, 0); drmModeAtomicAddProperty(req, plane_id, prop_src_w, buf-\u0026gt;width \u0026lt;\u0026lt; 16); drmModeAtomicAddProperty(req, plane_id, prop_src_h, buf-\u0026gt;height \u0026lt;\u0026lt; 16); 最终得到的结果是：\nstruct _drmModeAtomicReqItem { uint32_t object_id; uint32_t property_id; uint64_t value; uint32_t cursor; }; struct _drmModeAtomicReq { uint32_t cursor; uint32_t size_items; drmModeAtomicReqItemPtr items; }; typedef struct _drmModeAtomicReq drmModeAtomicReq, *drmModeAtomicReqPtr; Entry0: object = Connector0 property = CRTC_ID value = CRTC0 Entry1: object = CRTC0 property = ACTIVE value = 1 Entry2: object = CRTC0 property = MODE_ID value = blob Entry3: object = Plane0 property = CRTC_ID value = CRTC0 Entry4: object = Plane0 property = FB_ID value = fb0 ... 到这里只有Property, 没有drm_atomic_state .\n",
+  "keywords": [
+    "Linux", "DRM"
+  ],
+  "articleBody": "1. 用户态数据构造 libdrm提供了如下的编程范式：\ndrmModeAtomicReq *req = drmModeAtomicAlloc(); drmModeAtomicAddProperty(req, conn_id, prop_conn_crtc, crtc_id); /* crtc enable + mode */ drmModeAtomicAddProperty(req, crtc_id, prop_crtc_active, 1); drmModeAtomicAddProperty(req, crtc_id, prop_crtc_mode, mode_blob); /* plane setup */ drmModeAtomicAddProperty(req, plane_id, prop_plane_crtc, crtc_id); drmModeAtomicAddProperty(req, plane_id, prop_plane_fb, buf-\u003efb_id); drmModeAtomicAddProperty(req, plane_id, prop_crtc_x, 0); drmModeAtomicAddProperty(req, plane_id, prop_crtc_y, 0); drmModeAtomicAddProperty(req, plane_id, prop_crtc_w, buf-\u003ewidth); drmModeAtomicAddProperty(req, plane_id, prop_crtc_h, buf-\u003eheight); drmModeAtomicAddProperty(req, plane_id, prop_src_x, 0); drmModeAtomicAddProperty(req, plane_id, prop_src_y, 0); drmModeAtomicAddProperty(req, plane_id, prop_src_w, buf-\u003ewidth \u003c\u003c 16); drmModeAtomicAddProperty(req, plane_id, prop_src_h, buf-\u003eheight \u003c\u003c 16); 最终得到的结果是：\nstruct _drmModeAtomicReqItem { uint32_t object_id; uint32_t property_id; uint64_t value; uint32_t cursor; }; struct _drmModeAtomicReq { uint32_t cursor; uint32_t size_items; drmModeAtomicReqItemPtr items; }; typedef struct _drmModeAtomicReq drmModeAtomicReq, *drmModeAtomicReqPtr; Entry0: object = Connector0 property = CRTC_ID value = CRTC0 Entry1: object = CRTC0 property = ACTIVE value = 1 Entry2: object = CRTC0 property = MODE_ID value = blob Entry3: object = Plane0 property = CRTC_ID value = CRTC0 Entry4: object = Plane0 property = FB_ID value = fb0 ... 到这里只有Property, 没有drm_atomic_state .\n2. ioctl进入内核 int ret = drmModeAtomicCommit(fd, req, DRM_MODE_ATOMIC_ALLOW_MODESET | DRM_MODE_PAGE_FLIP_EVENT, \u0026(vo-\u003edrm_event)); -\u003e ret = DRM_IOCTL(fd, DRM_IOCTL_MODE_ATOMIC, \u0026atomic); // struct drm_mode_atomic atomic --------------------------------------------------------------------- drm_ioctl -\u003e drm_mode_atomic_ioctl 用户层通过libdrm的接口drmModeAtomicCommit 进入到内核drm_mode_atomic_ioctl.\n3. 内核创建drm_atomic_state struct drm_atomic_state { struct kref ref; struct drm_device *dev; /** * @allow_modeset: * * Allow full modeset. This is used by the ATOMIC IOCTL handler to * implement the DRM_MODE_ATOMIC_ALLOW_MODESET flag. Drivers should * never consult this flag, instead looking at the output of * drm_atomic_crtc_needs_modeset(). */ bool allow_modeset : 1; /** * @legacy_cursor_update: * * Hint to enforce legacy cursor IOCTL semantics. * * WARNING: This is thoroughly broken and pretty much impossible to * implement correctly. Drivers must ignore this and should instead * implement \u0026drm_plane_helper_funcs.atomic_async_check and * \u0026drm_plane_helper_funcs.atomic_async_commit hooks. New users of this * flag are not allowed. */ bool legacy_cursor_update : 1; bool async_update : 1; /** * @duplicated: * * Indicates whether or not this atomic state was duplicated using * drm_atomic_helper_duplicate_state(). Drivers and atomic helpers * should use this to fixup normal inconsistencies in duplicated * states. */ bool duplicated : 1; struct __drm_planes_state *planes; struct __drm_crtcs_state *crtcs; int num_connector; struct __drm_connnectors_state *connectors; int num_private_objs; struct __drm_private_objs_state *private_objs; struct drm_modeset_acquire_ctx *acquire_ctx; /** * @fake_commit: * * Used for signaling unbound planes/connectors. * When a connector or plane is not bound to any CRTC, it's still important * to preserve linearity to prevent the atomic states from being freed to early. * * This commit (if set) is not bound to any CRTC, but will be completed when * drm_atomic_helper_commit_hw_done() is called. */ struct drm_crtc_commit *fake_commit; /** * @commit_work: * * Work item which can be used by the driver or helpers to execute the * commit without blocking. */ struct work_struct commit_work; }; drm_mode_atomic_ioctl -\u003e drm_atomic_state_alloc(dev) -\u003e 创建 drm_atomic_state 也就是说：\nUser -------------------------- drmModeAtomicReq 变成 Kernel -------------------------- drm_atomic_state 4. 用户态的Property如何转换成内核态的Atomic State? 这是整个Atomic Framework最核心的一步。内核会遍历用户提交的所有property，\nCRTC0: MODE_ID ACTIVE Connector0: CRTC_ID Plane0: FB_ID SRC_X SRC_Y ... 然后逐个调用drm_atomic_set_property()或者更具体一点，不同object会进入不同helper, 例如drm_atomic_crtc_set_property, drm_atomic_plane_set_property, drm_atomic_connector_set_property。\n通过上面这些helper，用户态的Property慢慢会变成：\ndrm_atomic_state crtc_state active mode plane_state fb src_x ... connector_state crtc ... 5. 为什么这样设计 因为用户态不知道内核态数据结构，例如kernel下的drm_crtc_state, 用户根本无法构造。 另一个方面，Property(ACTIVE, MODE_ID, FB_ID, CRTC_ID)是ABI, 可以一直保持兼容; 而drm_atomic_state,drm_crtc_state, drm_plane_state完全可以随着 kernel 演进不断增加字段。 所以：\nProperty 是用户态与内核之间稳定的 ABI，而 drm_atomic_state 是内核内部对这些 Property 的组织和表达。\nstruct drm_crtc_state { /** @crtc: backpointer to the CRTC */ struct drm_crtc *crtc; /** * @enable: Whether the CRTC should be enabled, gates all other state. * This controls reservations of shared resources. Actual hardware state * is controlled by @active. */ bool enable; /** * @active: Whether the CRTC is actively displaying (used for DPMS). * Implies that @enable is set. The driver must not release any shared * resources if @active is set to false but @enable still true, because * userspace expects that a DPMS ON always succeeds. * * Hence drivers must not consult @active in their various * \u0026drm_mode_config_funcs.atomic_check callback to reject an atomic * commit. They can consult it to aid in the computation of derived * hardware state, since even in the DPMS OFF state the display hardware * should be as much powered down as when the CRTC is completely * disabled through setting @enable to false. */ bool active; /** * @planes_changed: Planes on this crtc are updated. Used by the atomic * helpers and drivers to steer the atomic commit control flow. */ bool planes_changed : 1; /** * @mode_changed: @mode or @enable has been changed. Used by the atomic * helpers and drivers to steer the atomic commit control flow. See also * drm_atomic_crtc_needs_modeset(). * * Drivers are supposed to set this for any CRTC state changes that * require a full modeset. They can also reset it to false if e.g. a * @mode change can be done without a full modeset by only changing * scaler settings. */ bool mode_changed : 1; /** * @active_changed: @active has been toggled. Used by the atomic * helpers and drivers to steer the atomic commit control flow. See also * drm_atomic_crtc_needs_modeset(). */ bool active_changed : 1; /** * @connectors_changed: Connectors to this crtc have been updated, * either in their state or routing. Used by the atomic * helpers and drivers to steer the atomic commit control flow. See also * drm_atomic_crtc_needs_modeset(). * * Drivers are supposed to set this as-needed from their own atomic * check code, e.g. from \u0026drm_encoder_helper_funcs.atomic_check */ bool connectors_changed : 1; /** * @zpos_changed: zpos values of planes on this crtc have been updated. * Used by the atomic helpers and drivers to steer the atomic commit * control flow. */ bool zpos_changed : 1; /** * @color_mgmt_changed: Color management properties have changed * (@gamma_lut, @degamma_lut or @ctm). Used by the atomic helpers and * drivers to steer the atomic commit control flow. */ bool color_mgmt_changed : 1; /** * @no_vblank: * * Reflects the ability of a CRTC to send VBLANK events. This state * usually depends on the pipeline configuration. If set to true, DRM * atomic helpers will send out a fake VBLANK event during display * updates after all hardware changes have been committed. This is * implemented in drm_atomic_helper_fake_vblank(). * * One usage is for drivers and/or hardware without support for VBLANK * interrupts. Such drivers typically do not initialize vblanking * (i.e., call drm_vblank_init() with the number of CRTCs). For CRTCs * without initialized vblanking, this field is set to true in * drm_atomic_helper_check_modeset(), and a fake VBLANK event will be * send out on each update of the display pipeline by * drm_atomic_helper_fake_vblank(). * * Another usage is CRTCs feeding a writeback connector operating in * oneshot mode. In this case the fake VBLANK event is only generated * when a job is queued to the writeback connector, and we want the * core to fake VBLANK events when this part of the pipeline hasn't * changed but others had or when the CRTC and connectors are being * disabled. * * __drm_atomic_helper_crtc_duplicate_state() will not reset the value * from the current state, the CRTC driver is then responsible for * updating this field when needed. * * Note that the combination of \u0026drm_crtc_state.event == NULL and * \u0026drm_crtc_state.no_blank == true is valid and usually used when the * writeback connector attached to the CRTC has a new job queued. In * this case the driver will send the VBLANK event on its own when the * writeback job is complete. */ bool no_vblank : 1; /** * @plane_mask: Bitmask of drm_plane_mask(plane) of planes attached to * this CRTC. */ u32 plane_mask; /** * @connector_mask: Bitmask of drm_connector_mask(connector) of * connectors attached to this CRTC. */ u32 connector_mask; /** * @encoder_mask: Bitmask of drm_encoder_mask(encoder) of encoders * attached to this CRTC. */ u32 encoder_mask; /** * @adjusted_mode: * * Internal display timings which can be used by the driver to handle * differences between the mode requested by userspace in @mode and what * is actually programmed into the hardware. * * For drivers using \u0026drm_bridge, this stores hardware display timings * used between the CRTC and the first bridge. For other drivers, the * meaning of the adjusted_mode field is purely driver implementation * defined information, and will usually be used to store the hardware * display timings used between the CRTC and encoder blocks. */ struct drm_display_mode adjusted_mode; /** * @mode: * * Display timings requested by userspace. The driver should try to * match the refresh rate as close as possible (but note that it's * undefined what exactly is close enough, e.g. some of the HDMI modes * only differ in less than 1% of the refresh rate). The active width * and height as observed by userspace for positioning planes must match * exactly. * * For external connectors where the sink isn't fixed (like with a * built-in panel), this mode here should match the physical mode on the * wire to the last details (i.e. including sync polarities and * everything). */ struct drm_display_mode mode; /** * @mode_blob: \u0026drm_property_blob for @mode, for exposing the mode to * atomic userspace. */ struct drm_property_blob *mode_blob; /** * @degamma_lut: * * Lookup table for converting framebuffer pixel data before apply the * color conversion matrix @ctm. See drm_crtc_enable_color_mgmt(). The * blob (if not NULL) is an array of \u0026struct drm_color_lut. */ struct drm_property_blob *degamma_lut; /** * @ctm: * * Color transformation matrix. See drm_crtc_enable_color_mgmt(). The * blob (if not NULL) is a \u0026struct drm_color_ctm. */ struct drm_property_blob *ctm; /** * @gamma_lut: * * Lookup table for converting pixel data after the color conversion * matrix @ctm. See drm_crtc_enable_color_mgmt(). The blob (if not * NULL) is an array of \u0026struct drm_color_lut. * * Note that for mostly historical reasons stemming from Xorg heritage, * this is also used to store the color map (also sometimes color lut, * CLUT or color palette) for indexed formats like DRM_FORMAT_C8. */ struct drm_property_blob *gamma_lut; /** * @target_vblank: * * Target vertical blank period when a page flip * should take effect. */ u32 target_vblank; /** * @async_flip: * * This is set when DRM_MODE_PAGE_FLIP_ASYNC is set in the legacy * PAGE_FLIP IOCTL. It's not wired up for the atomic IOCTL itself yet. */ bool async_flip; /** * @vrr_enabled: * * Indicates if variable refresh rate should be enabled for the CRTC. * Support for the requested vrr state will depend on driver and * hardware capabiltiy - lacking support is not treated as failure. */ bool vrr_enabled; /** * @self_refresh_active: * * Used by the self refresh helpers to denote when a self refresh * transition is occurring. This will be set on enable/disable callbacks * when self refresh is being enabled or disabled. In some cases, it may * not be desirable to fully shut off the crtc during self refresh. * CRTC's can inspect this flag and determine the best course of action. */ bool self_refresh_active; /** * @scaling_filter: * * Scaling filter to be applied */ enum drm_scaling_filter scaling_filter; /** * @event: * * Optional pointer to a DRM event to signal upon completion of the * state update. The driver must send out the event when the atomic * commit operation completes. There are two cases: * * - The event is for a CRTC which is being disabled through this * atomic commit. In that case the event can be send out any time * after the hardware has stopped scanning out the current * framebuffers. It should contain the timestamp and counter for the * last vblank before the display pipeline was shut off. The simplest * way to achieve that is calling drm_crtc_send_vblank_event() * somewhen after drm_crtc_vblank_off() has been called. * * - For a CRTC which is enabled at the end of the commit (even when it * undergoes an full modeset) the vblank timestamp and counter must * be for the vblank right before the first frame that scans out the * new set of buffers. Again the event can only be sent out after the * hardware has stopped scanning out the old buffers. * * - Events for disabled CRTCs are not allowed, and drivers can ignore * that case. * * For very simple hardware without VBLANK interrupt, enabling * \u0026struct drm_crtc_state.no_vblank makes DRM's atomic commit helpers * send a fake VBLANK event at the end of the display update after all * hardware changes have been applied. See * drm_atomic_helper_fake_vblank(). * * For more complex hardware this * can be handled by the drm_crtc_send_vblank_event() function, * which the driver should call on the provided event upon completion of * the atomic commit. Note that if the driver supports vblank signalling * and timestamping the vblank counters and timestamps must agree with * the ones returned from page flip events. With the current vblank * helper infrastructure this can be achieved by holding a vblank * reference while the page flip is pending, acquired through * drm_crtc_vblank_get() and released with drm_crtc_vblank_put(). * Drivers are free to implement their own vblank counter and timestamp * tracking though, e.g. if they have accurate timestamp registers in * hardware. * * For hardware which supports some means to synchronize vblank * interrupt delivery with committing display state there's also * drm_crtc_arm_vblank_event(). See the documentation of that function * for a detailed discussion of the constraints it needs to be used * safely. * * If the device can't notify of flip completion in a race-free way * at all, then the event should be armed just after the page flip is * committed. In the worst case the driver will send the event to * userspace one frame too late. This doesn't allow for a real atomic * update, but it should avoid tearing. */ struct drm_pending_vblank_event *event; /** * @commit: * * This tracks how the commit for this update proceeds through the * various phases. This is never cleared, except when we destroy the * state, so that subsequent commits can synchronize with previous ones. */ struct drm_crtc_commit *commit; /** @state: backpointer to global drm_atomic_state */ struct drm_atomic_state *state; }; 7. 总结 User Space ──────────────────────────────────────────── drmModeAtomicAlloc() │ ▼ drmModeAtomicReq │ ├── (CRTC, ACTIVE, 1) ├── (CRTC, MODE_ID, blob) ├── (Connector, CRTC_ID, crtc0) ├── (Plane, FB_ID, fb0) └── ... │ │ drmModeAtomicCommit() ▼ DRM_IOCTL_MODE_ATOMIC ──────────────────────────────────────────── Kernel Space drm_mode_atomic_ioctl() │ ▼ drm_atomic_state_alloc() │ ▼ 遍历所有 Property │ ▼ drm_atomic_set_property() │ ▼ drm_atomic_state ├── drm_crtc_state ├── drm_plane_state ├── drm_connector_state └── ... │ ▼ drm_atomic_check() │ ▼ drm_atomic_commit() │ ▼ mode_set / enable / flush ",
+  "wordCount" : "2383",
+  "inLanguage": "en",
+  "datePublished": "2026-06-26T17:35:25+08:00",
+  "dateModified": "2026-06-26T17:35:25+08:00",
+  "author":{
+    "@type": "Person",
+    "name": "Logan"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://maliuping.github.io/posts/linux/drm/how_to_construct_drm_atomic_state/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Logan's Lab",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://maliuping.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="header-nav">
+        <div class="logo">
+            <a href="https://maliuping.github.io/" accesskey="h" title="Logan&#39;s Lab (Alt + H)">Logan&#39;s Lab</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu" class="menu">
+            <li>
+                <a href="https://maliuping.github.io/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://maliuping.github.io/archives/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://maliuping.github.io/search/" title="搜索 (Alt &#43; /)" accesskey=/>
+                    <span>搜索</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://maliuping.github.io/tags/" title="标签">
+                    <span>标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://maliuping.github.io/about/" title="关于">
+                    <span>关于</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <nav class="breadcrumbs" role="navigation" aria-label="Breadcrumb">
+            <a href="/">Home</a>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+            <a href="/posts/">Posts</a>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+</nav>
+    <h1 class="post-title entry-hint-parent">
+      Drm_atomic_state如何构造
+    </h1>
+    <div class="post-meta">
+
+<span title='2026-06-26 17:35:25 +0800 +0800'>June 26, 2026</span>&nbsp;·&nbsp;<span>12 min</span>&nbsp;·&nbsp;<span>Logan</span>
+
+</div>
+  </header> <details class="toc"  open>
+    <summary accesskey="c" title="(Alt + C)">
+        <span class="title">Table of Contents</span>
+    </summary>
+
+    <div class="inner"><ul>
+            <li>
+                <a href="#1-%e7%94%a8%e6%88%b7%e6%80%81%e6%95%b0%e6%8d%ae%e6%9e%84%e9%80%a0" aria-label="1. 用户态数据构造">1. 用户态数据构造</a></li>
+            <li>
+                <a href="#2-ioctl%e8%bf%9b%e5%85%a5%e5%86%85%e6%a0%b8" aria-label="2. ioctl进入内核">2. ioctl进入内核</a></li>
+            <li>
+                <a href="#3-%e5%86%85%e6%a0%b8%e5%88%9b%e5%bb%badrm_atomic_state" aria-label="3. 内核创建drm_atomic_state">3. 内核创建drm_atomic_state</a></li>
+            <li>
+                <a href="#4-%e7%94%a8%e6%88%b7%e6%80%81%e7%9a%84property%e5%a6%82%e4%bd%95%e8%bd%ac%e6%8d%a2%e6%88%90%e5%86%85%e6%a0%b8%e6%80%81%e7%9a%84atomic-state" aria-label="4. 用户态的Property如何转换成内核态的Atomic State?">4. 用户态的Property如何转换成内核态的Atomic State?</a></li>
+            <li>
+                <a href="#5-%e4%b8%ba%e4%bb%80%e4%b9%88%e8%bf%99%e6%a0%b7%e8%ae%be%e8%ae%a1" aria-label="5. 为什么这样设计">5. 为什么这样设计</a></li>
+            <li>
+                <a href="#7-%e6%80%bb%e7%bb%93" aria-label="7. 总结">7. 总结</a>
+            </li>
+        </ul>
+    </div>
+</details>
+
+  <div class="post-content md-content"><h1 id="1-用户态数据构造">1. 用户态数据构造<a hidden class="anchor" aria-hidden="true" href="#1-用户态数据构造">#</a></h1>
+<p>libdrm提供了如下的编程范式：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>drmModeAtomicReq <span style="color:#f92672">*</span>req <span style="color:#f92672">=</span> <span style="color:#a6e22e">drmModeAtomicAlloc</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">drmModeAtomicAddProperty</span>(req, conn_id, prop_conn_crtc, crtc_id);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/* crtc enable + mode */</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">drmModeAtomicAddProperty</span>(req, crtc_id, prop_crtc_active, <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">drmModeAtomicAddProperty</span>(req, crtc_id, prop_crtc_mode, mode_blob);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/* plane setup */</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">drmModeAtomicAddProperty</span>(req, plane_id, prop_plane_crtc, crtc_id);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">drmModeAtomicAddProperty</span>(req, plane_id, prop_plane_fb, buf<span style="color:#f92672">-&gt;</span>fb_id);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">drmModeAtomicAddProperty</span>(req, plane_id, prop_crtc_x, <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">drmModeAtomicAddProperty</span>(req, plane_id, prop_crtc_y, <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">drmModeAtomicAddProperty</span>(req, plane_id, prop_crtc_w, buf<span style="color:#f92672">-&gt;</span>width);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">drmModeAtomicAddProperty</span>(req, plane_id, prop_crtc_h, buf<span style="color:#f92672">-&gt;</span>height);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">drmModeAtomicAddProperty</span>(req, plane_id, prop_src_x, <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">drmModeAtomicAddProperty</span>(req, plane_id, prop_src_y, <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">drmModeAtomicAddProperty</span>(req, plane_id, prop_src_w, buf<span style="color:#f92672">-&gt;</span>width <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">16</span>);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">drmModeAtomicAddProperty</span>(req, plane_id, prop_src_h, buf<span style="color:#f92672">-&gt;</span>height <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">16</span>);
+</span></span></code></pre></div><p>最终得到的结果是：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> _drmModeAtomicReqItem {
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">uint32_t</span> object_id;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">uint32_t</span> property_id;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">uint64_t</span> value;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">uint32_t</span> cursor;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> _drmModeAtomicReq {
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">uint32_t</span> cursor;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">uint32_t</span> size_items;
+</span></span><span style="display:flex;"><span>	drmModeAtomicReqItemPtr items;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> _drmModeAtomicReq drmModeAtomicReq, <span style="color:#f92672">*</span>drmModeAtomicReqPtr;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Entry0:
+</span></span><span style="display:flex;"><span>    object <span style="color:#f92672">=</span> Connector0
+</span></span><span style="display:flex;"><span>    property <span style="color:#f92672">=</span> CRTC_ID
+</span></span><span style="display:flex;"><span>    value <span style="color:#f92672">=</span> CRTC0
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Entry1:
+</span></span><span style="display:flex;"><span>    object <span style="color:#f92672">=</span> CRTC0
+</span></span><span style="display:flex;"><span>    property <span style="color:#f92672">=</span> ACTIVE
+</span></span><span style="display:flex;"><span>    value <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Entry2:
+</span></span><span style="display:flex;"><span>    object <span style="color:#f92672">=</span> CRTC0
+</span></span><span style="display:flex;"><span>    property <span style="color:#f92672">=</span> MODE_ID
+</span></span><span style="display:flex;"><span>    value <span style="color:#f92672">=</span> blob
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Entry3:
+</span></span><span style="display:flex;"><span>    object <span style="color:#f92672">=</span> Plane0
+</span></span><span style="display:flex;"><span>    property <span style="color:#f92672">=</span> CRTC_ID
+</span></span><span style="display:flex;"><span>    value <span style="color:#f92672">=</span> CRTC0
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Entry4:
+</span></span><span style="display:flex;"><span>    object <span style="color:#f92672">=</span> Plane0
+</span></span><span style="display:flex;"><span>    property <span style="color:#f92672">=</span> FB_ID
+</span></span><span style="display:flex;"><span>    value <span style="color:#f92672">=</span> fb0
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>...
+</span></span></code></pre></div><p>到这里只有Property, 没有<code>drm_atomic_state</code> .</p>
+<h1 id="2-ioctl进入内核">2. ioctl进入内核<a hidden class="anchor" aria-hidden="true" href="#2-ioctl进入内核">#</a></h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>	<span style="color:#66d9ef">int</span> ret <span style="color:#f92672">=</span> <span style="color:#a6e22e">drmModeAtomicCommit</span>(fd, req, DRM_MODE_ATOMIC_ALLOW_MODESET <span style="color:#f92672">|</span> DRM_MODE_PAGE_FLIP_EVENT, <span style="color:#f92672">&amp;</span>(vo<span style="color:#f92672">-&gt;</span>drm_event));
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">-&gt;</span> ret <span style="color:#f92672">=</span> <span style="color:#a6e22e">DRM_IOCTL</span>(fd, DRM_IOCTL_MODE_ATOMIC, <span style="color:#f92672">&amp;</span>atomic); <span style="color:#75715e">// struct drm_mode_atomic atomic
+</span></span></span><span style="display:flex;"><span>    <span style="color:#f92672">---------------------------------------------------------------------</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    drm_ioctl
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">-&gt;</span> drm_mode_atomic_ioctl
+</span></span></code></pre></div><p>用户层通过libdrm的接口<code>drmModeAtomicCommit</code> 进入到内核<code>drm_mode_atomic_ioctl</code>.</p>
+<h1 id="3-内核创建drm_atomic_state">3. 内核创建<code>drm_atomic_state</code><a hidden class="anchor" aria-hidden="true" href="#3-内核创建drm_atomic_state">#</a></h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> drm_atomic_state {
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> kref ref;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> drm_device <span style="color:#f92672">*</span>dev;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @allow_modeset:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * Allow full modeset. This is used by the ATOMIC IOCTL handler to
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * implement the DRM_MODE_ATOMIC_ALLOW_MODESET flag. Drivers should
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * never consult this flag, instead looking at the output of
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * drm_atomic_crtc_needs_modeset().
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">bool</span> allow_modeset : <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @legacy_cursor_update:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * Hint to enforce legacy cursor IOCTL semantics.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * WARNING: This is thoroughly broken and pretty much impossible to
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * implement correctly. Drivers must ignore this and should instead
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * implement &amp;drm_plane_helper_funcs.atomic_async_check and
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * &amp;drm_plane_helper_funcs.atomic_async_commit hooks. New users of this
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * flag are not allowed.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">bool</span> legacy_cursor_update : <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">bool</span> async_update : <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @duplicated:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * Indicates whether or not this atomic state was duplicated using
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * drm_atomic_helper_duplicate_state(). Drivers and atomic helpers
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * should use this to fixup normal  inconsistencies in duplicated
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * states.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">bool</span> duplicated : <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> __drm_planes_state <span style="color:#f92672">*</span>planes;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> __drm_crtcs_state <span style="color:#f92672">*</span>crtcs;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">int</span> num_connector;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> __drm_connnectors_state <span style="color:#f92672">*</span>connectors;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">int</span> num_private_objs;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> __drm_private_objs_state <span style="color:#f92672">*</span>private_objs;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> drm_modeset_acquire_ctx <span style="color:#f92672">*</span>acquire_ctx;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @fake_commit:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * Used for signaling unbound planes/connectors.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * When a connector or plane is not bound to any CRTC, it&#39;s still important
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * to preserve linearity to prevent the atomic states from being freed to early.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * This commit (if set) is not bound to any CRTC, but will be completed when
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * drm_atomic_helper_commit_hw_done() is called.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> drm_crtc_commit <span style="color:#f92672">*</span>fake_commit;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @commit_work:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * Work item which can be used by the driver or helpers to execute the
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * commit without blocking.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> work_struct commit_work;
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>drm_mode_atomic_ioctl
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span> <span style="color:#a6e22e">drm_atomic_state_alloc</span>(dev)
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">-&gt;</span> <span style="color:#960050;background-color:#1e0010">创建</span> drm_atomic_state
+</span></span></code></pre></div><p>也就是说：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>User
+</span></span><span style="display:flex;"><span><span style="color:#f92672">--------------------------</span>
+</span></span><span style="display:flex;"><span>drmModeAtomicReq
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">变成</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Kernel
+</span></span><span style="display:flex;"><span><span style="color:#f92672">--------------------------</span>
+</span></span><span style="display:flex;"><span>drm_atomic_state
+</span></span></code></pre></div><h1 id="4-用户态的property如何转换成内核态的atomic-state">4. 用户态的Property如何转换成内核态的Atomic State?<a hidden class="anchor" aria-hidden="true" href="#4-用户态的property如何转换成内核态的atomic-state">#</a></h1>
+<p>这是整个Atomic Framework最核心的一步。内核会遍历用户提交的所有property，</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>CRTC0:
+</span></span><span style="display:flex;"><span>    MODE_ID
+</span></span><span style="display:flex;"><span>    ACTIVE
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Connector0:
+</span></span><span style="display:flex;"><span>    CRTC_ID
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Plane0:
+</span></span><span style="display:flex;"><span>    FB_ID
+</span></span><span style="display:flex;"><span>    SRC_X
+</span></span><span style="display:flex;"><span>    SRC_Y
+</span></span><span style="display:flex;"><span>...
+</span></span></code></pre></div><p>然后逐个调用<code>drm_atomic_set_property()</code>或者更具体一点，不同object会进入不同helper,
+例如<code>drm_atomic_crtc_set_property</code>, <code>drm_atomic_plane_set_property</code>, <code>drm_atomic_connector_set_property</code>。</p>
+<p>通过上面这些helper，用户态的Property慢慢会变成：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>drm_atomic_state
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    crtc_state
+</span></span><span style="display:flex;"><span>        active
+</span></span><span style="display:flex;"><span>        mode
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    plane_state
+</span></span><span style="display:flex;"><span>        fb
+</span></span><span style="display:flex;"><span>        src_x
+</span></span><span style="display:flex;"><span>        ...
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    connector_state
+</span></span><span style="display:flex;"><span>        crtc
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>...
+</span></span></code></pre></div><h1 id="5-为什么这样设计">5. 为什么这样设计<a hidden class="anchor" aria-hidden="true" href="#5-为什么这样设计">#</a></h1>
+<p>因为用户态不知道内核态数据结构，例如kernel下的<code>drm_crtc_state</code>, 用户根本无法构造。
+另一个方面，<strong>Property</strong>(ACTIVE, MODE_ID, FB_ID, CRTC_ID)是ABI, 可以一直保持兼容;
+而<code>drm_atomic_state</code>,<code>drm_crtc_state</code>, <code>drm_plane_state</code>完全可以随着 kernel 演进不断增加字段。
+所以：</p>
+<blockquote>
+<p>Property 是用户态与内核之间稳定的 ABI，而 drm_atomic_state 是内核内部对这些 Property 的组织和表达。</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> drm_crtc_state {
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/** @crtc: backpointer to the CRTC */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> drm_crtc <span style="color:#f92672">*</span>crtc;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @enable: Whether the CRTC should be enabled, gates all other state.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * This controls reservations of shared resources. Actual hardware state
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * is controlled by @active.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">bool</span> enable;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @active: Whether the CRTC is actively displaying (used for DPMS).
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * Implies that @enable is set. The driver must not release any shared
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * resources if @active is set to false but @enable still true, because
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * userspace expects that a DPMS ON always succeeds.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * Hence drivers must not consult @active in their various
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * &amp;drm_mode_config_funcs.atomic_check callback to reject an atomic
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * commit. They can consult it to aid in the computation of derived
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * hardware state, since even in the DPMS OFF state the display hardware
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * should be as much powered down as when the CRTC is completely
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * disabled through setting @enable to false.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">bool</span> active;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @planes_changed: Planes on this crtc are updated. Used by the atomic
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * helpers and drivers to steer the atomic commit control flow.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">bool</span> planes_changed : <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @mode_changed: @mode or @enable has been changed. Used by the atomic
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * helpers and drivers to steer the atomic commit control flow. See also
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * drm_atomic_crtc_needs_modeset().
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * Drivers are supposed to set this for any CRTC state changes that
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * require a full modeset. They can also reset it to false if e.g. a
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @mode change can be done without a full modeset by only changing
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * scaler settings.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">bool</span> mode_changed : <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @active_changed: @active has been toggled. Used by the atomic
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * helpers and drivers to steer the atomic commit control flow. See also
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * drm_atomic_crtc_needs_modeset().
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">bool</span> active_changed : <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @connectors_changed: Connectors to this crtc have been updated,
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * either in their state or routing. Used by the atomic
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * helpers and drivers to steer the atomic commit control flow. See also
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * drm_atomic_crtc_needs_modeset().
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * Drivers are supposed to set this as-needed from their own atomic
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * check code, e.g. from &amp;drm_encoder_helper_funcs.atomic_check
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">bool</span> connectors_changed : <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @zpos_changed: zpos values of planes on this crtc have been updated.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * Used by the atomic helpers and drivers to steer the atomic commit
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * control flow.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">bool</span> zpos_changed : <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @color_mgmt_changed: Color management properties have changed
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * (@gamma_lut, @degamma_lut or @ctm). Used by the atomic helpers and
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * drivers to steer the atomic commit control flow.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">bool</span> color_mgmt_changed : <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @no_vblank:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * Reflects the ability of a CRTC to send VBLANK events. This state
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * usually depends on the pipeline configuration. If set to true, DRM
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * atomic helpers will send out a fake VBLANK event during display
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * updates after all hardware changes have been committed. This is
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * implemented in drm_atomic_helper_fake_vblank().
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * One usage is for drivers and/or hardware without support for VBLANK
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * interrupts. Such drivers typically do not initialize vblanking
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * (i.e., call drm_vblank_init() with the number of CRTCs). For CRTCs
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * without initialized vblanking, this field is set to true in
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * drm_atomic_helper_check_modeset(), and a fake VBLANK event will be
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * send out on each update of the display pipeline by
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * drm_atomic_helper_fake_vblank().
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * Another usage is CRTCs feeding a writeback connector operating in
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * oneshot mode. In this case the fake VBLANK event is only generated
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * when a job is queued to the writeback connector, and we want the
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * core to fake VBLANK events when this part of the pipeline hasn&#39;t
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * changed but others had or when the CRTC and connectors are being
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * disabled.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * __drm_atomic_helper_crtc_duplicate_state() will not reset the value
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * from the current state, the CRTC driver is then responsible for
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * updating this field when needed.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * Note that the combination of &amp;drm_crtc_state.event == NULL and
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * &amp;drm_crtc_state.no_blank == true is valid and usually used when the
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * writeback connector attached to the CRTC has a new job queued. In
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * this case the driver will send the VBLANK event on its own when the
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * writeback job is complete.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">bool</span> no_vblank : <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @plane_mask: Bitmask of drm_plane_mask(plane) of planes attached to
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * this CRTC.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	u32 plane_mask;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @connector_mask: Bitmask of drm_connector_mask(connector) of
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * connectors attached to this CRTC.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	u32 connector_mask;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @encoder_mask: Bitmask of drm_encoder_mask(encoder) of encoders
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * attached to this CRTC.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	u32 encoder_mask;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @adjusted_mode:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * Internal display timings which can be used by the driver to handle
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * differences between the mode requested by userspace in @mode and what
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * is actually programmed into the hardware.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * For drivers using &amp;drm_bridge, this stores hardware display timings
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * used between the CRTC and the first bridge. For other drivers, the
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * meaning of the adjusted_mode field is purely driver implementation
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * defined information, and will usually be used to store the hardware
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * display timings used between the CRTC and encoder blocks.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> drm_display_mode adjusted_mode;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @mode:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * Display timings requested by userspace. The driver should try to
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * match the refresh rate as close as possible (but note that it&#39;s
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * undefined what exactly is close enough, e.g. some of the HDMI modes
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * only differ in less than 1% of the refresh rate). The active width
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * and height as observed by userspace for positioning planes must match
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * exactly.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * For external connectors where the sink isn&#39;t fixed (like with a
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * built-in panel), this mode here should match the physical mode on the
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * wire to the last details (i.e. including sync polarities and
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * everything).
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> drm_display_mode mode;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @mode_blob: &amp;drm_property_blob for @mode, for exposing the mode to
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * atomic userspace.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> drm_property_blob <span style="color:#f92672">*</span>mode_blob;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @degamma_lut:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * Lookup table for converting framebuffer pixel data before apply the
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * color conversion matrix @ctm. See drm_crtc_enable_color_mgmt(). The
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * blob (if not NULL) is an array of &amp;struct drm_color_lut.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> drm_property_blob <span style="color:#f92672">*</span>degamma_lut;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @ctm:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * Color transformation matrix. See drm_crtc_enable_color_mgmt(). The
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * blob (if not NULL) is a &amp;struct drm_color_ctm.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> drm_property_blob <span style="color:#f92672">*</span>ctm;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @gamma_lut:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * Lookup table for converting pixel data after the color conversion
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * matrix @ctm.  See drm_crtc_enable_color_mgmt(). The blob (if not
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * NULL) is an array of &amp;struct drm_color_lut.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * Note that for mostly historical reasons stemming from Xorg heritage,
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * this is also used to store the color map (also sometimes color lut,
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * CLUT or color palette) for indexed formats like DRM_FORMAT_C8.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> drm_property_blob <span style="color:#f92672">*</span>gamma_lut;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @target_vblank:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * Target vertical blank period when a page flip
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * should take effect.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	u32 target_vblank;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @async_flip:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * This is set when DRM_MODE_PAGE_FLIP_ASYNC is set in the legacy
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * PAGE_FLIP IOCTL. It&#39;s not wired up for the atomic IOCTL itself yet.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">bool</span> async_flip;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @vrr_enabled:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * Indicates if variable refresh rate should be enabled for the CRTC.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * Support for the requested vrr state will depend on driver and
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * hardware capabiltiy - lacking support is not treated as failure.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">bool</span> vrr_enabled;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @self_refresh_active:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * Used by the self refresh helpers to denote when a self refresh
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * transition is occurring. This will be set on enable/disable callbacks
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * when self refresh is being enabled or disabled. In some cases, it may
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * not be desirable to fully shut off the crtc during self refresh.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * CRTC&#39;s can inspect this flag and determine the best course of action.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">bool</span> self_refresh_active;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @scaling_filter:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * Scaling filter to be applied
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">enum</span> drm_scaling_filter scaling_filter;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @event:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * Optional pointer to a DRM event to signal upon completion of the
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * state update. The driver must send out the event when the atomic
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * commit operation completes. There are two cases:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *  - The event is for a CRTC which is being disabled through this
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *    atomic commit. In that case the event can be send out any time
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *    after the hardware has stopped scanning out the current
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *    framebuffers. It should contain the timestamp and counter for the
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *    last vblank before the display pipeline was shut off. The simplest
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *    way to achieve that is calling drm_crtc_send_vblank_event()
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *    somewhen after drm_crtc_vblank_off() has been called.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *  - For a CRTC which is enabled at the end of the commit (even when it
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *    undergoes an full modeset) the vblank timestamp and counter must
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *    be for the vblank right before the first frame that scans out the
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *    new set of buffers. Again the event can only be sent out after the
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *    hardware has stopped scanning out the old buffers.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *  - Events for disabled CRTCs are not allowed, and drivers can ignore
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *    that case.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * For very simple hardware without VBLANK interrupt, enabling
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * &amp;struct drm_crtc_state.no_vblank makes DRM&#39;s atomic commit helpers
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * send a fake VBLANK event at the end of the display update after all
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * hardware changes have been applied. See
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * drm_atomic_helper_fake_vblank().
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * For more complex hardware this
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * can be handled by the drm_crtc_send_vblank_event() function,
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * which the driver should call on the provided event upon completion of
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * the atomic commit. Note that if the driver supports vblank signalling
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * and timestamping the vblank counters and timestamps must agree with
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * the ones returned from page flip events. With the current vblank
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * helper infrastructure this can be achieved by holding a vblank
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * reference while the page flip is pending, acquired through
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * drm_crtc_vblank_get() and released with drm_crtc_vblank_put().
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * Drivers are free to implement their own vblank counter and timestamp
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * tracking though, e.g. if they have accurate timestamp registers in
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * hardware.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * For hardware which supports some means to synchronize vblank
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * interrupt delivery with committing display state there&#39;s also
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * drm_crtc_arm_vblank_event(). See the documentation of that function
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * for a detailed discussion of the constraints it needs to be used
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * safely.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * If the device can&#39;t notify of flip completion in a race-free way
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * at all, then the event should be armed just after the page flip is
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * committed. In the worst case the driver will send the event to
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * userspace one frame too late. This doesn&#39;t allow for a real atomic
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * update, but it should avoid tearing.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> drm_pending_vblank_event <span style="color:#f92672">*</span>event;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * @commit:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * This tracks how the commit for this update proceeds through the
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * various phases. This is never cleared, except when we destroy the
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * state, so that subsequent commits can synchronize with previous ones.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> drm_crtc_commit <span style="color:#f92672">*</span>commit;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/** @state: backpointer to global drm_atomic_state */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> drm_atomic_state <span style="color:#f92672">*</span>state;
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><h1 id="7-总结">7. 总结<a hidden class="anchor" aria-hidden="true" href="#7-总结">#</a></h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>User Space
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">────────────────────────────────────────────</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">drmModeAtomicAlloc</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#960050;background-color:#1e0010">│</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#960050;background-color:#1e0010">▼</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>drmModeAtomicReq
+</span></span><span style="display:flex;"><span>    <span style="color:#960050;background-color:#1e0010">│</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#960050;background-color:#1e0010">├──</span> (CRTC, ACTIVE, <span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#960050;background-color:#1e0010">├──</span> (CRTC, MODE_ID, blob)
+</span></span><span style="display:flex;"><span>    <span style="color:#960050;background-color:#1e0010">├──</span> (Connector, CRTC_ID, crtc0)
+</span></span><span style="display:flex;"><span>    <span style="color:#960050;background-color:#1e0010">├──</span> (Plane, FB_ID, fb0)
+</span></span><span style="display:flex;"><span>    <span style="color:#960050;background-color:#1e0010">└──</span> ...
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#960050;background-color:#1e0010">│</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#960050;background-color:#1e0010">│</span> <span style="color:#a6e22e">drmModeAtomicCommit</span>()
+</span></span><span style="display:flex;"><span>        <span style="color:#960050;background-color:#1e0010">▼</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>DRM_IOCTL_MODE_ATOMIC
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">────────────────────────────────────────────</span>
+</span></span><span style="display:flex;"><span>Kernel Space
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">drm_mode_atomic_ioctl</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#960050;background-color:#1e0010">│</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#960050;background-color:#1e0010">▼</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">drm_atomic_state_alloc</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#960050;background-color:#1e0010">│</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#960050;background-color:#1e0010">▼</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">遍历所有</span> Property
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#960050;background-color:#1e0010">│</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#960050;background-color:#1e0010">▼</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">drm_atomic_set_property</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#960050;background-color:#1e0010">│</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#960050;background-color:#1e0010">▼</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>drm_atomic_state
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#960050;background-color:#1e0010">├──</span> drm_crtc_state
+</span></span><span style="display:flex;"><span>    <span style="color:#960050;background-color:#1e0010">├──</span> drm_plane_state
+</span></span><span style="display:flex;"><span>    <span style="color:#960050;background-color:#1e0010">├──</span> drm_connector_state
+</span></span><span style="display:flex;"><span>    <span style="color:#960050;background-color:#1e0010">└──</span> ...
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#960050;background-color:#1e0010">│</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#960050;background-color:#1e0010">▼</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">drm_atomic_check</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#960050;background-color:#1e0010">│</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#960050;background-color:#1e0010">▼</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">drm_atomic_commit</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#960050;background-color:#1e0010">│</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#960050;background-color:#1e0010">▼</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>mode_set <span style="color:#f92672">/</span> enable <span style="color:#f92672">/</span> flush
+</span></span></code></pre></div>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://maliuping.github.io/tags/linux/">Linux</a></li>
+      <li><a href="https://maliuping.github.io/tags/drm/">DRM</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="next" href="https://maliuping.github.io/posts/linux/ftrace/kernel_debugging_with_ftrace/">
+    <span class="title">Next »</span>
+    <span>Linux 内核调试：ftrace 通用方法（以DRM/显示子系统为例）</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://maliuping.github.io/">Logan&#39;s Lab</a></span> · 
+
+    
+    
+    <span>
+        Powered by
+        <a href="https://gohugo.io/?utm_source=papermod" rel="noopener" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" id="top-link" class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up">
+        <polyline points="17 11 12 6 7 11"></polyline>
+        <polyline points="17 18 12 13 7 18"></polyline>
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var toplink = document.getElementById("top-link");
+    window.onscroll = function () {
+        const scrollThreshold = window.innerHeight;
+        if (document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold) {
+            toplink.classList.remove("hidden");
+        } else {
+            toplink.classList.add("hidden");
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
