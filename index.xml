@@ -6,8 +6,15 @@
     <description>Recent content on Logan&#39;s Lab</description>
     <generator>Hugo</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Fri, 26 Jun 2026 17:35:25 +0800</lastBuildDate>
+    <lastBuildDate>Wed, 01 Jul 2026 13:40:00 +0800</lastBuildDate>
     <atom:link href="https://maliuping.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Display Calculator</title>
+      <link>https://maliuping.github.io/tools/display-calculator/</link>
+      <pubDate>Wed, 01 Jul 2026 13:40:00 +0800</pubDate>
+      <guid>https://maliuping.github.io/tools/display-calculator/</guid>
+      <description>实时计算显示链路带宽、Lane Rate、时钟与 UI。</description>
+    </item>
     <item>
       <title>Drm_atomic_state如何构造</title>
       <link>https://maliuping.github.io/posts/linux/drm/how_to_construct_drm_atomic_state/</link>

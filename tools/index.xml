@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Tools on Logan&#39;s Lab</title>
+    <link>https://maliuping.github.io/tools/</link>
+    <description>Recent content in Tools on Logan&#39;s Lab</description>
+    <generator>Hugo</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Wed, 01 Jul 2026 13:40:00 +0800</lastBuildDate>
+    <atom:link href="https://maliuping.github.io/tools/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Display Calculator</title>
+      <link>https://maliuping.github.io/tools/display-calculator/</link>
+      <pubDate>Wed, 01 Jul 2026 13:40:00 +0800</pubDate>
+      <guid>https://maliuping.github.io/tools/display-calculator/</guid>
+      <description>实时计算显示链路带宽、Lane Rate、时钟与 UI。</description>
+    </item>
+  </channel>
+</rss>

@@ -5,11 +5,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
-<title>Linux | Logan&#39;s Lab</title>
+<title>Tools | Logan&#39;s Lab</title>
 <meta name="keywords" content="">
-<meta name="description" content="">
+<meta name="description" content="Tools - Logan&#39;s Lab">
 <meta name="author" content="Logan">
-<link rel="canonical" href="https://maliuping.github.io/tags/linux/">
+<link rel="canonical" href="https://maliuping.github.io/tools/">
 <link crossorigin="anonymous" href="/assets/css/stylesheet.2a8c9da18ecd8f60e3a36cef4c5c02256c41738a2e5a283f1288d4489b487696.css" integrity="sha256-KoydoY7Nj2Djo2zvTFwCJWxBc4ouWig/EojUSJtIdpY=" rel="preload stylesheet" as="style">
 <link rel="icon" href="https://maliuping.github.io/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="https://maliuping.github.io/favicon-16x16.png">
@@ -18,8 +18,8 @@
 <link rel="mask-icon" href="https://maliuping.github.io/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" type="application/rss+xml" href="https://maliuping.github.io/tags/linux/index.xml" title="rss">
-<link rel="alternate" hreflang="en" href="https://maliuping.github.io/tags/linux/">
+<link rel="alternate" type="application/rss+xml" href="https://maliuping.github.io/tools/index.xml" title="rss">
+<link rel="alternate" hreflang="en" href="https://maliuping.github.io/tools/">
 <noscript>
     <style>
         #theme-toggle,
@@ -65,15 +65,30 @@
         document.querySelector("html").dataset.theme = 'light';
     }
 
-</script><meta property="og:url" content="https://maliuping.github.io/tags/linux/">
+</script><meta property="og:url" content="https://maliuping.github.io/tools/">
   <meta property="og:site_name" content="Logan&#39;s Lab">
-  <meta property="og:title" content="Linux">
+  <meta property="og:title" content="Tools">
   <meta property="og:locale" content="zh_cn">
   <meta property="og:type" content="website">
 
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Linux">
+  <meta name="twitter:title" content="Tools">
 
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Tools",
+      "item": "https://maliuping.github.io/tools/"
+    }
+  ]
+}
+</script>
 </head>
 <body class="list" id="top">
     <header class="header">
@@ -106,7 +121,7 @@
         <ul id="menu" class="menu">
             <li>
                 <a href="https://maliuping.github.io/tools/" title="工具">
-                    <span>工具</span>
+                    <span class="active">工具</span>
                 </a>
             </li>
             <li>
@@ -140,56 +155,33 @@
 <main class="main"> 
 <header class="page-header"><nav class="breadcrumbs" role="navigation" aria-label="Breadcrumb">
             <a href="/">Home</a>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
-                <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
-            <a href="/tags/">Tags</a>
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
         stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
         <polyline points="9 18 15 12 9 6"></polyline>
     </svg>
 </nav>
   <h1>
-    Linux
+    Tools
   </h1>
 </header>
 
-<article class="post-entry tag-entry"> 
+<article class="post-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">Drm_atomic_state如何构造
+    <h2 class="entry-hint-parent">Display Calculator
     </h2>
   </header>
   <div class="entry-content">
-    <p>1. 用户态数据构造 libdrm提供了如下的编程范式：
-1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 drmModeAtomicReq *req = drmModeAtomicAlloc(); drmModeAtomicAddProperty(req, conn_id, prop_conn_crtc, crtc_id); /* crtc enable &#43; mode */ drmModeAtomicAddProperty(req, crtc_id, prop_crtc_active, 1); drmModeAtomicAddProperty(req, crtc_id, prop_crtc_mode, mode_blob); /* plane setup */ drmModeAtomicAddProperty(req, plane_id, prop_plane_crtc, crtc_id); drmModeAtomicAddProperty(req, plane_id, prop_plane_fb, buf-&gt;fb_id); drmModeAtomicAddProperty(req, plane_id, prop_crtc_x, 0); drmModeAtomicAddProperty(req, plane_id, prop_crtc_y, 0); drmModeAtomicAddProperty(req, plane_id, prop_crtc_w, buf-&gt;width); drmModeAtomicAddProperty(req, plane_id, prop_crtc_h, buf-&gt;height); drmModeAtomicAddProperty(req, plane_id, prop_src_x, 0); drmModeAtomicAddProperty(req, plane_id, prop_src_y, 0); drmModeAtomicAddProperty(req, plane_id, prop_src_w, buf-&gt;width &lt;&lt; 16); drmModeAtomicAddProperty(req, plane_id, prop_src_h, buf-&gt;height &lt;&lt; 16); 最终得到的结果是：
-1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 struct _drmModeAtomicReqItem { uint32_t object_id; uint32_t property_id; uint64_t value; uint32_t cursor; }; struct _drmModeAtomicReq { uint32_t cursor; uint32_t size_items; drmModeAtomicReqItemPtr items; }; typedef struct _drmModeAtomicReq drmModeAtomicReq, *drmModeAtomicReqPtr; Entry0: object = Connector0 property = CRTC_ID value = CRTC0 Entry1: object = CRTC0 property = ACTIVE value = 1 Entry2: object = CRTC0 property = MODE_ID value = blob Entry3: object = Plane0 property = CRTC_ID value = CRTC0 Entry4: object = Plane0 property = FB_ID value = fb0 ... 到这里只有Property, 没有drm_atomic_state .
-...</p>
+    <p> Display Link Budget
+Display Calculator 输入像素时钟、BPP、Lane 数和 PPI Width，页面会实时计算总吞吐、每 Lane 速率、推荐 Lane 速率以及相关时钟参数。 Live Auto Refresh 所有结果会在输入变化时立即更新。
+Inputs 左侧输入参数
+Pixel Clock (MHz) Bits Per Pixel Lane Number PPI Width Margin (%) Outputs 右侧实时结果
+Total Throughput 0 Mbps Per Lane Rate 0 Mbps Recommended Lane Rate 0 Mbps DDR Clock 0 MHz Byte Clock 0 MHz UI (ns) 0 ns Generated Formulas 下面自动生成公式与代入结果
+TotalThroughput = PixelClock × BPP LaneRate = PixelClock × BPP / Lane RecommendedLaneRate = LaneRate × (1 &#43; Margin / 100) ByteClock = LaneRate / PPIWidth DDRClock = LaneRate / 2 UI = 1000 / LaneRate 注：DDR Clock、Byte Clock 和 UI 按公式使用 Per Lane Rate 计算； Recommended Lane Rate 额外用于留出 Margin。 ...</p>
   </div>
   <footer class="entry-footer">
 
-<span title='2026-06-26 17:35:25 +0800 +0800'>June 26, 2026</span>&nbsp;·&nbsp;<span>14 min</span>&nbsp;·&nbsp;<span>Logan</span></footer>
-  <a class="entry-link" aria-label="post link to Drm_atomic_state如何构造" href="https://maliuping.github.io/posts/linux/drm/how_to_construct_drm_atomic_state/"></a>
-</article>
-
-<article class="post-entry tag-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">Linux 内核调试：ftrace 通用方法（以DRM/显示子系统为例）
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>1. 为什么要学 ftrace 在内核调试里，经常会遇到这样的问题：
-这个 callback 到底是谁调的？ 某个函数有没有真正执行到？ 一次 ioctl / probe / 中断 / commit 的完整调用链是什么？ 多个回调的执行顺序是什么？ 某个驱动回调是在 probe 阶段调用，还是运行时 atomic/stream on 阶段调用？ 这类问题，如果只靠 grep 源码，通常只能知道“理论上谁可能会调用”；但实际运行时到底走了哪条路径、有没有进入某个分支、调用顺序是否符合预期，还是需要运行时观测。
-而 ftrace 是 Linux 内核里最通用、最实用的一套函数级 tracing 机制，适合做以下事情：
-跟踪函数是否被调用 观察函数调用顺序 观察“谁调用了谁” 从一个入口函数出发，查看整条调用树 分析 probe / bind / irq / workqueue / atomic commit / stream on 等流程 这篇文章整理一套 ftrace 的通用使用模板，并以 DRM 显示子系统中的 bridge / atomic callback 为例，说明如何用它排查问题。后续切换到其他子系统时，只需要替换过滤函数名即可。
-2. 先回答一个常见疑问：ftrace 需要写“钩子函数”吗？ 通常不需要。
-这是很多人第一次接触 ftrace 时最容易混淆的地方。
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-06-23 09:56:33 +0800 +0800'>June 23, 2026</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>Logan</span></footer>
-  <a class="entry-link" aria-label="post link to Linux 内核调试：ftrace 通用方法（以DRM/显示子系统为例）" href="https://maliuping.github.io/posts/linux/ftrace/kernel_debugging_with_ftrace/"></a>
+<span title='2026-07-01 13:40:00 +0800 +0800'>July 1, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>Logan</span></footer>
+  <a class="entry-link" aria-label="post link to Display Calculator" href="https://maliuping.github.io/tools/display-calculator/"></a>
 </article>
     </main>
     
