@@ -172,11 +172,12 @@
   </header>
   <div class="entry-content">
     <p> Display Link Budget
-Display Calculator 输入像素时钟、BPP、Lane 数和 PPI Width，页面会实时计算总吞吐、每 Lane 速率、推荐 Lane 速率以及相关时钟参数。 Live Auto Refresh 所有结果会在输入变化时立即更新。
+Display Calculator 输入像素时钟、BPP、Lane 数、PPI Width 和水平时序参数，页面会实时计算总吞吐、每 Lane 速率、相关时钟参数以及 DSI video timing。 Live Auto Refresh 所有结果会在输入变化时立即更新。
 Inputs 左侧输入参数
-Pixel Clock (MHz) Bits Per Pixel Lane Number PPI Width Margin (%) Outputs 右侧实时结果
-Total Throughput 0 Mbps Per Lane Rate 0 Mbps Recommended Lane Rate 0 Mbps DDR Clock 0 MHz Byte Clock 0 MHz UI (ns) 0 ns Generated Formulas 下面自动生成公式与代入结果
-TotalThroughput = PixelClock × BPP LaneRate = PixelClock × BPP / Lane RecommendedLaneRate = LaneRate × (1 &#43; Margin / 100) ByteClock = LaneRate / PPIWidth DDRClock = LaneRate / 2 UI = 1000 / LaneRate 注：DDR Clock、Byte Clock 和 UI 按公式使用 Per Lane Rate 计算； Recommended Lane Rate 额外用于留出 Margin。 ...</p>
+Pixel Clock (MHz) Bits Per Pixel Lane Number PPI Width Margin (%) Horizontal Timing 单位均为 pixel
+H Active H Sync Width H Back Porch H Front Porch Outputs 右侧实时结果
+Total Throughput 0 Mbps Per Lane Rate 0 Mbps Recommended Lane Rate 0 Mbps DDR Clock 0 MHz Line Byte Clock 0 MHz UI (ns) 0 ns HSA Time 0 cycles HBP Time 0 cycles HACT Time 0 cycles HLINE Time 0 cycles Generated Formulas 下面自动生成公式与代入结果
+...</p>
   </div>
   <footer class="entry-footer">
 

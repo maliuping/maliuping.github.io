@@ -13,7 +13,7 @@
       <link>https://maliuping.github.io/tools/display-calculator/</link>
       <pubDate>Wed, 01 Jul 2026 13:40:00 +0800</pubDate>
       <guid>https://maliuping.github.io/tools/display-calculator/</guid>
-      <description>实时计算显示链路带宽、Lane Rate、时钟与 UI。</description>
+      <description>实时计算显示链路带宽、Lane Rate、时钟、UI 与 DSI video timing。</description>
     </item>
   </channel>
 </rss>
