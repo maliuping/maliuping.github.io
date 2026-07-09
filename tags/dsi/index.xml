@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>Display on Logan&#39;s Lab</title>
-    <link>https://maliuping.github.io/categories/display/</link>
-    <description>Recent content in Display on Logan&#39;s Lab</description>
+    <title>DSI on Logan&#39;s Lab</title>
+    <link>https://maliuping.github.io/tags/dsi/</link>
+    <description>Recent content in DSI on Logan&#39;s Lab</description>
     <generator>Hugo</generator>
     <language>zh-cn</language>
     <lastBuildDate>Thu, 09 Jul 2026 21:44:23 +0800</lastBuildDate>
-    <atom:link href="https://maliuping.github.io/categories/display/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://maliuping.github.io/tags/dsi/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Lane mapping</title>
       <link>https://maliuping.github.io/posts/display/dsi/lane_mapping/</link>
@@ -58,62 +58,6 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;此时 Controller 输出的 &lt;strong&gt;Lane1 数据&lt;/strong&gt; 实际会从 &lt;strong&gt;PHY Lane2&lt;/strong&gt; 发出，而 &lt;strong&gt;Lane2 数据&lt;/strong&gt; 则从 &lt;strong&gt;PHY Lane1&lt;/strong&gt; 发出。&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Dphy clocks overview</title>
-      <link>https://maliuping.github.io/posts/display/dphy/dphy_clocks_overview/</link>
-      <pubDate>Thu, 09 Jul 2026 15:23:56 +0800</pubDate>
-      <guid>https://maliuping.github.io/posts/display/dphy/dphy_clocks_overview/</guid>
-      <description>&lt;p&gt;在 MIPI D-PHY 中，经常会看到 &lt;strong&gt;Lane Rate、HS Clock、Byte Clock、Pixel Clock&lt;/strong&gt; 等概念，它们分别位于不同的模块，不要混为一谈。&lt;/p&gt;
-&lt;h1 id=&#34;1-pixel-clock像素时钟&#34;&gt;1. Pixel Clock（像素时钟）&lt;/h1&gt;
-&lt;p&gt;&lt;strong&gt;作用对象：DPU / DPI / IPI&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;Pixel Clock 决定像素数据进入 DSI Host 的速度。&lt;/p&gt;
-&lt;p&gt;例如：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;1920×1080@60 RGB888&lt;/li&gt;
-&lt;li&gt;Pixel Clock = &lt;strong&gt;148.5 MHz&lt;/strong&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;表示：&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;Controller 每秒接收 148.5M 个 Pixel。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;它属于&lt;strong&gt;显示时序&lt;/strong&gt;，与 D-PHY 串行发送方式无关。&lt;/p&gt;
-&lt;h1 id=&#34;2-lane-ratebit-rate&#34;&gt;2. Lane Rate（Bit Rate）&lt;/h1&gt;
-&lt;p&gt;&lt;strong&gt;作用对象：D-PHY Serial Link&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;Lane Rate 又叫：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Data Rate&lt;/li&gt;
-&lt;li&gt;Bit Rate&lt;/li&gt;
-&lt;li&gt;HS Bit Rate&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;表示：&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;一条 Data Lane 每秒传输多少 bit。&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;例如：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Lane Rate = 1 Gbps
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;表示：&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Aux</title>
-      <link>https://maliuping.github.io/posts/display/dp/aux/</link>
-      <pubDate>Thu, 18 Jun 2026 07:41:14 +0800</pubDate>
-      <guid>https://maliuping.github.io/posts/display/dp/aux/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Dpcd</title>
-      <link>https://maliuping.github.io/posts/display/dp/dpcd/</link>
-      <pubDate>Sun, 14 Jun 2026 21:19:57 +0800</pubDate>
-      <guid>https://maliuping.github.io/posts/display/dp/dpcd/</guid>
-      <description></description>
     </item>
   </channel>
 </rss>

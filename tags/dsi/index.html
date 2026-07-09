@@ -5,11 +5,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
-<title>Tags | Logan&#39;s Lab</title>
+<title>DSI | Logan&#39;s Lab</title>
 <meta name="keywords" content="">
 <meta name="description" content="">
 <meta name="author" content="Logan">
-<link rel="canonical" href="https://maliuping.github.io/tags/">
+<link rel="canonical" href="https://maliuping.github.io/tags/dsi/">
 <link crossorigin="anonymous" href="/assets/css/stylesheet.2a8c9da18ecd8f60e3a36cef4c5c02256c41738a2e5a283f1288d4489b487696.css" integrity="sha256-KoydoY7Nj2Djo2zvTFwCJWxBc4ouWig/EojUSJtIdpY=" rel="preload stylesheet" as="style">
 <link rel="icon" href="https://maliuping.github.io/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="https://maliuping.github.io/favicon-16x16.png">
@@ -18,8 +18,8 @@
 <link rel="mask-icon" href="https://maliuping.github.io/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" type="application/rss+xml" href="https://maliuping.github.io/tags/index.xml" title="rss">
-<link rel="alternate" hreflang="en" href="https://maliuping.github.io/tags/">
+<link rel="alternate" type="application/rss+xml" href="https://maliuping.github.io/tags/dsi/index.xml" title="rss">
+<link rel="alternate" hreflang="en" href="https://maliuping.github.io/tags/dsi/">
 <noscript>
     <style>
         #theme-toggle,
@@ -228,14 +228,14 @@
     });
   }, { once: true });
 </script>
-<meta property="og:url" content="https://maliuping.github.io/tags/">
+<meta property="og:url" content="https://maliuping.github.io/tags/dsi/">
   <meta property="og:site_name" content="Logan&#39;s Lab">
-  <meta property="og:title" content="Tags">
+  <meta property="og:title" content="DSI">
   <meta property="og:locale" content="zh_cn">
   <meta property="og:type" content="website">
 
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Tags">
+  <meta name="twitter:title" content="DSI">
 
 </head>
 <body class="list" id="top">
@@ -289,7 +289,7 @@
             </li>
             <li>
                 <a href="https://maliuping.github.io/tags/" title="标签">
-                    <span class="active">标签</span>
+                    <span>标签</span>
                 </a>
             </li>
             <li>
@@ -300,40 +300,43 @@
         </ul>
     </nav>
 </header>
-<main class="main">
-<header class="page-header">
-    <h1>Tags</h1>
+<main class="main"> 
+<header class="page-header"><nav class="breadcrumbs" role="navigation" aria-label="Breadcrumb">
+            <a href="/">Home</a>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+            <a href="/tags/">Tags</a>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+</nav>
+  <h1>
+    DSI
+  </h1>
 </header>
 
-<ul class="terms-tags">
-            <li>
-                <a href="https://maliuping.github.io/tags/aux/">Aux <sup><strong><sup>1</sup></strong></sup> </a>
-            </li>
-            <li>
-                <a href="https://maliuping.github.io/tags/displayport/">DisplayPort <sup><strong><sup>1</sup></strong></sup> </a>
-            </li>
-            <li>
-                <a href="https://maliuping.github.io/tags/dphy/">DPHY <sup><strong><sup>1</sup></strong></sup> </a>
-            </li>
-            <li>
-                <a href="https://maliuping.github.io/tags/drm/">DRM <sup><strong><sup>2</sup></strong></sup> </a>
-            </li>
-            <li>
-                <a href="https://maliuping.github.io/tags/dsi/">DSI <sup><strong><sup>1</sup></strong></sup> </a>
-            </li>
-            <li>
-                <a href="https://maliuping.github.io/tags/ftrace/">Ftrace <sup><strong><sup>1</sup></strong></sup> </a>
-            </li>
-            <li>
-                <a href="https://maliuping.github.io/tags/interrupt/">Interrupt <sup><strong><sup>1</sup></strong></sup> </a>
-            </li>
-            <li>
-                <a href="https://maliuping.github.io/tags/linux/">Linux <sup><strong><sup>2</sup></strong></sup> </a>
-            </li>
-            <li>
-                <a href="https://maliuping.github.io/tags/risc-v/">RISC-V <sup><strong><sup>1</sup></strong></sup> </a>
-            </li>
-</ul>
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Lane mapping
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>什么是 Lane Mapping？ Lane Mapping（也称 Lane Swapping）是指：
+将 DSI Controller 输出的逻辑 Data Lane，映射到不同的 D-PHY 物理 Data Lane。
+例如，一个 4-Lane DSI Host 默认连接关系如下：
+1 2 3 4 5 6 DSI Controller D-PHY Lane0 -----------------&gt; PHY Lane0 Lane1 -----------------&gt; PHY Lane1 Lane2 -----------------&gt; PHY Lane2 Lane3 -----------------&gt; PHY Lane3 这是默认的 1:1 映射。
+如果配置了 Lane Mapping，则可以变为：
+1 2 3 4 5 6 DSI Controller D-PHY Lane0 -----------------&gt; PHY Lane0 Lane1 -----------------&gt; PHY Lane2 Lane2 -----------------&gt; PHY Lane1 Lane3 -----------------&gt; PHY Lane3 此时 Controller 输出的 Lane1 数据 实际会从 PHY Lane2 发出，而 Lane2 数据 则从 PHY Lane1 发出。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-07-09 21:44:23 +0800 +0800'>July 9, 2026</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>Logan</span></footer>
+  <a class="entry-link" aria-label="post link to Lane mapping" href="https://maliuping.github.io/posts/display/dsi/lane_mapping/"></a>
+</article>
     </main>
     
 <footer class="footer">
