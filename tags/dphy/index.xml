@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>Display on Logan&#39;s Lab</title>
-    <link>https://maliuping.github.io/categories/display/</link>
-    <description>Recent content in Display on Logan&#39;s Lab</description>
+    <title>DPHY on Logan&#39;s Lab</title>
+    <link>https://maliuping.github.io/tags/dphy/</link>
+    <description>Recent content in DPHY on Logan&#39;s Lab</description>
     <generator>Hugo</generator>
     <language>zh-cn</language>
     <lastBuildDate>Thu, 09 Jul 2026 15:23:56 +0800</lastBuildDate>
-    <atom:link href="https://maliuping.github.io/categories/display/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://maliuping.github.io/tags/dphy/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Dphy clocks overview</title>
       <link>https://maliuping.github.io/posts/display/dphy/dphy_clocks_overview/</link>
@@ -49,20 +49,6 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;表示：&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Aux</title>
-      <link>https://maliuping.github.io/posts/display/dp/aux/</link>
-      <pubDate>Thu, 18 Jun 2026 07:41:14 +0800</pubDate>
-      <guid>https://maliuping.github.io/posts/display/dp/aux/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Dpcd</title>
-      <link>https://maliuping.github.io/posts/display/dp/dpcd/</link>
-      <pubDate>Sun, 14 Jun 2026 21:19:57 +0800</pubDate>
-      <guid>https://maliuping.github.io/posts/display/dp/dpcd/</guid>
-      <description></description>
     </item>
   </channel>
 </rss>

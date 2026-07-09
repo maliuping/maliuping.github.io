@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Dphy clocks overview | Logan&#39;s Lab</title>
+<meta name="keywords" content="DPHY">
+<meta name="description" content="在 MIPI D-PHY 中，经常会看到 Lane Rate、HS Clock、Byte Clock、Pixel Clock 等概念，它们分别位于不同的模块，不要混为一谈。
+1. Pixel Clock（像素时钟）
+作用对象：DPU / DPI / IPI
+Pixel Clock 决定像素数据进入 DSI Host 的速度。
+例如：
+
+1920×1080@60 RGB888
+Pixel Clock = 148.5 MHz
+
+表示：
+
+Controller 每秒接收 148.5M 个 Pixel。
+
+它属于显示时序，与 D-PHY 串行发送方式无关。
+2. Lane Rate（Bit Rate）
+作用对象：D-PHY Serial Link
+Lane Rate 又叫：
+
+Data Rate
+Bit Rate
+HS Bit Rate
+
+表示：
+
+一条 Data Lane 每秒传输多少 bit。
+
+例如：
+
+
+1
+
+
+Lane Rate = 1 Gbps
+
+
+表示：">
+<meta name="author" content="Logan">
+<link rel="canonical" href="https://maliuping.github.io/posts/display/dphy/dphy_clocks_overview/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.2a8c9da18ecd8f60e3a36cef4c5c02256c41738a2e5a283f1288d4489b487696.css" integrity="sha256-KoydoY7Nj2Djo2zvTFwCJWxBc4ouWig/EojUSJtIdpY=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://maliuping.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://maliuping.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://maliuping.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://maliuping.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://maliuping.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://maliuping.github.io/posts/display/dphy/dphy_clocks_overview/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><style>
+  pre.mermaid {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--entry);
+  }
+
+  pre.mermaid svg {
+    display: block;
+    height: auto;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+</style>
+
+<script type="module">
+  const getMermaidThemeConfig = () => {
+    const isDark = document.documentElement.dataset.theme === "dark";
+
+    if (isDark) {
+      return {
+        theme: "base",
+        themeVariables: {
+          background: "#1d1e20",
+          primaryColor: "#2f2521",
+          primaryBorderColor: "#c98a52",
+          primaryTextColor: "#f2e7da",
+          secondaryColor: "#25303a",
+          secondaryBorderColor: "#7aa2c7",
+          secondaryTextColor: "#e8eef5",
+          tertiaryColor: "#2b2b2f",
+          tertiaryBorderColor: "#8b8f98",
+          tertiaryTextColor: "#e4e7eb",
+          lineColor: "#c98a52",
+          arrowheadColor: "#c98a52",
+          edgeLabelBackground: "#1d1e20",
+          clusterBkg: "#232427",
+          clusterBorder: "#5f636b",
+          mainBkg: "#2f2521",
+          nodeBorder: "#c98a52",
+          defaultLinkColor: "#c98a52",
+          titleColor: "#f2e7da",
+          textColor: "#e4e7eb",
+          labelTextColor: "#e4e7eb",
+          actorBorder: "#c98a52",
+          actorBkg: "#2f2521",
+          actorTextColor: "#f2e7da",
+          signalColor: "#d8dde3",
+          signalTextColor: "#d8dde3",
+          noteBkgColor: "#353028",
+          noteBorderColor: "#c98a52",
+          noteTextColor: "#f2e7da",
+          activationBorderColor: "#c98a52",
+          activationBkgColor: "#4a3527",
+        },
+      };
+    }
+
+    return {
+      theme: "base",
+      themeVariables: {
+        background: "#ffffff",
+        primaryColor: "#f5e6d3",
+        primaryBorderColor: "#b86b2f",
+        primaryTextColor: "#2f221b",
+        secondaryColor: "#e7eef5",
+        secondaryBorderColor: "#5f86ad",
+        secondaryTextColor: "#203040",
+        tertiaryColor: "#f3f1ec",
+        tertiaryBorderColor: "#8d8275",
+        tertiaryTextColor: "#2d2924",
+        lineColor: "#b86b2f",
+        arrowheadColor: "#b86b2f",
+        edgeLabelBackground: "#fffaf4",
+        clusterBkg: "#faf6f0",
+        clusterBorder: "#b7aa9a",
+        mainBkg: "#f5e6d3",
+        nodeBorder: "#b86b2f",
+        defaultLinkColor: "#b86b2f",
+        titleColor: "#2f221b",
+        textColor: "#2f2924",
+        labelTextColor: "#2f2924",
+        actorBorder: "#b86b2f",
+        actorBkg: "#f5e6d3",
+        actorTextColor: "#2f221b",
+        signalColor: "#5b4636",
+        signalTextColor: "#5b4636",
+        noteBkgColor: "#fff4dc",
+        noteBorderColor: "#b86b2f",
+        noteTextColor: "#3b2b20",
+        activationBorderColor: "#b86b2f",
+        activationBkgColor: "#efd0af",
+      },
+    };
+  };
+
+  const collectMermaidBlocks = () => {
+    const blocks = new Set(document.querySelectorAll("pre.mermaid"));
+
+    document.querySelectorAll("pre > code.language-mermaid").forEach((code) => {
+      const pre = code.parentElement;
+      if (!pre) {
+        return;
+      }
+
+      if (!pre.dataset.mermaidSource) {
+        pre.dataset.mermaidSource = code.textContent.trim();
+      }
+
+      pre.classList.add("mermaid");
+      pre.textContent = pre.dataset.mermaidSource;
+      blocks.add(pre);
+    });
+
+    return Array.from(blocks);
+  };
+
+  const renderMermaid = async () => {
+    const blocks = collectMermaidBlocks();
+    if (blocks.length === 0) {
+      return;
+    }
+
+    const { default: mermaid } = await import("https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs");
+    const mermaidTheme = getMermaidThemeConfig();
+
+    blocks.forEach((block) => {
+      if (!block.dataset.mermaidSource) {
+        block.dataset.mermaidSource = block.textContent.trim();
+      }
+
+      block.removeAttribute("data-processed");
+      block.textContent = block.dataset.mermaidSource;
+    });
+
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: "loose",
+      ...mermaidTheme,
+    });
+
+    await mermaid.run({ nodes: blocks });
+  };
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    await renderMermaid();
+
+    const themeToggle = document.getElementById("theme-toggle");
+    if (!themeToggle || themeToggle.dataset.mermaidBound === "true") {
+      return;
+    }
+
+    themeToggle.dataset.mermaidBound = "true";
+    themeToggle.addEventListener("click", () => {
+      window.setTimeout(() => {
+        renderMermaid();
+      }, 0);
+    });
+  }, { once: true });
+</script>
+<meta property="og:url" content="https://maliuping.github.io/posts/display/dphy/dphy_clocks_overview/">
+  <meta property="og:site_name" content="Logan&#39;s Lab">
+  <meta property="og:title" content="Dphy clocks overview">
+  <meta property="og:description" content="在 MIPI D-PHY 中，经常会看到 Lane Rate、HS Clock、Byte Clock、Pixel Clock 等概念，它们分别位于不同的模块，不要混为一谈。
+1. Pixel Clock（像素时钟） 作用对象：DPU / DPI / IPI
+Pixel Clock 决定像素数据进入 DSI Host 的速度。
+例如：
+1920×1080@60 RGB888 Pixel Clock = 148.5 MHz 表示：
+Controller 每秒接收 148.5M 个 Pixel。
+它属于显示时序，与 D-PHY 串行发送方式无关。
+2. Lane Rate（Bit Rate） 作用对象：D-PHY Serial Link
+Lane Rate 又叫：
+Data Rate Bit Rate HS Bit Rate 表示：
+一条 Data Lane 每秒传输多少 bit。
+例如：
+1 Lane Rate = 1 Gbps 表示：">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-07-09T15:23:56+08:00">
+    <meta property="article:modified_time" content="2026-07-09T15:23:56+08:00">
+    <meta property="article:tag" content="DPHY">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Dphy clocks overview">
+  <meta name="twitter:description" content="在 MIPI D-PHY 中，经常会看到 Lane Rate、HS Clock、Byte Clock、Pixel Clock 等概念，它们分别位于不同的模块，不要混为一谈。
+1. Pixel Clock（像素时钟） 作用对象：DPU / DPI / IPI
+Pixel Clock 决定像素数据进入 DSI Host 的速度。
+例如：
+1920×1080@60 RGB888 Pixel Clock = 148.5 MHz 表示：
+Controller 每秒接收 148.5M 个 Pixel。
+它属于显示时序，与 D-PHY 串行发送方式无关。
+2. Lane Rate（Bit Rate） 作用对象：D-PHY Serial Link
+Lane Rate 又叫：
+Data Rate Bit Rate HS Bit Rate 表示：
+一条 Data Lane 每秒传输多少 bit。
+例如：
+1 Lane Rate = 1 Gbps 表示：">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://maliuping.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Dphy clocks overview",
+      "item": "https://maliuping.github.io/posts/display/dphy/dphy_clocks_overview/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Dphy clocks overview",
+  "name": "Dphy clocks overview",
+  "description": "在 MIPI D-PHY 中，经常会看到 Lane Rate、HS Clock、Byte Clock、Pixel Clock 等概念，它们分别位于不同的模块，不要混为一谈。\n1. Pixel Clock（像素时钟） 作用对象：DPU / DPI / IPI\nPixel Clock 决定像素数据进入 DSI Host 的速度。\n例如：\n1920×1080@60 RGB888 Pixel Clock = 148.5 MHz 表示：\nController 每秒接收 148.5M 个 Pixel。\n它属于显示时序，与 D-PHY 串行发送方式无关。\n2. Lane Rate（Bit Rate） 作用对象：D-PHY Serial Link\nLane Rate 又叫：\nData Rate Bit Rate HS Bit Rate 表示：\n一条 Data Lane 每秒传输多少 bit。\n例如：\n1 Lane Rate = 1 Gbps 表示：\n",
+  "keywords": [
+    "DPHY"
+  ],
+  "articleBody": "在 MIPI D-PHY 中，经常会看到 Lane Rate、HS Clock、Byte Clock、Pixel Clock 等概念，它们分别位于不同的模块，不要混为一谈。\n1. Pixel Clock（像素时钟） 作用对象：DPU / DPI / IPI\nPixel Clock 决定像素数据进入 DSI Host 的速度。\n例如：\n1920×1080@60 RGB888 Pixel Clock = 148.5 MHz 表示：\nController 每秒接收 148.5M 个 Pixel。\n它属于显示时序，与 D-PHY 串行发送方式无关。\n2. Lane Rate（Bit Rate） 作用对象：D-PHY Serial Link\nLane Rate 又叫：\nData Rate Bit Rate HS Bit Rate 表示：\n一条 Data Lane 每秒传输多少 bit。\n例如：\n1 Lane Rate = 1 Gbps 表示：\n1 1 秒发送 10^9 bit 如果使用 4 Lane，则总带宽约为：\n1 4 × 1Gbps = 4Gbps Lane Rate 是 D-PHY 最核心的参数。\n3. HS Clock（High-Speed Clock） HS Clock 是 D-PHY Serializer 内部使用的高速时钟。\n由于 D-PHY 采用 DDR（Double Data Rate） 传输：\n上升沿发送 1 bit 下降沿发送 1 bit 因此：\n1 Lane Rate = 2 × HS Clock 例如：\nLane Rate HS Clock 1 Gbps 500 MHz 1.5 Gbps 750 MHz 2 Gbps 1 GHz 4. Byte Clock（PPI Clock） Byte Clock 是 Controller 与 D-PHY(PPI Interface) 之间工作的时钟。\n它不是 PHY 线上的时钟，而是：\nSerializer 每隔一个 Byte Clock，从 Controller 获取一次并行数据。\n对于 Synopsys DSI Host（16-bit PPI）：\n每个 Byte Clock 周期传输：\n1 16 bit 因此：\n1 Byte Clock = Lane Rate / 16 也可以写成：\n1 Byte Clock = HS Clock / 8 例如：\nLane Rate Byte Clock 1 Gbps 62.5 MHz 1.5 Gbps 93.75 MHz 2 Gbps 125 MHz 5. 四个 Clock 所在位置 可以用下面这张图理解它们的位置：\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 Display Pipeline +--------------------+ | DPU / DPI / IPI | | Pixel Clock | +--------------------+ │ ▼ +--------------------+ | DSI Controller | | Byte Clock (PPI) | +--------------------+ │ 16-bit Parallel ▼ +--------------------+ | D-PHY Serializer | | HS Clock (DDR) | +--------------------+ │ Serial Bit Stream ▼ +--------------------+ | MIPI D-PHY Lane | | Lane Rate | +--------------------+ 6. 四者关系总结 对于 16-bit PPI 的 DSI Host，可记住下面三个公式：\n1 Lane Rate = 2 × HS Clock 1 Byte Clock = HS Clock / 8 1 Byte Clock = Lane Rate / 16 如果再结合 Pixel Clock，则可以得到整个显示链路：\n1 2 3 4 5 6 7 8 9 10 11 12 13 Pixel Clock │ ▼ DSI Controller (Byte Clock) │ ▼ Serializer (HS Clock) │ ▼ MIPI Lane (Lane Rate) PPI Width HS Clock PPI Clock 8 bit LaneRate / 2 LaneRate / 8 = HSClock / 4 16 bit LaneRate / 2 LaneRate / 16 = HSClock / 8 32 bit LaneRate / 2 LaneRate / 32 = HSClock / 16 其中：\nPixel Clock：决定像素进入 Controller 的速度。 Byte Clock：决定 Controller 向 D-PHY 输出并行数据的速度。 HS Clock：Serializer 的内部工作时钟，采用 DDR。 Lane Rate：最终在 MIPI Data Lane 上传输的串行比特率，也是 D-PHY 最常见的标称速率。 补充说明： Byte Clock = Lane Rate / 16 并不是 MIPI D-PHY 规范固定规定的公式，而是 16-bit PPI 接口宽度 下得到的结果。如果某些 D-PHY IP 使用 8-bit 或 32-bit PPI，则关系会分别变为 Lane Rate / 8 或 Lane Rate / 32。因此，这个公式应理解为 “PPI 位宽决定了 Byte Clock 与 Lane Rate 的换算关系”，而不是 D-PHY 的通用公式。这样也能解释为什么不同厂商的 Databook 中会出现不同的 Byte Clock 定义。\n",
+  "wordCount" : "475",
+  "inLanguage": "en",
+  "datePublished": "2026-07-09T15:23:56+08:00",
+  "dateModified": "2026-07-09T15:23:56+08:00",
+  "author":{
+    "@type": "Person",
+    "name": "Logan"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://maliuping.github.io/posts/display/dphy/dphy_clocks_overview/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Logan's Lab",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://maliuping.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="header-nav">
+        <div class="logo">
+            <a href="https://maliuping.github.io/" accesskey="h" title="Logan&#39;s Lab (Alt + H)">Logan&#39;s Lab</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu" class="menu">
+            <li>
+                <a href="https://maliuping.github.io/tools/" title="工具">
+                    <span>工具</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://maliuping.github.io/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://maliuping.github.io/archives/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://maliuping.github.io/search/" title="搜索 (Alt &#43; /)" accesskey=/>
+                    <span>搜索</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://maliuping.github.io/tags/" title="标签">
+                    <span>标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://maliuping.github.io/about/" title="关于">
+                    <span>关于</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <nav class="breadcrumbs" role="navigation" aria-label="Breadcrumb">
+            <a href="/">Home</a>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+            <a href="/posts/">Posts</a>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+</nav>
+    <h1 class="post-title entry-hint-parent">
+      Dphy clocks overview
+    </h1>
+    <div class="post-meta">
+
+<span title='2026-07-09 15:23:56 +0800 +0800'>July 9, 2026</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>Logan</span>
+
+</div>
+  </header> <details class="toc"  open>
+    <summary accesskey="c" title="(Alt + C)">
+        <span class="title">Table of Contents</span>
+    </summary>
+
+    <div class="inner"><ul>
+            <li>
+                <a href="#1-pixel-clock%e5%83%8f%e7%b4%a0%e6%97%b6%e9%92%9f" aria-label="1. Pixel Clock（像素时钟）">1. Pixel Clock（像素时钟）</a></li>
+            <li>
+                <a href="#2-lane-ratebit-rate" aria-label="2. Lane Rate（Bit Rate）">2. Lane Rate（Bit Rate）</a></li>
+            <li>
+                <a href="#3-hs-clockhigh-speed-clock" aria-label="3. HS Clock（High-Speed Clock）">3. HS Clock（High-Speed Clock）</a></li>
+            <li>
+                <a href="#4-byte-clockppi-clock" aria-label="4. Byte Clock（PPI Clock）">4. Byte Clock（PPI Clock）</a></li>
+            <li>
+                <a href="#5-%e5%9b%9b%e4%b8%aa-clock-%e6%89%80%e5%9c%a8%e4%bd%8d%e7%bd%ae" aria-label="5. 四个 Clock 所在位置">5. 四个 Clock 所在位置</a></li>
+            <li>
+                <a href="#6-%e5%9b%9b%e8%80%85%e5%85%b3%e7%b3%bb%e6%80%bb%e7%bb%93" aria-label="6. 四者关系总结">6. 四者关系总结</a>
+            </li>
+        </ul>
+    </div>
+</details>
+
+  <div class="post-content md-content"><p>在 MIPI D-PHY 中，经常会看到 <strong>Lane Rate、HS Clock、Byte Clock、Pixel Clock</strong> 等概念，它们分别位于不同的模块，不要混为一谈。</p>
+<h1 id="1-pixel-clock像素时钟">1. Pixel Clock（像素时钟）<a hidden class="anchor" aria-hidden="true" href="#1-pixel-clock像素时钟">#</a></h1>
+<p><strong>作用对象：DPU / DPI / IPI</strong></p>
+<p>Pixel Clock 决定像素数据进入 DSI Host 的速度。</p>
+<p>例如：</p>
+<ul>
+<li>1920×1080@60 RGB888</li>
+<li>Pixel Clock = <strong>148.5 MHz</strong></li>
+</ul>
+<p>表示：</p>
+<blockquote>
+<p>Controller 每秒接收 148.5M 个 Pixel。</p>
+</blockquote>
+<p>它属于<strong>显示时序</strong>，与 D-PHY 串行发送方式无关。</p>
+<h1 id="2-lane-ratebit-rate">2. Lane Rate（Bit Rate）<a hidden class="anchor" aria-hidden="true" href="#2-lane-ratebit-rate">#</a></h1>
+<p><strong>作用对象：D-PHY Serial Link</strong></p>
+<p>Lane Rate 又叫：</p>
+<ul>
+<li>Data Rate</li>
+<li>Bit Rate</li>
+<li>HS Bit Rate</li>
+</ul>
+<p>表示：</p>
+<blockquote>
+<p>一条 Data Lane 每秒传输多少 bit。</p>
+</blockquote>
+<p>例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Lane Rate = 1 Gbps
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>表示：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">1 秒发送 10^9 bit
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>如果使用 4 Lane，则总带宽约为：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">4 × 1Gbps = 4Gbps
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Lane Rate 是 D-PHY 最核心的参数。</p>
+<h1 id="3-hs-clockhigh-speed-clock">3. HS Clock（High-Speed Clock）<a hidden class="anchor" aria-hidden="true" href="#3-hs-clockhigh-speed-clock">#</a></h1>
+<p>HS Clock 是 D-PHY Serializer 内部使用的高速时钟。</p>
+<p>由于 D-PHY 采用 <strong>DDR（Double Data Rate）</strong> 传输：</p>
+<ul>
+<li>上升沿发送 1 bit</li>
+<li>下降沿发送 1 bit</li>
+</ul>
+<p>因此：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Lane Rate = 2 × HS Clock
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>例如：</p>
+<table>
+	<thead>
+			<tr>
+					<th style="text-align: right">Lane Rate</th>
+					<th style="text-align: right">HS Clock</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: right">1 Gbps</td>
+					<td style="text-align: right">500 MHz</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">1.5 Gbps</td>
+					<td style="text-align: right">750 MHz</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">2 Gbps</td>
+					<td style="text-align: right">1 GHz</td>
+			</tr>
+	</tbody>
+</table>
+<h1 id="4-byte-clockppi-clock">4. Byte Clock（PPI Clock）<a hidden class="anchor" aria-hidden="true" href="#4-byte-clockppi-clock">#</a></h1>
+<p>Byte Clock 是 <strong>Controller 与 D-PHY(PPI Interface)</strong> 之间工作的时钟。</p>
+<p>它不是 PHY 线上的时钟，而是：</p>
+<blockquote>
+<p>Serializer 每隔一个 Byte Clock，从 Controller 获取一次并行数据。</p>
+</blockquote>
+<p>对于 Synopsys DSI Host（16-bit PPI）：</p>
+<p>每个 Byte Clock 周期传输：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">16 bit
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>因此：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Byte Clock = Lane Rate / 16
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>也可以写成：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Byte Clock = HS Clock / 8
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>例如：</p>
+<table>
+	<thead>
+			<tr>
+					<th style="text-align: right">Lane Rate</th>
+					<th style="text-align: right">Byte Clock</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: right">1 Gbps</td>
+					<td style="text-align: right">62.5 MHz</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">1.5 Gbps</td>
+					<td style="text-align: right">93.75 MHz</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">2 Gbps</td>
+					<td style="text-align: right">125 MHz</td>
+			</tr>
+	</tbody>
+</table>
+<h1 id="5-四个-clock-所在位置">5. 四个 Clock 所在位置<a hidden class="anchor" aria-hidden="true" href="#5-四个-clock-所在位置">#</a></h1>
+<p>可以用下面这张图理解它们的位置：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">              Display Pipeline
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">+--------------------+
+</span></span><span class="line"><span class="cl">| DPU / DPI / IPI    |
+</span></span><span class="line"><span class="cl">| Pixel Clock        |
+</span></span><span class="line"><span class="cl">+--------------------+
+</span></span><span class="line"><span class="cl">          │
+</span></span><span class="line"><span class="cl">          ▼
+</span></span><span class="line"><span class="cl">+--------------------+
+</span></span><span class="line"><span class="cl">| DSI Controller     |
+</span></span><span class="line"><span class="cl">| Byte Clock (PPI)   |
+</span></span><span class="line"><span class="cl">+--------------------+
+</span></span><span class="line"><span class="cl">          │ 16-bit Parallel
+</span></span><span class="line"><span class="cl">          ▼
+</span></span><span class="line"><span class="cl">+--------------------+
+</span></span><span class="line"><span class="cl">| D-PHY Serializer   |
+</span></span><span class="line"><span class="cl">| HS Clock (DDR)     |
+</span></span><span class="line"><span class="cl">+--------------------+
+</span></span><span class="line"><span class="cl">          │ Serial Bit Stream
+</span></span><span class="line"><span class="cl">          ▼
+</span></span><span class="line"><span class="cl">+--------------------+
+</span></span><span class="line"><span class="cl">| MIPI D-PHY Lane    |
+</span></span><span class="line"><span class="cl">| Lane Rate          |
+</span></span><span class="line"><span class="cl">+--------------------+
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h1 id="6-四者关系总结">6. 四者关系总结<a hidden class="anchor" aria-hidden="true" href="#6-四者关系总结">#</a></h1>
+<p>对于 <strong>16-bit PPI</strong> 的 DSI Host，可记住下面三个公式：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Lane Rate = 2 × HS Clock
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Byte Clock = HS Clock / 8
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Byte Clock = Lane Rate / 16
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>如果再结合 Pixel Clock，则可以得到整个显示链路：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Pixel Clock
+</span></span><span class="line"><span class="cl">        │
+</span></span><span class="line"><span class="cl">        ▼
+</span></span><span class="line"><span class="cl">DSI Controller
+</span></span><span class="line"><span class="cl">(Byte Clock)
+</span></span><span class="line"><span class="cl">        │
+</span></span><span class="line"><span class="cl">        ▼
+</span></span><span class="line"><span class="cl">Serializer
+</span></span><span class="line"><span class="cl">(HS Clock)
+</span></span><span class="line"><span class="cl">        │
+</span></span><span class="line"><span class="cl">        ▼
+</span></span><span class="line"><span class="cl">MIPI Lane
+</span></span><span class="line"><span class="cl">(Lane Rate)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><table>
+	<thead>
+			<tr>
+					<th style="text-align: right">PPI Width</th>
+					<th style="text-align: right">HS Clock</th>
+					<th style="text-align: right">PPI Clock</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: right">8 bit</td>
+					<td style="text-align: right">LaneRate / 2</td>
+					<td style="text-align: right">LaneRate / 8 = HSClock / 4</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">16 bit</td>
+					<td style="text-align: right">LaneRate / 2</td>
+					<td style="text-align: right">LaneRate / 16 = HSClock / 8</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">32 bit</td>
+					<td style="text-align: right">LaneRate / 2</td>
+					<td style="text-align: right">LaneRate / 32 = HSClock / 16</td>
+			</tr>
+	</tbody>
+</table>
+<p>其中：</p>
+<ul>
+<li><strong>Pixel Clock</strong>：决定像素进入 Controller 的速度。</li>
+<li><strong>Byte Clock</strong>：决定 Controller 向 D-PHY 输出并行数据的速度。</li>
+<li><strong>HS Clock</strong>：Serializer 的内部工作时钟，采用 DDR。</li>
+<li><strong>Lane Rate</strong>：最终在 MIPI Data Lane 上传输的串行比特率，也是 D-PHY 最常见的标称速率。</li>
+</ul>
+<blockquote>
+<p><strong>补充说明：</strong> <code>Byte Clock = Lane Rate / 16</code> 并不是 MIPI D-PHY 规范固定规定的公式，而是 <strong>16-bit PPI 接口宽度</strong> 下得到的结果。如果某些 D-PHY IP 使用 <strong>8-bit</strong> 或 <strong>32-bit</strong> PPI，则关系会分别变为 <code>Lane Rate / 8</code> 或 <code>Lane Rate / 32</code>。因此，这个公式应理解为 <strong>&ldquo;PPI 位宽决定了 Byte Clock 与 Lane Rate 的换算关系&rdquo;</strong>，而不是 D-PHY 的通用公式。这样也能解释为什么不同厂商的 Databook 中会出现不同的 Byte Clock 定义。</p>
+</blockquote>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://maliuping.github.io/tags/dphy/">DPHY</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="next" href="https://maliuping.github.io/posts/linux/drm/how_to_construct_drm_atomic_state/">
+    <span class="title">Next »</span>
+    <span>Drm_atomic_state如何构造</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://maliuping.github.io/">Logan&#39;s Lab</a></span> · 
+
+    
+    
+    <span>
+        Powered by
+        <a href="https://gohugo.io/?utm_source=papermod" rel="noopener" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" id="top-link" class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up">
+        <polyline points="17 11 12 6 7 11"></polyline>
+        <polyline points="17 18 12 13 7 18"></polyline>
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var toplink = document.getElementById("top-link");
+    window.onscroll = function () {
+        const scrollThreshold = window.innerHeight;
+        if (document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold) {
+            toplink.classList.remove("hidden");
+        } else {
+            toplink.classList.add("hidden");
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
