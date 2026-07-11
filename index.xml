@@ -109,6 +109,77 @@
       <description>实时计算显示链路带宽、Lane Rate、时钟、UI 与 DSI video timing。</description>
     </item>
     <item>
+      <title>Ulps</title>
+      <link>https://maliuping.github.io/posts/display/dphy/ulps/</link>
+      <pubDate>Tue, 30 Jun 2026 23:46:46 +0800</pubDate>
+      <guid>https://maliuping.github.io/posts/display/dphy/ulps/</guid>
+      <description>&lt;p&gt;本文想讲下ULPS, 它是 D-PHY 定义的一种深度低功耗状态，适用于 data lane和 clock lane。核心特征是：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Lane 长期保持LP-00&lt;/li&gt;
+&lt;li&gt;PHY模拟电路可以进入低功耗状态&lt;/li&gt;
+&lt;li&gt;需要特点流程可进入 和 退出&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;但是在讲ULPS前，需要先引入escape mode。&lt;/p&gt;
+&lt;h1 id=&#34;1-escape-mode&#34;&gt;1. Escape mode&lt;/h1&gt;
+&lt;p&gt;Escape Mode 是一种基于低功耗（LP）状态的特殊工作模式，在该模式下可以提供额外的功能。Escape Mode 在正向（Forward）方向必须支持，在反向（Reverse）方向是可选的；即便支持，也不要求实现全部功能。
+Data Lane 通过特定的进入流程进入 Escape Mode，该流程为：LP-11 → LP-10 → LP-00 → LP-01 → LP-00。当线路上观察到最后一个 Bridge 状态（LP-00）时，Lane 即进入 Escape Mode，并处于 Space 状态（LP-00）。如果在到达最终 Bridge 状态之前的任何时刻检测到 LP-11，则该进入流程必须中止，接收端应等待或返回到 Stop 状态。&lt;/p&gt;
+&lt;p&gt;对于 Data Lane，一旦进入 Escape Mode，发送端需要发送一个 8-bit 的入口命令，用于指示请求执行的操作。当前所有支持的 Escape Mode 命令及其对应行为在如下 Table 中定义，未分配的命令保留用于未来扩展。&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;escape_mode_cmd&#34; loading=&#34;lazy&#34; src=&#34;https://maliuping.github.io/posts/display/dphy/ulps/escape_mode_cmd.png&#34;&gt;&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;escape mode action&lt;/th&gt;
+					&lt;th&gt;command type&lt;/th&gt;
+					&lt;th&gt;entry command pattern (first bit transmitted to last bit transmitted)&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;low-power data tranmission&lt;/td&gt;
+					&lt;td&gt;mode&lt;/td&gt;
+					&lt;td&gt;11100001&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;ultra-low power state&lt;/td&gt;
+					&lt;td&gt;mode&lt;/td&gt;
+					&lt;td&gt;00011110&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;undefined-1&lt;/td&gt;
+					&lt;td&gt;mode&lt;/td&gt;
+					&lt;td&gt;10011111&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;undefined-2&lt;/td&gt;
+					&lt;td&gt;mode&lt;/td&gt;
+					&lt;td&gt;11011110&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;reset-trigger; remote application&lt;/td&gt;
+					&lt;td&gt;trigger&lt;/td&gt;
+					&lt;td&gt;01100010&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;entry sequence for HS test mode&lt;/td&gt;
+					&lt;td&gt;trigger&lt;/td&gt;
+					&lt;td&gt;01011101&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;unknown-4&lt;/td&gt;
+					&lt;td&gt;trigger&lt;/td&gt;
+					&lt;td&gt;00100001&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;unknown-5&lt;/td&gt;
+					&lt;td&gt;trigger&lt;/td&gt;
+					&lt;td&gt;10100000&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;退出 Escape Mode 必须通过 Stop 状态实现，并且由于采用 Spaced-One-Hot 编码，在 Escape Mode 期间不会出现 Stop 状态。一旦进入 Stop 状态，Lane 会立即返回 Control Mode。如果接收到的入口命令不被支持，则该 Escape 操作应被忽略，接收端需等待发送端返回 Stop 状态。
+在 Escape Mode 下，PHY 使用 Spaced-One-Hot 编码进行异步通信，因此 Data Lane 的操作不依赖 Clock Lane。Trigger-Reset 命令的完整 Escape Mode 操作流程示例见如下 Figure 18。&lt;/p&gt;</description>
+    </item>
+    <item>
       <title>Drm_atomic_state如何构造</title>
       <link>https://maliuping.github.io/posts/linux/drm/how_to_construct_drm_atomic_state/</link>
       <pubDate>Fri, 26 Jun 2026 17:35:25 +0800</pubDate>
