@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Tmux | Logan&#39;s Lab</title>
+<meta name="keywords" content="Tmux">
+<meta name="description" content="1. overviw
+之前没搞懂tmux的本质，用的时候也很难受，用着用着就放弃了。最近发现tmux原来是这样的组织结构。它包含三层层级结构：
+
+
+1
+2
+3
+4
+
+
+tmux
+ ├─ Session（会话）→ 一个独立工作区
+ │   ├─ Window（窗口）→ 相当于标签页
+ │   │   ├─ Pane（面板）→ 分割窗格
+
+
+举个例子，我一般这么用：
+
+
+Window 0: auto_test build/edit
+
+
+Window 1：左右分两个面板，左边写代码，右边build
+
+
+Window 2: blog source edit
+
+
+全在一个终端窗口里搞定，不用在terminal 的好几个标签之间跳来跳去。
+2. 最常用的操作（前缀键 Ctrl&#43;b）
+2.1 注意前缀键的使用方式是：
+
+
+先按Ctrl &#43; b
+
+
+松开
+
+
+再按其他组合键
+
+
+2.2 会话管理
+
+
+创建新会话：tmux new -s mysession
+
+
+列出所有会话：tmux ls
+
+
+脱离当前会话：Ctrl&#43;b d
+
+
+重新接入会话：tmux attach -t mysession
+
+
+重命名会话：Ctrl&#43;b $
+
+
+2.3 窗口管理
+
+
+新建窗口：Ctrl&#43;b c
+
+
+切换窗口：Ctrl&#43;b &#43; 数字键
+
+
+上/下一个：Ctrl&#43;b p / Ctrl&#43;b n">
+<meta name="author" content="Logan">
+<link rel="canonical" href="https://maliuping.github.io/tools/tmux/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.2a8c9da18ecd8f60e3a36cef4c5c02256c41738a2e5a283f1288d4489b487696.css" integrity="sha256-KoydoY7Nj2Djo2zvTFwCJWxBc4ouWig/EojUSJtIdpY=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://maliuping.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://maliuping.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://maliuping.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://maliuping.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://maliuping.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://maliuping.github.io/tools/tmux/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><style>
+  pre.mermaid {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--entry);
+  }
+
+  pre.mermaid svg {
+    display: block;
+    height: auto;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+</style>
+
+<script type="module">
+  const getMermaidThemeConfig = () => {
+    const isDark = document.documentElement.dataset.theme === "dark";
+
+    if (isDark) {
+      return {
+        theme: "base",
+        themeVariables: {
+          background: "#1d1e20",
+          primaryColor: "#2f2521",
+          primaryBorderColor: "#c98a52",
+          primaryTextColor: "#f2e7da",
+          secondaryColor: "#25303a",
+          secondaryBorderColor: "#7aa2c7",
+          secondaryTextColor: "#e8eef5",
+          tertiaryColor: "#2b2b2f",
+          tertiaryBorderColor: "#8b8f98",
+          tertiaryTextColor: "#e4e7eb",
+          lineColor: "#c98a52",
+          arrowheadColor: "#c98a52",
+          edgeLabelBackground: "#1d1e20",
+          clusterBkg: "#232427",
+          clusterBorder: "#5f636b",
+          mainBkg: "#2f2521",
+          nodeBorder: "#c98a52",
+          defaultLinkColor: "#c98a52",
+          titleColor: "#f2e7da",
+          textColor: "#e4e7eb",
+          labelTextColor: "#e4e7eb",
+          actorBorder: "#c98a52",
+          actorBkg: "#2f2521",
+          actorTextColor: "#f2e7da",
+          signalColor: "#d8dde3",
+          signalTextColor: "#d8dde3",
+          noteBkgColor: "#353028",
+          noteBorderColor: "#c98a52",
+          noteTextColor: "#f2e7da",
+          activationBorderColor: "#c98a52",
+          activationBkgColor: "#4a3527",
+        },
+      };
+    }
+
+    return {
+      theme: "base",
+      themeVariables: {
+        background: "#ffffff",
+        primaryColor: "#f5e6d3",
+        primaryBorderColor: "#b86b2f",
+        primaryTextColor: "#2f221b",
+        secondaryColor: "#e7eef5",
+        secondaryBorderColor: "#5f86ad",
+        secondaryTextColor: "#203040",
+        tertiaryColor: "#f3f1ec",
+        tertiaryBorderColor: "#8d8275",
+        tertiaryTextColor: "#2d2924",
+        lineColor: "#b86b2f",
+        arrowheadColor: "#b86b2f",
+        edgeLabelBackground: "#fffaf4",
+        clusterBkg: "#faf6f0",
+        clusterBorder: "#b7aa9a",
+        mainBkg: "#f5e6d3",
+        nodeBorder: "#b86b2f",
+        defaultLinkColor: "#b86b2f",
+        titleColor: "#2f221b",
+        textColor: "#2f2924",
+        labelTextColor: "#2f2924",
+        actorBorder: "#b86b2f",
+        actorBkg: "#f5e6d3",
+        actorTextColor: "#2f221b",
+        signalColor: "#5b4636",
+        signalTextColor: "#5b4636",
+        noteBkgColor: "#fff4dc",
+        noteBorderColor: "#b86b2f",
+        noteTextColor: "#3b2b20",
+        activationBorderColor: "#b86b2f",
+        activationBkgColor: "#efd0af",
+      },
+    };
+  };
+
+  const collectMermaidBlocks = () => {
+    const blocks = new Set(document.querySelectorAll("pre.mermaid"));
+
+    document.querySelectorAll("pre > code.language-mermaid").forEach((code) => {
+      const pre = code.parentElement;
+      if (!pre) {
+        return;
+      }
+
+      if (!pre.dataset.mermaidSource) {
+        pre.dataset.mermaidSource = code.textContent.trim();
+      }
+
+      pre.classList.add("mermaid");
+      pre.textContent = pre.dataset.mermaidSource;
+      blocks.add(pre);
+    });
+
+    return Array.from(blocks);
+  };
+
+  const renderMermaid = async () => {
+    const blocks = collectMermaidBlocks();
+    if (blocks.length === 0) {
+      return;
+    }
+
+    const { default: mermaid } = await import("https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs");
+    const mermaidTheme = getMermaidThemeConfig();
+
+    blocks.forEach((block) => {
+      if (!block.dataset.mermaidSource) {
+        block.dataset.mermaidSource = block.textContent.trim();
+      }
+
+      block.removeAttribute("data-processed");
+      block.textContent = block.dataset.mermaidSource;
+    });
+
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: "loose",
+      ...mermaidTheme,
+    });
+
+    await mermaid.run({ nodes: blocks });
+  };
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    await renderMermaid();
+
+    const themeToggle = document.getElementById("theme-toggle");
+    if (!themeToggle || themeToggle.dataset.mermaidBound === "true") {
+      return;
+    }
+
+    themeToggle.dataset.mermaidBound = "true";
+    themeToggle.addEventListener("click", () => {
+      window.setTimeout(() => {
+        renderMermaid();
+      }, 0);
+    });
+  }, { once: true });
+</script>
+<meta property="og:url" content="https://maliuping.github.io/tools/tmux/">
+  <meta property="og:site_name" content="Logan&#39;s Lab">
+  <meta property="og:title" content="Tmux">
+  <meta property="og:description" content="1. overviw 之前没搞懂tmux的本质，用的时候也很难受，用着用着就放弃了。最近发现tmux原来是这样的组织结构。它包含三层层级结构：
+1 2 3 4 tmux ├─ Session（会话）→ 一个独立工作区 │ ├─ Window（窗口）→ 相当于标签页 │ │ ├─ Pane（面板）→ 分割窗格 举个例子，我一般这么用：
+Window 0: auto_test build/edit
+Window 1：左右分两个面板，左边写代码，右边build
+Window 2: blog source edit
+全在一个终端窗口里搞定，不用在terminal 的好几个标签之间跳来跳去。
+2. 最常用的操作（前缀键 Ctrl&#43;b） 2.1 注意前缀键的使用方式是： 先按Ctrl &#43; b
+松开
+再按其他组合键
+2.2 会话管理 创建新会话：tmux new -s mysession
+列出所有会话：tmux ls
+脱离当前会话：Ctrl&#43;b d
+重新接入会话：tmux attach -t mysession
+重命名会话：Ctrl&#43;b $
+2.3 窗口管理 新建窗口：Ctrl&#43;b c
+切换窗口：Ctrl&#43;b &#43; 数字键
+上/下一个：Ctrl&#43;b p / Ctrl&#43;b n">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="tools">
+    <meta property="article:published_time" content="2026-07-15T10:15:14+08:00">
+    <meta property="article:modified_time" content="2026-07-15T10:15:14+08:00">
+    <meta property="article:tag" content="Tmux">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Tmux">
+  <meta name="twitter:description" content="1. overviw 之前没搞懂tmux的本质，用的时候也很难受，用着用着就放弃了。最近发现tmux原来是这样的组织结构。它包含三层层级结构：
+1 2 3 4 tmux ├─ Session（会话）→ 一个独立工作区 │ ├─ Window（窗口）→ 相当于标签页 │ │ ├─ Pane（面板）→ 分割窗格 举个例子，我一般这么用：
+Window 0: auto_test build/edit
+Window 1：左右分两个面板，左边写代码，右边build
+Window 2: blog source edit
+全在一个终端窗口里搞定，不用在terminal 的好几个标签之间跳来跳去。
+2. 最常用的操作（前缀键 Ctrl&#43;b） 2.1 注意前缀键的使用方式是： 先按Ctrl &#43; b
+松开
+再按其他组合键
+2.2 会话管理 创建新会话：tmux new -s mysession
+列出所有会话：tmux ls
+脱离当前会话：Ctrl&#43;b d
+重新接入会话：tmux attach -t mysession
+重命名会话：Ctrl&#43;b $
+2.3 窗口管理 新建窗口：Ctrl&#43;b c
+切换窗口：Ctrl&#43;b &#43; 数字键
+上/下一个：Ctrl&#43;b p / Ctrl&#43;b n">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Tools",
+      "item": "https://maliuping.github.io/tools/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Tmux",
+      "item": "https://maliuping.github.io/tools/tmux/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Tmux",
+  "name": "Tmux",
+  "description": "1. overviw 之前没搞懂tmux的本质，用的时候也很难受，用着用着就放弃了。最近发现tmux原来是这样的组织结构。它包含三层层级结构：\n1 2 3 4 tmux ├─ Session（会话）→ 一个独立工作区 │ ├─ Window（窗口）→ 相当于标签页 │ │ ├─ Pane（面板）→ 分割窗格 举个例子，我一般这么用：\nWindow 0: auto_test build/edit\nWindow 1：左右分两个面板，左边写代码，右边build\nWindow 2: blog source edit\n全在一个终端窗口里搞定，不用在terminal 的好几个标签之间跳来跳去。\n2. 最常用的操作（前缀键 Ctrl+b） 2.1 注意前缀键的使用方式是： 先按Ctrl + b\n松开\n再按其他组合键\n2.2 会话管理 创建新会话：tmux new -s mysession\n列出所有会话：tmux ls\n脱离当前会话：Ctrl+b d\n重新接入会话：tmux attach -t mysession\n重命名会话：Ctrl+b $\n2.3 窗口管理 新建窗口：Ctrl+b c\n切换窗口：Ctrl+b + 数字键\n上/下一个：Ctrl+b p / Ctrl+b n\n",
+  "keywords": [
+    "Tmux"
+  ],
+  "articleBody": "1. overviw 之前没搞懂tmux的本质，用的时候也很难受，用着用着就放弃了。最近发现tmux原来是这样的组织结构。它包含三层层级结构：\n1 2 3 4 tmux ├─ Session（会话）→ 一个独立工作区 │ ├─ Window（窗口）→ 相当于标签页 │ │ ├─ Pane（面板）→ 分割窗格 举个例子，我一般这么用：\nWindow 0: auto_test build/edit\nWindow 1：左右分两个面板，左边写代码，右边build\nWindow 2: blog source edit\n全在一个终端窗口里搞定，不用在terminal 的好几个标签之间跳来跳去。\n2. 最常用的操作（前缀键 Ctrl+b） 2.1 注意前缀键的使用方式是： 先按Ctrl + b\n松开\n再按其他组合键\n2.2 会话管理 创建新会话：tmux new -s mysession\n列出所有会话：tmux ls\n脱离当前会话：Ctrl+b d\n重新接入会话：tmux attach -t mysession\n重命名会话：Ctrl+b $\n2.3 窗口管理 新建窗口：Ctrl+b c\n切换窗口：Ctrl+b + 数字键\n上/下一个：Ctrl+b p / Ctrl+b n\n重命名窗口：Ctrl+b ,\n关闭窗口：Ctrl+b \u0026\n2.4 面板管理 水平分割：Ctrl+b \"\n垂直分割：Ctrl+b %\n切换面板：Ctrl+b + 方向键\n调整大小：Ctrl+b + 按住方向键\n关闭面板：Ctrl+b x\n滚动看历史？ Ctrl+b [ 进入复制模式，方向键翻页，q 退出。简单粗暴。\n2.5 窗口名字 创建会话时指定窗口名字 1 tmux new -s work -n editor 创建窗口时指定名字 1 tmux new-window -n editor 重命名窗口 1 2 3 4 5 快捷键： Ctrl+b , 然后输入： editor 3. 实际使用感受 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 # 连上服务器 $ tmux new -s dev # 建个叫 dev 的会话 # 在 dev 里 Ctrl+b c # 新开窗口 1：写代码 Ctrl+b % # 垂直分屏：左边写，右边build Ctrl+b c # 新开窗口 2：blog edit Ctrl+b c # 新开窗口 3：auto_test Ctrl+b d # 脱离会话，关电脑回家 # 第二天到公司 $ tmux attach -t dev # 一切原封不动 4. 进阶玩法 4.1 鼠标支持 在 ~/.tmux.conf 里加一行：\n1 set -g mouse on 然后就能用鼠标点击切窗口、拖拽调面板大小了。\n",
+  "wordCount" : "200",
+  "inLanguage": "en",
+  "datePublished": "2026-07-15T10:15:14+08:00",
+  "dateModified": "2026-07-15T10:15:14+08:00",
+  "author":{
+    "@type": "Person",
+    "name": "Logan"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://maliuping.github.io/tools/tmux/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Logan's Lab",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://maliuping.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="header-nav">
+        <div class="logo">
+            <a href="https://maliuping.github.io/" accesskey="h" title="Logan&#39;s Lab (Alt + H)">Logan&#39;s Lab</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu" class="menu">
+            <li>
+                <a href="https://maliuping.github.io/tools/" title="工具">
+                    <span>工具</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://maliuping.github.io/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://maliuping.github.io/archives/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://maliuping.github.io/search/" title="搜索 (Alt &#43; /)" accesskey=/>
+                    <span>搜索</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://maliuping.github.io/tags/" title="标签">
+                    <span>标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://maliuping.github.io/about/" title="关于">
+                    <span>关于</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <nav class="breadcrumbs" role="navigation" aria-label="Breadcrumb">
+            <a href="/">Home</a>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+            <a href="/tools/">Tools</a>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+</nav>
+    <h1 class="post-title entry-hint-parent">
+      Tmux
+    </h1>
+    <div class="post-meta">
+
+<span title='2026-07-15 10:15:14 +0800 +0800'>July 15, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>Logan</span>
+
+</div>
+  </header> <details class="toc"  open>
+    <summary accesskey="c" title="(Alt + C)">
+        <span class="title">Table of Contents</span>
+    </summary>
+
+    <div class="inner"><ul>
+            <li>
+                <a href="#1-overviw" aria-label="1. overviw">1. overviw</a></li>
+            <li>
+                <a href="#2-%e6%9c%80%e5%b8%b8%e7%94%a8%e7%9a%84%e6%93%8d%e4%bd%9c%e5%89%8d%e7%bc%80%e9%94%ae-ctrlb" aria-label="2. 最常用的操作（前缀键 Ctrl&#43;b）">2. 最常用的操作（前缀键 Ctrl+b）</a><ul>
+                    
+            <li>
+                <a href="#21-%e6%b3%a8%e6%84%8f%e5%89%8d%e7%bc%80%e9%94%ae%e7%9a%84%e4%bd%bf%e7%94%a8%e6%96%b9%e5%bc%8f%e6%98%af" aria-label="2.1 注意前缀键的使用方式是：">2.1 注意前缀键的使用方式是：</a></li>
+            <li>
+                <a href="#22-%e4%bc%9a%e8%af%9d%e7%ae%a1%e7%90%86" aria-label="2.2 会话管理">2.2 会话管理</a></li>
+            <li>
+                <a href="#23-%e7%aa%97%e5%8f%a3%e7%ae%a1%e7%90%86" aria-label="2.3 窗口管理">2.3 窗口管理</a></li>
+            <li>
+                <a href="#24-%e9%9d%a2%e6%9d%bf%e7%ae%a1%e7%90%86" aria-label="2.4 面板管理">2.4 面板管理</a></li>
+            <li>
+                <a href="#25-%e7%aa%97%e5%8f%a3%e5%90%8d%e5%ad%97" aria-label="2.5 窗口名字">2.5 窗口名字</a></li></ul>
+            </li>
+            <li>
+                <a href="#3-%e5%ae%9e%e9%99%85%e4%bd%bf%e7%94%a8%e6%84%9f%e5%8f%97" aria-label="3. 实际使用感受">3. 实际使用感受</a></li>
+            <li>
+                <a href="#4-%e8%bf%9b%e9%98%b6%e7%8e%a9%e6%b3%95" aria-label="4. 进阶玩法">4. 进阶玩法</a><ul>
+                    
+            <li>
+                <a href="#41-%e9%bc%a0%e6%a0%87%e6%94%af%e6%8c%81" aria-label="4.1 鼠标支持">4.1 鼠标支持</a>
+            </li>
+        </ul>
+        </li>
+        </ul>
+    </div>
+</details>
+
+  <div class="post-content md-content"><h1 id="1-overviw">1. overviw<a hidden class="anchor" aria-hidden="true" href="#1-overviw">#</a></h1>
+<p>之前没搞懂tmux的本质，用的时候也很难受，用着用着就放弃了。最近发现tmux原来是这样的组织结构。它包含三层层级结构：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-Plain" data-lang="Plain"><span class="line"><span class="cl">tmux
+</span></span><span class="line"><span class="cl"> ├─ Session（会话）→ 一个独立工作区
+</span></span><span class="line"><span class="cl"> │   ├─ Window（窗口）→ 相当于标签页
+</span></span><span class="line"><span class="cl"> │   │   ├─ Pane（面板）→ 分割窗格
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>举个例子，我一般这么用：</p>
+<ul>
+<li>
+<p><strong>Window 0</strong>: auto_test build/edit</p>
+</li>
+<li>
+<p><strong>Window 1</strong>：左右分两个面板，左边写代码，右边build</p>
+</li>
+<li>
+<p><strong>Window 2</strong>: blog source edit</p>
+</li>
+</ul>
+<p>全在一个终端窗口里搞定，不用在terminal 的好几个标签之间跳来跳去。</p>
+<h1 id="2-最常用的操作前缀键-ctrlb">2. 最常用的操作（前缀键 Ctrl+b）<a hidden class="anchor" aria-hidden="true" href="#2-最常用的操作前缀键-ctrlb">#</a></h1>
+<h2 id="21-注意前缀键的使用方式是">2.1 注意前缀键的使用方式是：<a hidden class="anchor" aria-hidden="true" href="#21-注意前缀键的使用方式是">#</a></h2>
+<ol>
+<li>
+<p>先按Ctrl + b</p>
+</li>
+<li>
+<p>松开</p>
+</li>
+<li>
+<p>再按其他组合键</p>
+</li>
+</ol>
+<h2 id="22-会话管理">2.2 会话管理<a hidden class="anchor" aria-hidden="true" href="#22-会话管理">#</a></h2>
+<ul>
+<li>
+<p>创建新会话：<code>tmux new -s mysession</code></p>
+</li>
+<li>
+<p>列出所有会话：<code>tmux ls</code></p>
+</li>
+<li>
+<p>脱离当前会话：Ctrl+b d</p>
+</li>
+<li>
+<p>重新接入会话：<code>tmux attach -t mysession</code></p>
+</li>
+<li>
+<p>重命名会话：Ctrl+b $</p>
+</li>
+</ul>
+<h2 id="23-窗口管理">2.3 窗口管理<a hidden class="anchor" aria-hidden="true" href="#23-窗口管理">#</a></h2>
+<ul>
+<li>
+<p>新建窗口：Ctrl+b c</p>
+</li>
+<li>
+<p>切换窗口：Ctrl+b + 数字键</p>
+</li>
+<li>
+<p>上/下一个：Ctrl+b p / Ctrl+b n</p>
+</li>
+<li>
+<p>重命名窗口：Ctrl+b ,</p>
+</li>
+<li>
+<p>关闭窗口：Ctrl+b &amp;</p>
+</li>
+</ul>
+<h2 id="24-面板管理">2.4 面板管理<a hidden class="anchor" aria-hidden="true" href="#24-面板管理">#</a></h2>
+<ul>
+<li>
+<p>水平分割：Ctrl+b &quot;</p>
+</li>
+<li>
+<p>垂直分割：Ctrl+b %</p>
+</li>
+<li>
+<p>切换面板：Ctrl+b + 方向键</p>
+</li>
+<li>
+<p>调整大小：Ctrl+b + 按住方向键</p>
+</li>
+<li>
+<p>关闭面板：Ctrl+b x</p>
+</li>
+</ul>
+<p><strong>滚动看历史？</strong> Ctrl+b [ 进入复制模式，方向键翻页，q 退出。简单粗暴。</p>
+<h2 id="25-窗口名字">2.5 窗口名字<a hidden class="anchor" aria-hidden="true" href="#25-窗口名字">#</a></h2>
+<ol>
+<li>创建会话时指定窗口名字</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-Text" data-lang="Text"><span class="line"><span class="cl">tmux new -s work -n editor
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ol start="2">
+<li>创建窗口时指定名字</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-Text" data-lang="Text"><span class="line"><span class="cl">tmux new-window -n editor
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ol start="3">
+<li>重命名窗口</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-Text" data-lang="Text"><span class="line"><span class="cl">快捷键：
+</span></span><span class="line"><span class="cl">Ctrl+b ,
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">然后输入：
+</span></span><span class="line"><span class="cl">editor
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h1 id="3-实际使用感受">3. 实际使用感受<a hidden class="anchor" aria-hidden="true" href="#3-实际使用感受">#</a></h1>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-Markdown" data-lang="Markdown"><span class="line"><span class="cl"><span class="gh"># 连上服务器
+</span></span></span><span class="line"><span class="cl">$ tmux new -s dev                # 建个叫 dev 的会话
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="gh"># 在 dev 里
+</span></span></span><span class="line"><span class="cl">Ctrl+b c                         # 新开窗口 1：写代码
+</span></span><span class="line"><span class="cl">Ctrl+b %                         # 垂直分屏：左边写，右边build
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Ctrl+b c                         # 新开窗口 2：blog edit
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Ctrl+b c                         # 新开窗口 3：auto_test
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Ctrl+b d                         # 脱离会话，关电脑回家
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="gh"># 第二天到公司
+</span></span></span><span class="line"><span class="cl">$ tmux attach -t dev             # 一切原封不动
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h1 id="4-进阶玩法">4. 进阶玩法<a hidden class="anchor" aria-hidden="true" href="#4-进阶玩法">#</a></h1>
+<h2 id="41-鼠标支持">4.1 鼠标支持<a hidden class="anchor" aria-hidden="true" href="#41-鼠标支持">#</a></h2>
+<p>在 <code>~/.tmux.conf</code> 里加一行：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-Plain" data-lang="Plain"><span class="line"><span class="cl">set -g mouse on
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>然后就能用鼠标点击切窗口、拖拽调面板大小了。</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://maliuping.github.io/tags/tmux/">Tmux</a></li>
+    </ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://maliuping.github.io/">Logan&#39;s Lab</a></span> · 
+
+    
+    
+    <span>
+        Powered by
+        <a href="https://gohugo.io/?utm_source=papermod" rel="noopener" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" id="top-link" class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up">
+        <polyline points="17 11 12 6 7 11"></polyline>
+        <polyline points="17 18 12 13 7 18"></polyline>
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var toplink = document.getElementById("top-link");
+    window.onscroll = function () {
+        const scrollThreshold = window.innerHeight;
+        if (document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold) {
+            toplink.classList.remove("hidden");
+        } else {
+            toplink.classList.add("hidden");
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

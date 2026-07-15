@@ -3,7 +3,25 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://maliuping.github.io/categories/</loc>
-    <lastmod>2026-07-09T21:44:23+08:00</lastmod>
+    <lastmod>2026-07-15T10:15:14+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/</loc>
+    <lastmod>2026-07-15T10:15:14+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/tags/</loc>
+    <lastmod>2026-07-15T10:15:14+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/tags/tmux/</loc>
+    <lastmod>2026-07-15T10:15:14+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/tools/tmux/</loc>
+    <lastmod>2026-07-15T10:15:14+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/categories/tools/</loc>
+    <lastmod>2026-07-15T10:15:14+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/tools/</loc>
+    <lastmod>2026-07-15T10:15:14+08:00</lastmod>
   </url><url>
     <loc>https://maliuping.github.io/categories/display/</loc>
     <lastmod>2026-07-09T21:44:23+08:00</lastmod>
@@ -14,13 +32,7 @@
     <loc>https://maliuping.github.io/posts/display/dsi/lane_mapping/</loc>
     <lastmod>2026-07-09T21:44:23+08:00</lastmod>
   </url><url>
-    <loc>https://maliuping.github.io/</loc>
-    <lastmod>2026-07-09T21:44:23+08:00</lastmod>
-  </url><url>
     <loc>https://maliuping.github.io/posts/</loc>
-    <lastmod>2026-07-09T21:44:23+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/tags/</loc>
     <lastmod>2026-07-09T21:44:23+08:00</lastmod>
   </url><url>
     <loc>https://maliuping.github.io/tags/dphy/</loc>
@@ -30,9 +42,6 @@
     <lastmod>2026-07-09T15:23:56+08:00</lastmod>
   </url><url>
     <loc>https://maliuping.github.io/tools/display-calculator/</loc>
-    <lastmod>2026-07-01T13:40:00+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/tools/</loc>
     <lastmod>2026-07-01T13:40:00+08:00</lastmod>
   </url><url>
     <loc>https://maliuping.github.io/posts/display/dphy/ulps/</loc>

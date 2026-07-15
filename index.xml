@@ -6,8 +6,84 @@
     <description>Recent content on Logan&#39;s Lab</description>
     <generator>Hugo</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Thu, 09 Jul 2026 21:44:23 +0800</lastBuildDate>
+    <lastBuildDate>Wed, 15 Jul 2026 10:15:14 +0800</lastBuildDate>
     <atom:link href="https://maliuping.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Tmux</title>
+      <link>https://maliuping.github.io/tools/tmux/</link>
+      <pubDate>Wed, 15 Jul 2026 10:15:14 +0800</pubDate>
+      <guid>https://maliuping.github.io/tools/tmux/</guid>
+      <description>&lt;h1 id=&#34;1-overviw&#34;&gt;1. overviw&lt;/h1&gt;
+&lt;p&gt;之前没搞懂tmux的本质，用的时候也很难受，用着用着就放弃了。最近发现tmux原来是这样的组织结构。它包含三层层级结构：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-Plain&#34; data-lang=&#34;Plain&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;tmux
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt; ├─ Session（会话）→ 一个独立工作区
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt; │   ├─ Window（窗口）→ 相当于标签页
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt; │   │   ├─ Pane（面板）→ 分割窗格
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;举个例子，我一般这么用：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Window 0&lt;/strong&gt;: auto_test build/edit&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Window 1&lt;/strong&gt;：左右分两个面板，左边写代码，右边build&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Window 2&lt;/strong&gt;: blog source edit&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;全在一个终端窗口里搞定，不用在terminal 的好几个标签之间跳来跳去。&lt;/p&gt;
+&lt;h1 id=&#34;2-最常用的操作前缀键-ctrlb&#34;&gt;2. 最常用的操作（前缀键 Ctrl+b）&lt;/h1&gt;
+&lt;h2 id=&#34;21-注意前缀键的使用方式是&#34;&gt;2.1 注意前缀键的使用方式是：&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;先按Ctrl + b&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;松开&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;再按其他组合键&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;22-会话管理&#34;&gt;2.2 会话管理&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;创建新会话：&lt;code&gt;tmux new -s mysession&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;列出所有会话：&lt;code&gt;tmux ls&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;脱离当前会话：Ctrl+b d&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;重新接入会话：&lt;code&gt;tmux attach -t mysession&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;重命名会话：Ctrl+b $&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;23-窗口管理&#34;&gt;2.3 窗口管理&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;新建窗口：Ctrl+b c&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;切换窗口：Ctrl+b + 数字键&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;上/下一个：Ctrl+b p / Ctrl+b n&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Lane mapping</title>
       <link>https://maliuping.github.io/posts/display/dsi/lane_mapping/</link>
