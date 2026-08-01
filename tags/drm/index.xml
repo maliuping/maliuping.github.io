@@ -152,12 +152,5 @@
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;到这里只有Property, 没有&lt;code&gt;drm_atomic_state&lt;/code&gt; .&lt;/p&gt;</description>
     </item>
-    <item>
-      <title>Dpcd</title>
-      <link>https://maliuping.github.io/posts/display/dp/dpcd/</link>
-      <pubDate>Sun, 14 Jun 2026 21:19:57 +0800</pubDate>
-      <guid>https://maliuping.github.io/posts/display/dp/dpcd/</guid>
-      <description></description>
-    </item>
   </channel>
 </rss>

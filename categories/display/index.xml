@@ -172,19 +172,5 @@ Data Lane 通过特定的进入流程进入 Escape Mode，该流程为：LP-11 �
 &lt;p&gt;退出 Escape Mode 必须通过 Stop 状态实现，并且由于采用 Spaced-One-Hot 编码，在 Escape Mode 期间不会出现 Stop 状态。一旦进入 Stop 状态，Lane 会立即返回 Control Mode。如果接收到的入口命令不被支持，则该 Escape 操作应被忽略，接收端需等待发送端返回 Stop 状态。
 在 Escape Mode 下，PHY 使用 Spaced-One-Hot 编码进行异步通信，因此 Data Lane 的操作不依赖 Clock Lane。Trigger-Reset 命令的完整 Escape Mode 操作流程示例见如下 Figure 18。&lt;/p&gt;</description>
     </item>
-    <item>
-      <title>Aux</title>
-      <link>https://maliuping.github.io/posts/display/dp/aux/</link>
-      <pubDate>Thu, 18 Jun 2026 07:41:14 +0800</pubDate>
-      <guid>https://maliuping.github.io/posts/display/dp/aux/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Dpcd</title>
-      <link>https://maliuping.github.io/posts/display/dp/dpcd/</link>
-      <pubDate>Sun, 14 Jun 2026 21:19:57 +0800</pubDate>
-      <guid>https://maliuping.github.io/posts/display/dp/dpcd/</guid>
-      <description></description>
-    </item>
   </channel>
 </rss>
