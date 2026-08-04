@@ -2,22 +2,34 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://maliuping.github.io/categories/book/</loc>
+    <lastmod>2026-08-04T13:11:39+08:00</lastmod>
+  </url><url>
     <loc>https://maliuping.github.io/categories/</loc>
-    <lastmod>2026-08-01T11:52:02+08:00</lastmod>
+    <lastmod>2026-08-04T13:11:39+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/</loc>
+    <lastmod>2026-08-04T13:11:39+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/posts/</loc>
+    <lastmod>2026-08-04T13:11:39+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/tags/</loc>
+    <lastmod>2026-08-04T13:11:39+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/tags/thoughts/</loc>
+    <lastmod>2026-08-04T13:11:39+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/posts/book/fpmm/prototype_verification-software_first/</loc>
+    <lastmod>2026-08-04T13:11:39+08:00</lastmod>
   </url><url>
     <loc>https://maliuping.github.io/tags/fpga/</loc>
     <lastmod>2026-08-01T11:52:02+08:00</lastmod>
   </url><url>
-    <loc>https://maliuping.github.io/</loc>
-    <lastmod>2026-08-01T11:52:02+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/posts/</loc>
-    <lastmod>2026-08-01T11:52:02+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/tags/</loc>
-    <lastmod>2026-08-01T11:52:02+08:00</lastmod>
-  </url><url>
     <loc>https://maliuping.github.io/categories/thoughts/</loc>
+    <lastmod>2026-08-01T11:52:02+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/posts/book/fpmm/the_value_of_prototype_validation/</loc>
     <lastmod>2026-08-01T11:52:02+08:00</lastmod>
   </url><url>
     <loc>https://maliuping.github.io/posts/fpga/the_value_of_prototype_validation/</loc>

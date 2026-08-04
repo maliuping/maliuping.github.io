@@ -6,8 +6,75 @@
     <description>Recent content on Logan&#39;s Lab</description>
     <generator>Hugo</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Sat, 01 Aug 2026 11:52:02 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 04 Aug 2026 13:11:39 +0800</lastBuildDate>
     <atom:link href="https://maliuping.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>芯片原型验证与软件先行战略</title>
+      <link>https://maliuping.github.io/posts/book/fpmm/prototype_verification-software_first/</link>
+      <pubDate>Tue, 04 Aug 2026 13:11:39 +0800</pubDate>
+      <guid>https://maliuping.github.io/posts/book/fpmm/prototype_verification-software_first/</guid>
+      <description>&lt;p&gt;fpmm 1.3 章节，以下是对&lt;strong&gt;虚拟平台（如 Synopsys Innovator）&lt;/strong&gt;、&lt;strong&gt;QEMU&lt;/strong&gt; 与 &lt;strong&gt;SDK&lt;/strong&gt; 在原型验证流程中定位与关系的总结输出：&lt;/p&gt;
+&lt;h3 id=&#34;1-虚拟平台工业级的软件仿真环境innovator-vs-qemu&#34;&gt;1. 虚拟平台：工业级的软件仿真环境（Innovator vs. QEMU）&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;核心功能相似性&lt;/strong&gt;：Synopsys Innovator 与 QEMU 在本质上都是&lt;strong&gt;无需硬件的原型验证工具&lt;/strong&gt;，均属于纯软件仿真环境。它们利用指令集仿真（ISS）来运行未经修改的目标软件代码，且在采用松散时序模型时，速度极快（可达数十 MIPS），非常接近实时运行。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Innovator 的专业优势&lt;/strong&gt;：相比通用的 QEMU，Innovator 深度集成在芯片设计流程中，主要用于&lt;strong&gt;架构探索&lt;/strong&gt;（如评估总线带宽、缓存利用率等）。它基于 SystemC 和 TLM-2.0 标准，能提供极高的调试可见性，并具备**混合原型验证（Hybrid Prototyping）**能力，可与物理 FPGA 硬件（如 HAPS）链接运行。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;2-sdk高层抽象的软件开发包&#34;&gt;2. SDK：高层抽象的软件开发包&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;定义与目的&lt;/strong&gt;：SDK（软件开发工具包）是来源中提到的最常见的原型验证环境。其核心目标是提供**“足够的精度”**，通过高级 API（应用程序编程接口）来“欺骗”应用程序，使其认为自己运行在最终的硬件平台上。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;开发独立性&lt;/strong&gt;：在 SDK 环境中开发的软件通常是在&lt;strong&gt;主机（Host PC）上编译和验证功能逻辑的&lt;/strong&gt;，而不是直接运行在目标处理器的 RTL 模型上。因此，在 SDK 开发阶段，&lt;strong&gt;并不需要 RTL 已经部署到 FPGA 或虚拟平台中&lt;/strong&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;3-sdk-与芯片设计工程师的关系&#34;&gt;3. SDK 与芯片设计工程师的关系&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;软硬件并行开发的纽带&lt;/strong&gt;：虽然 SDK 位于软件栈的最顶层，应用开发者不直接接触底层硬件细节，但 SDK 的存在是&lt;strong&gt;硬件团队对软件团队“启动太晚”问题的回答&lt;/strong&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;职责分工&lt;/strong&gt;：
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;驱动工程师&lt;/strong&gt;：负责开发底层的驱动程序、操作系统（OS）支持和中间件（Middleware），并确保 SDK 提供给上层应用的 API 保持一致，从而不破坏遗留软件。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;应用软件工程师&lt;/strong&gt;：主要利用 SDK 在 API 之上编写业务逻辑，实现与硬件设计的并行甚至领先开发。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;4-验证层级的递进关系&#34;&gt;4. 验证层级的递进关系&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;SDK&lt;/strong&gt;：用于早期应用层逻辑验证，精度最低，速度最快，完全脱离硬件。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;虚拟平台（Innovator/QEMU）&lt;/strong&gt;：提供功能精确的软件模型，用于架构探索和早期 OS/驱动开发。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;FPGA 原型验证&lt;/strong&gt;：提供**“硅片级”**的硬件表示，使用真实 RTL，具备周期精确性（Cycle-accurate）和高性能，是软硬件第一次真正集成的地方。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;首片硅片（First Silicon）&lt;/strong&gt;：最终的物理芯片，精度 100%，但出现最晚且调试可见性受限。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;总结结论&lt;/strong&gt;：SDK 和虚拟平台（如 Innovator）都是实现**“软件先行”**战略的关键工具。SDK 让应用开发在无需 RTL 的情况下尽早开始，而虚拟平台和 FPGA 原型则随着设计成熟度（RTL 的完善）逐步介入，提供更高的精度以验证底层的软硬件交互。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>原型验证的核心价值</title>
+      <link>https://maliuping.github.io/posts/book/fpmm/the_value_of_prototype_validation/</link>
+      <pubDate>Sat, 01 Aug 2026 11:52:02 +0800</pubDate>
+      <guid>https://maliuping.github.io/posts/book/fpmm/the_value_of_prototype_validation/</guid>
+      <description>&lt;p&gt;原型验证的价值在于&lt;strong&gt;同时解决软件提前验证和芯片系统验证&lt;/strong&gt;这两个问题，但其&lt;strong&gt;核心驱动力&lt;/strong&gt;和&lt;strong&gt;最大价值&lt;/strong&gt;被明确定义为支持&lt;strong&gt;嵌入式软件的预硅（Pre-silicon）验证&lt;/strong&gt;。&lt;/p&gt;
+&lt;h1 id=&#34;1-核心目标解决软件开发的延迟问题&#34;&gt;1. 核心目标：解决软件开发的延迟问题&lt;/h1&gt;
+&lt;p&gt;在现代 SoC 设计中，&lt;strong&gt;嵌入式软件开发已成为项目工作量和进度的决定性因素&lt;/strong&gt;。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;最大的价值：&lt;/strong&gt; FPGA 原型验证最大的价值在于其独特的性能，能够提供一个既快又准确的 SoC 模型，从而实现嵌入式软件的&lt;strong&gt;预硅验证&lt;/strong&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;硬件团队对软件问题的回答：&lt;/strong&gt; 手册指出，原型验证实际上是硬件团队为解决软件团队面临的“启动太晚”问题而提供的方案。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;显著提升 ROI：&lt;/strong&gt; 通过原型验证让软件开发提前开始（例如提前 7 个月），可以显著缩短产品的盈亏平衡时间并增加收入。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;2-重要功能复杂的系统级硬件验证&#34;&gt;2. 重要功能：复杂的系统级硬件验证&lt;/h1&gt;
+&lt;p&gt;虽然软件是主要驱动力，但原型验证也是&lt;strong&gt;芯片系统级验证&lt;/strong&gt;中不可或缺的工具。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;高性能硬件测试：&lt;/strong&gt; 对于硬件团队，FPGA 原型提供了远超仿真（Simulation）和硬件加速器（Emulation）的执行速度（通常快 10 倍以上），适用于运行大规模回归测试和长时软件任务（如 OS 启动）。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;真实数据流测试：&lt;/strong&gt; 只有 FPGA 原型能够以接近实时的速度连接真实物理接口（如 USB、HDMI、以太网），验证芯片在真实世界数据流中的表现。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;捕捉罕见硬件漏洞：&lt;/strong&gt; 它能帮助发现那些在软件模拟或架构探索阶段无法预见的复杂硬件交互问题。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;3-终极意义软硬件集成与验证&#34;&gt;3. 终极意义：软硬件集成与验证&lt;/h1&gt;
+&lt;p&gt;本书的观念是，原型验证最关键的阶段是将&lt;strong&gt;软件和硬件第一次结合在一起&lt;/strong&gt;的时刻。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;软硬件协同：&lt;/strong&gt; 原型验证允许软件在周期精确（Cycle-accurate）且快速的硬件模型上运行，这使得在拿到第一批真实芯片（First Silicon）时，系统和软件往往能在一天内就跑通。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;建立信心：&lt;/strong&gt; 这种“可运行的规范（Executable Specification）”为整个 SoC 项目提供了巨大的信心，确保了硬件能正确执行其预定的软件功能。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;总结来说：&lt;/strong&gt; 本书认为原型验证&lt;strong&gt;主要是为了解决软件提前验证准备的问题&lt;/strong&gt;（因为这是当前 SoC 开发的最大瓶颈），但它是通过&lt;strong&gt;解决复杂的芯片系统验证问题&lt;/strong&gt;（提供高性能、高准确度的硬件环境）来实现这一目标的。&lt;/p&gt;
+&lt;h1 id=&#34;reference&#34;&gt;reference&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;FPGA 原型验证方法手册&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
     <item>
       <title>原型验证的核心价值</title>
       <link>https://maliuping.github.io/posts/fpga/the_value_of_prototype_validation/</link>
