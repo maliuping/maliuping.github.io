@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html lang="en" dir="auto" data-theme="auto">
 
-<head><meta charset="utf-8">
+<head>
+	<meta name="generator" content="Hugo 0.164.0"><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
-<title>Thoughts | Logan&#39;s Lab</title>
-<meta name="keywords" content="">
+<title>Logan&#39;s Lab</title>
+
 <meta name="description" content="">
 <meta name="author" content="Logan">
-<link rel="canonical" href="https://maliuping.github.io/tags/thoughts/">
+<link rel="canonical" href="https://maliuping.github.io/">
 <link crossorigin="anonymous" href="/assets/css/stylesheet.2a8c9da18ecd8f60e3a36cef4c5c02256c41738a2e5a283f1288d4489b487696.css" integrity="sha256-KoydoY7Nj2Djo2zvTFwCJWxBc4ouWig/EojUSJtIdpY=" rel="preload stylesheet" as="style">
 <link rel="icon" href="https://maliuping.github.io/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="https://maliuping.github.io/favicon-16x16.png">
@@ -18,8 +19,9 @@
 <link rel="mask-icon" href="https://maliuping.github.io/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" type="application/rss+xml" href="https://maliuping.github.io/tags/thoughts/index.xml" title="rss">
-<link rel="alternate" hreflang="en" href="https://maliuping.github.io/tags/thoughts/">
+<link rel="alternate" type="application/rss+xml" href="https://maliuping.github.io/index.xml" title="rss">
+<link rel="alternate" type="application/json" href="https://maliuping.github.io/index.json" title="json">
+<link rel="alternate" hreflang="en" href="https://maliuping.github.io/">
 <noscript>
     <style>
         #theme-toggle,
@@ -228,15 +230,28 @@
     });
   }, { once: true });
 </script>
-<meta property="og:url" content="https://maliuping.github.io/tags/thoughts/">
+<meta property="og:url" content="https://maliuping.github.io/">
   <meta property="og:site_name" content="Logan&#39;s Lab">
-  <meta property="og:title" content="Thoughts">
+  <meta property="og:title" content="Logan&#39;s Lab">
   <meta property="og:locale" content="zh_cn">
   <meta property="og:type" content="website">
 
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Thoughts">
+  <meta name="twitter:title" content="Logan&#39;s Lab">
 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Logan's Lab",
+  "url": "https://maliuping.github.io/",
+  "description": "",
+  "logo": "https://maliuping.github.io/favicon.ico",
+  "sameAs": [
+      
+  ]
+}
+</script>
 </head>
 <body class="list" id="top">
     <header class="header">
@@ -301,95 +316,41 @@
     </nav>
 </header>
 <main class="main"> 
-<header class="page-header"><nav class="breadcrumbs" role="navigation" aria-label="Breadcrumb">
-            <a href="/">Home</a>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
-                <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
-            <a href="/tags/">Tags</a>
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
-        <polyline points="9 18 15 12 9 6"></polyline>
-    </svg>
-</nav>
-  <h1>
-    Thoughts
-  </h1>
-</header>
 
-<article class="post-entry tag-entry"> 
+<article class="post-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">原型验证方法介绍—1
+    <h2 class="entry-hint-parent">Riscv Interrubt
     </h2>
   </header>
   <div class="entry-content">
-    <p>fpmm 总共介绍了 5 种 具体的原型验证方法：
-虚拟平台 (Virtual Platforms)： 这是在项目最早阶段即可使用的原型。它们是 SoC、电路板、虚拟 I/O 和用户界面的全功能但时序松散（loosely-timed）的软件模型，运行在主机仿真环境中。其优势在于极高的系统可见性和控制力，且易于分发给多位用户。
-SDK（软件开发工具包）： 这是非常通用的原型验证环境（如 iPhone SDK）。其目标是提供“足够的精度”来欺骗应用程序，使其认为运行在最终平台上。开发者通常在高级 API 之上进行编程，代码首先在主机上编译验证，之后再针对目标处理器重新编译。
-FPGA（基于 FPGA 的原型验证）： 在设计流程后期但早于真实硅片可用。它是 SoC、电路板和 I/O 的全功能硬件表示，使用与 SoC 相同的 RTL 代码。其核心优势是运行速度快（可达数十 MIPS）且具有 RTL 级的精度，能够连接真实外部接口进行测试。
-硬件仿真器 (Emulators)： 另一种硬件辅助手段，侧重于自动化映射而非执行性能。它具有更短的编译时间和高度自动化的 RTL 映射流程，但运行速度通常低于 1 MIPS。由于速度慢且成本极其昂贵，它常被视为仿真环境的加速扩展，主要用于短时任务（如 Boot ROM 调试）。
-首片硅片 (First Silicon)： 在真实芯片流片回来后，利用首批样品制作的原型板。虽然它的执行速度最快（实时）且精度 100%，但在设计流程中出现最晚，无法为软件开发提供领先优势。此外，其内部调试可见性非常有限。
-这些方法在可用时间、执行速度、精度、容量、开发成本和调试能力等维度上各有利弊，用户需根据项目优先级进行选择。
-</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-08-07 00:42:59 +0800 +0800'>August 7, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>Logan</span></footer>
-  <a class="entry-link" aria-label="post link to 原型验证方法介绍—1" href="https://maliuping.github.io/posts/book/fpmm/prototype_verification_methods_overview/"></a>
-</article>
-
-<article class="post-entry tag-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">应用特定性与混合信号设计-4
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>fpmm 第 1.6.5 章节的主题是**“应用特定性与混合信号设计 (Application specificity and mixed-signal design)”**。
-该小节的核心内容总结如下：
-市场应用的影响： 芯片所针对的目标应用市场对其开发过程有深远影响。 四大芯片类别： 国际半导体技术路线图 (ITRS) 将芯片设计分为四大类：SoC（片上系统）、MPU（微处理器单元）、混合信号设计和嵌入式存储器。 特定领域的需求： MPU：侧重于在保持芯片面积不变的同时提高性能。 混合信号：核心问题是不断降低的供应电压和相对参数的变化。 SoC：进一步细分为网络应用、便携式消费电子和固定式消费电子，各具子需求。 对原型验证的要求： 由于应用特定性变得更加重要，原型验证需要进行应用特定的分析，并提供应用特定的系统接口。 混合信号与接口速度： 大多数系统接口包含大量的混合信号内容。外部接口的速度决定了原型是能够直接以实时速度运行，还是需要降速运行。 总结，强调了终端应用对芯片设计要求的决定性作用，指出原型验证必须针对不同的应用领域提供定制化的分析和接口支持，特别是要处理复杂的混合信号内容和接口速度匹配问题。
-</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-08-07 00:35:04 +0800 +0800'>August 7, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>Logan</span></footer>
-  <a class="entry-link" aria-label="post link to 应用特定性与混合信号设计-4" href="https://maliuping.github.io/posts/book/fpmm/application_specificity_mixed-signal_design/"></a>
-</article>
-
-<article class="post-entry tag-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">芯片原型验证与软件先行战略-3
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>fpmm 1.3 章节，以下是对虚拟平台（如 Synopsys Innovator）、QEMU 与 SDK 在原型验证流程中定位与关系的总结输出：
-1. 虚拟平台：工业级的软件仿真环境（Innovator vs. QEMU） 核心功能相似性：Synopsys Innovator 与 QEMU 在本质上都是无需硬件的原型验证工具，均属于纯软件仿真环境。它们利用指令集仿真（ISS）来运行未经修改的目标软件代码，且在采用松散时序模型时，速度极快（可达数十 MIPS），非常接近实时运行。 Innovator 的专业优势：相比通用的 QEMU，Innovator 深度集成在芯片设计流程中，主要用于架构探索（如评估总线带宽、缓存利用率等）。它基于 SystemC 和 TLM-2.0 标准，能提供极高的调试可见性，并具备**混合原型验证（Hybrid Prototyping）**能力，可与物理 FPGA 硬件（如 HAPS）链接运行。 2. SDK：高层抽象的软件开发包 定义与目的：SDK（软件开发工具包）是来源中提到的最常见的原型验证环境。其核心目标是提供**“足够的精度”**，通过高级 API（应用程序编程接口）来“欺骗”应用程序，使其认为自己运行在最终的硬件平台上。 开发独立性：在 SDK 环境中开发的软件通常是在主机（Host PC）上编译和验证功能逻辑的，而不是直接运行在目标处理器的 RTL 模型上。因此，在 SDK 开发阶段，并不需要 RTL 已经部署到 FPGA 或虚拟平台中。 3. SDK 与芯片设计工程师的关系 软硬件并行开发的纽带：虽然 SDK 位于软件栈的最顶层，应用开发者不直接接触底层硬件细节，但 SDK 的存在是硬件团队对软件团队“启动太晚”问题的回答。 职责分工： 驱动工程师：负责开发底层的驱动程序、操作系统（OS）支持和中间件（Middleware），并确保 SDK 提供给上层应用的 API 保持一致，从而不破坏遗留软件。 应用软件工程师：主要利用 SDK 在 API 之上编写业务逻辑，实现与硬件设计的并行甚至领先开发。 4. 验证层级的递进关系 SDK：用于早期应用层逻辑验证，精度最低，速度最快，完全脱离硬件。 虚拟平台（Innovator/QEMU）：提供功能精确的软件模型，用于架构探索和早期 OS/驱动开发。 FPGA 原型验证：提供**“硅片级”**的硬件表示，使用真实 RTL，具备周期精确性（Cycle-accurate）和高性能，是软硬件第一次真正集成的地方。 首片硅片（First Silicon）：最终的物理芯片，精度 100%，但出现最晚且调试可见性受限。 总结结论：SDK 和虚拟平台（如 Innovator）都是实现**“软件先行”**战略的关键工具。SDK 让应用开发在无需 RTL 的情况下尽早开始，而虚拟平台和 FPGA 原型则随着设计成熟度（RTL 的完善）逐步介入，提供更高的精度以验证底层的软硬件交互。
+    <p>1 中断概念 在riscv中，中断属于异常的一种，其处理过程与异常处理类似。大多数riscv处理器同时支持M模式和S模式下的中断。在默认情况下，中断会在M模式下处理。如处理器支持S模式，那么可以有选择的把部分中断委托给S模式来处理。
+1.1 中断类型 借mcause寄存器中 中断ID的描述，中断可分为定时器中断，软件中断，外部中断。
+软件中断：
+用于处理器内核之间的通信，处理器核间中断（IPI） 定时器中断：
+用于操作系统的时钟中断
+riscv体系规定处理器必须有一个定时器，通常实现在M模式。
+riscv体系结构为定时器定义了两个64位的寄存器mtime和mtimecmp。它们通常实现在CLINT中
+外部中断：
+通常是指来自处理器外部设备的中断。 通常将软件中断和定时器中断概括为本地中断(CLINT)， 将外部中断称为全局中断。通过sifive FU740-C000可以理解下，FU740-C000的中断架构如下。
+本地中断直接发送到特定的hart，并具有专用的中断值。这种方式可以减少中断延迟，因为不需要仲裁来确定哪个hart处理给定的请求，也不需要额外的内存访问来确定中断原因。
+软件和定时器中断是由Core-Local Interruptor（CLINT）生成的本地中断。FU740-C000不包含其他本地中断源。
+相比之下，全局中断通过平台级中断控制器（PLIC）路由，可以将中断导向系统中的任何hart。将全局中断与hart(s)解耦，允许设计PLIC以适应平台需求，从而支持广泛的属性，如中断数量、优先级和路由方案。
+默认情况下，所有中断都在机器模式下处理。对于支持特权模式的hart，可以选择将中断委托给特权模式处理。
+1.2 中断处理过程 1.3 中断处理相关寄存器 寄存器 含义 mtvec（Machine Trap-Vector Base-Address） 它保存发生异常时处理器需要跳转到的地址 mepc（Machine Exception Program Counter） 当 trap 发生时，hart 会将发生 trap 所对应的指令的地址值（pc）保存在 mepc 中 mcause（Machine Cause) 当 trap 发生时，hart 会设置该寄存器通知我们 trap 发生的原因 mtval（Machine Trap value) 它保存了 exception 发生时的附加信息：譬如访问地址出错时 的地址信息、或者执行非法指令时的指令本身，对于其他异常，它的值为 0。 mstatus（Machine Status) 用于跟踪和控制 hart 的当前操作状态（特别地，包括关闭和打开全局中断）。 mscratch（Machine Scratch) Machine 模式下专用寄存器，可以自己定义其用法 mie（Machine Interrupt Enable) 用于进一步控制（打开和关闭）software interrupt/timer interrupt/external interrupt mip（Machine Interrupt Pending) 它列出目前已发生等待处理的中断 mideleg mie(Machine Interrupt Enable) 打开（1）或者关闭（0） M/S 模式下对应的 External/Timer/Software 中
 ...</p>
   </div>
   <footer class="entry-footer">
 
-<span title='2026-08-04 13:11:39 +0800 +0800'>August 4, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>Logan</span></footer>
-  <a class="entry-link" aria-label="post link to 芯片原型验证与软件先行战略-3" href="https://maliuping.github.io/posts/book/fpmm/prototype_verification-software_first/"></a>
+<span title='2026-06-11 00:21:53 +0800 +0800'>June 11, 2026</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>Logan</span></footer>
+  <a class="entry-link" aria-label="post link to Riscv Interrubt" href="https://maliuping.github.io/posts/riscv/interrupt/"></a>
 </article>
-
-<article class="post-entry tag-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">原型验证的核心价值-2
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>原型验证的价值在于同时解决软件提前验证和芯片系统验证这两个问题，但其核心驱动力和最大价值被明确定义为支持嵌入式软件的预硅（Pre-silicon）验证。
-1. 核心目标：解决软件开发的延迟问题 在现代 SoC 设计中，嵌入式软件开发已成为项目工作量和进度的决定性因素。
-最大的价值： FPGA 原型验证最大的价值在于其独特的性能，能够提供一个既快又准确的 SoC 模型，从而实现嵌入式软件的预硅验证。 硬件团队对软件问题的回答： 手册指出，原型验证实际上是硬件团队为解决软件团队面临的“启动太晚”问题而提供的方案。 显著提升 ROI： 通过原型验证让软件开发提前开始（例如提前 7 个月），可以显著缩短产品的盈亏平衡时间并增加收入。 2. 重要功能：复杂的系统级硬件验证 虽然软件是主要驱动力，但原型验证也是芯片系统级验证中不可或缺的工具。
-高性能硬件测试： 对于硬件团队，FPGA 原型提供了远超仿真（Simulation）和硬件加速器（Emulation）的执行速度（通常快 10 倍以上），适用于运行大规模回归测试和长时软件任务（如 OS 启动）。 真实数据流测试： 只有 FPGA 原型能够以接近实时的速度连接真实物理接口（如 USB、HDMI、以太网），验证芯片在真实世界数据流中的表现。 捕捉罕见硬件漏洞： 它能帮助发现那些在软件模拟或架构探索阶段无法预见的复杂硬件交互问题。 3. 终极意义：软硬件集成与验证 本书的观念是，原型验证最关键的阶段是将软件和硬件第一次结合在一起的时刻。
-软硬件协同： 原型验证允许软件在周期精确（Cycle-accurate）且快速的硬件模型上运行，这使得在拿到第一批真实芯片（First Silicon）时，系统和软件往往能在一天内就跑通。 建立信心： 这种“可运行的规范（Executable Specification）”为整个 SoC 项目提供了巨大的信心，确保了硬件能正确执行其预定的软件功能。 总结来说： 本书认为原型验证主要是为了解决软件提前验证准备的问题（因为这是当前 SoC 开发的最大瓶颈），但它是通过解决复杂的芯片系统验证问题（提供高性能、高准确度的硬件环境）来实现这一目标的。
-reference FPGA 原型验证方法手册 </p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-08-01 11:52:02 +0800 +0800'>August 1, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>Logan</span></footer>
-  <a class="entry-link" aria-label="post link to 原型验证的核心价值-2" href="https://maliuping.github.io/posts/book/fpmm/the_value_of_prototype_validation/"></a>
-</article>
+<footer class="page-footer">
+  <nav class="pagination">
+    <a class="prev" href="https://maliuping.github.io/">
+      «&nbsp;Prev&nbsp;
+    </a>
+  </nav>
+</footer>
     </main>
     
 <footer class="footer">

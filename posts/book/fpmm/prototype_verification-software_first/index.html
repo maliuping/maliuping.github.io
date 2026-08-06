@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
-<title>芯片原型验证与软件先行战略 | Logan&#39;s Lab</title>
+<title>芯片原型验证与软件先行战略-3 | Logan&#39;s Lab</title>
 <meta name="keywords" content="Thoughts">
 <meta name="description" content="fpmm 1.3 章节，以下是对虚拟平台（如 Synopsys Innovator）、QEMU 与 SDK 在原型验证流程中定位与关系的总结输出：
 1. 虚拟平台：工业级的软件仿真环境（Innovator vs. QEMU）
@@ -257,7 +257,7 @@ FPGA 原型验证：提供**“硅片级”**的硬件表示，使用真实 RTL�
 </script>
 <meta property="og:url" content="https://maliuping.github.io/posts/book/fpmm/prototype_verification-software_first/">
   <meta property="og:site_name" content="Logan&#39;s Lab">
-  <meta property="og:title" content="芯片原型验证与软件先行战略">
+  <meta property="og:title" content="芯片原型验证与软件先行战略-3">
   <meta property="og:description" content="fpmm 1.3 章节，以下是对虚拟平台（如 Synopsys Innovator）、QEMU 与 SDK 在原型验证流程中定位与关系的总结输出：
 1. 虚拟平台：工业级的软件仿真环境（Innovator vs. QEMU） 核心功能相似性：Synopsys Innovator 与 QEMU 在本质上都是无需硬件的原型验证工具，均属于纯软件仿真环境。它们利用指令集仿真（ISS）来运行未经修改的目标软件代码，且在采用松散时序模型时，速度极快（可达数十 MIPS），非常接近实时运行。 Innovator 的专业优势：相比通用的 QEMU，Innovator 深度集成在芯片设计流程中，主要用于架构探索（如评估总线带宽、缓存利用率等）。它基于 SystemC 和 TLM-2.0 标准，能提供极高的调试可见性，并具备**混合原型验证（Hybrid Prototyping）**能力，可与物理 FPGA 硬件（如 HAPS）链接运行。 2. SDK：高层抽象的软件开发包 定义与目的：SDK（软件开发工具包）是来源中提到的最常见的原型验证环境。其核心目标是提供**“足够的精度”**，通过高级 API（应用程序编程接口）来“欺骗”应用程序，使其认为自己运行在最终的硬件平台上。 开发独立性：在 SDK 环境中开发的软件通常是在主机（Host PC）上编译和验证功能逻辑的，而不是直接运行在目标处理器的 RTL 模型上。因此，在 SDK 开发阶段，并不需要 RTL 已经部署到 FPGA 或虚拟平台中。 3. SDK 与芯片设计工程师的关系 软硬件并行开发的纽带：虽然 SDK 位于软件栈的最顶层，应用开发者不直接接触底层硬件细节，但 SDK 的存在是硬件团队对软件团队“启动太晚”问题的回答。 职责分工： 驱动工程师：负责开发底层的驱动程序、操作系统（OS）支持和中间件（Middleware），并确保 SDK 提供给上层应用的 API 保持一致，从而不破坏遗留软件。 应用软件工程师：主要利用 SDK 在 API 之上编写业务逻辑，实现与硬件设计的并行甚至领先开发。 4. 验证层级的递进关系 SDK：用于早期应用层逻辑验证，精度最低，速度最快，完全脱离硬件。 虚拟平台（Innovator/QEMU）：提供功能精确的软件模型，用于架构探索和早期 OS/驱动开发。 FPGA 原型验证：提供**“硅片级”**的硬件表示，使用真实 RTL，具备周期精确性（Cycle-accurate）和高性能，是软硬件第一次真正集成的地方。 首片硅片（First Silicon）：最终的物理芯片，精度 100%，但出现最晚且调试可见性受限。 总结结论：SDK 和虚拟平台（如 Innovator）都是实现**“软件先行”**战略的关键工具。SDK 让应用开发在无需 RTL 的情况下尽早开始，而虚拟平台和 FPGA 原型则随着设计成熟度（RTL 的完善）逐步介入，提供更高的精度以验证底层的软硬件交互。">
   <meta property="og:locale" content="zh_cn">
@@ -268,7 +268,7 @@ FPGA 原型验证：提供**“硅片级”**的硬件表示，使用真实 RTL�
     <meta property="article:tag" content="Thoughts">
 
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="芯片原型验证与软件先行战略">
+  <meta name="twitter:title" content="芯片原型验证与软件先行战略-3">
   <meta name="twitter:description" content="fpmm 1.3 章节，以下是对虚拟平台（如 Synopsys Innovator）、QEMU 与 SDK 在原型验证流程中定位与关系的总结输出：
 1. 虚拟平台：工业级的软件仿真环境（Innovator vs. QEMU） 核心功能相似性：Synopsys Innovator 与 QEMU 在本质上都是无需硬件的原型验证工具，均属于纯软件仿真环境。它们利用指令集仿真（ISS）来运行未经修改的目标软件代码，且在采用松散时序模型时，速度极快（可达数十 MIPS），非常接近实时运行。 Innovator 的专业优势：相比通用的 QEMU，Innovator 深度集成在芯片设计流程中，主要用于架构探索（如评估总线带宽、缓存利用率等）。它基于 SystemC 和 TLM-2.0 标准，能提供极高的调试可见性，并具备**混合原型验证（Hybrid Prototyping）**能力，可与物理 FPGA 硬件（如 HAPS）链接运行。 2. SDK：高层抽象的软件开发包 定义与目的：SDK（软件开发工具包）是来源中提到的最常见的原型验证环境。其核心目标是提供**“足够的精度”**，通过高级 API（应用程序编程接口）来“欺骗”应用程序，使其认为自己运行在最终的硬件平台上。 开发独立性：在 SDK 环境中开发的软件通常是在主机（Host PC）上编译和验证功能逻辑的，而不是直接运行在目标处理器的 RTL 模型上。因此，在 SDK 开发阶段，并不需要 RTL 已经部署到 FPGA 或虚拟平台中。 3. SDK 与芯片设计工程师的关系 软硬件并行开发的纽带：虽然 SDK 位于软件栈的最顶层，应用开发者不直接接触底层硬件细节，但 SDK 的存在是硬件团队对软件团队“启动太晚”问题的回答。 职责分工： 驱动工程师：负责开发底层的驱动程序、操作系统（OS）支持和中间件（Middleware），并确保 SDK 提供给上层应用的 API 保持一致，从而不破坏遗留软件。 应用软件工程师：主要利用 SDK 在 API 之上编写业务逻辑，实现与硬件设计的并行甚至领先开发。 4. 验证层级的递进关系 SDK：用于早期应用层逻辑验证，精度最低，速度最快，完全脱离硬件。 虚拟平台（Innovator/QEMU）：提供功能精确的软件模型，用于架构探索和早期 OS/驱动开发。 FPGA 原型验证：提供**“硅片级”**的硬件表示，使用真实 RTL，具备周期精确性（Cycle-accurate）和高性能，是软硬件第一次真正集成的地方。 首片硅片（First Silicon）：最终的物理芯片，精度 100%，但出现最晚且调试可见性受限。 总结结论：SDK 和虚拟平台（如 Innovator）都是实现**“软件先行”**战略的关键工具。SDK 让应用开发在无需 RTL 的情况下尽早开始，而虚拟平台和 FPGA 原型则随着设计成熟度（RTL 的完善）逐步介入，提供更高的精度以验证底层的软硬件交互。">
 
@@ -287,7 +287,7 @@ FPGA 原型验证：提供**“硅片级”**的硬件表示，使用真实 RTL�
     {
       "@type": "ListItem",
       "position":  2 ,
-      "name": "芯片原型验证与软件先行战略",
+      "name": "芯片原型验证与软件先行战略-3",
       "item": "https://maliuping.github.io/posts/book/fpmm/prototype_verification-software_first/"
     }
   ]
@@ -297,8 +297,8 @@ FPGA 原型验证：提供**“硅片级”**的硬件表示，使用真实 RTL�
 {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
-  "headline": "芯片原型验证与软件先行战略",
-  "name": "芯片原型验证与软件先行战略",
+  "headline": "芯片原型验证与软件先行战略-3",
+  "name": "芯片原型验证与软件先行战略-3",
   "description": "fpmm 1.3 章节，以下是对虚拟平台（如 Synopsys Innovator）、QEMU 与 SDK 在原型验证流程中定位与关系的总结输出：\n1. 虚拟平台：工业级的软件仿真环境（Innovator vs. QEMU） 核心功能相似性：Synopsys Innovator 与 QEMU 在本质上都是无需硬件的原型验证工具，均属于纯软件仿真环境。它们利用指令集仿真（ISS）来运行未经修改的目标软件代码，且在采用松散时序模型时，速度极快（可达数十 MIPS），非常接近实时运行。 Innovator 的专业优势：相比通用的 QEMU，Innovator 深度集成在芯片设计流程中，主要用于架构探索（如评估总线带宽、缓存利用率等）。它基于 SystemC 和 TLM-2.0 标准，能提供极高的调试可见性，并具备**混合原型验证（Hybrid Prototyping）**能力，可与物理 FPGA 硬件（如 HAPS）链接运行。 2. SDK：高层抽象的软件开发包 定义与目的：SDK（软件开发工具包）是来源中提到的最常见的原型验证环境。其核心目标是提供**“足够的精度”**，通过高级 API（应用程序编程接口）来“欺骗”应用程序，使其认为自己运行在最终的硬件平台上。 开发独立性：在 SDK 环境中开发的软件通常是在主机（Host PC）上编译和验证功能逻辑的，而不是直接运行在目标处理器的 RTL 模型上。因此，在 SDK 开发阶段，并不需要 RTL 已经部署到 FPGA 或虚拟平台中。 3. SDK 与芯片设计工程师的关系 软硬件并行开发的纽带：虽然 SDK 位于软件栈的最顶层，应用开发者不直接接触底层硬件细节，但 SDK 的存在是硬件团队对软件团队“启动太晚”问题的回答。 职责分工： 驱动工程师：负责开发底层的驱动程序、操作系统（OS）支持和中间件（Middleware），并确保 SDK 提供给上层应用的 API 保持一致，从而不破坏遗留软件。 应用软件工程师：主要利用 SDK 在 API 之上编写业务逻辑，实现与硬件设计的并行甚至领先开发。 4. 验证层级的递进关系 SDK：用于早期应用层逻辑验证，精度最低，速度最快，完全脱离硬件。 虚拟平台（Innovator/QEMU）：提供功能精确的软件模型，用于架构探索和早期 OS/驱动开发。 FPGA 原型验证：提供**“硅片级”**的硬件表示，使用真实 RTL，具备周期精确性（Cycle-accurate）和高性能，是软硬件第一次真正集成的地方。 首片硅片（First Silicon）：最终的物理芯片，精度 100%，但出现最晚且调试可见性受限。 总结结论：SDK 和虚拟平台（如 Innovator）都是实现**“软件先行”**战略的关键工具。SDK 让应用开发在无需 RTL 的情况下尽早开始，而虚拟平台和 FPGA 原型则随着设计成熟度（RTL 的完善）逐步介入，提供更高的精度以验证底层的软硬件交互。\n",
   "keywords": [
     "Thoughts"
@@ -406,7 +406,7 @@ FPGA 原型验证：提供**“硅片级”**的硬件表示，使用真实 RTL�
     </svg>
 </nav>
     <h1 class="post-title entry-hint-parent">
-      芯片原型验证与软件先行战略
+      芯片原型验证与软件先行战略-3
     </h1>
     <div class="post-meta">
 
@@ -517,9 +517,13 @@ FPGA 原型验证：提供**“硅片级”**的硬件表示，使用真实 RTL�
       <li><a href="https://maliuping.github.io/tags/thoughts/">Thoughts</a></li>
     </ul>
 <nav class="paginav">
+  <a class="prev" href="https://maliuping.github.io/posts/book/fpmm/application_specificity_mixed-signal_design/">
+    <span class="title">« Prev</span>
+    <span>应用特定性与混合信号设计-4</span>
+  </a>
   <a class="next" href="https://maliuping.github.io/posts/book/fpmm/the_value_of_prototype_validation/">
     <span class="title">Next »</span>
-    <span>原型验证的核心价值</span>
+    <span>原型验证的核心价值-2</span>
   </a>
 </nav>
 

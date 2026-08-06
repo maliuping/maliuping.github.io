@@ -320,7 +320,45 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">芯片原型验证与软件先行战略
+    <h2 class="entry-hint-parent">原型验证方法介绍—1
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>fpmm 总共介绍了 5 种 具体的原型验证方法：
+虚拟平台 (Virtual Platforms)： 这是在项目最早阶段即可使用的原型。它们是 SoC、电路板、虚拟 I/O 和用户界面的全功能但时序松散（loosely-timed）的软件模型，运行在主机仿真环境中。其优势在于极高的系统可见性和控制力，且易于分发给多位用户。
+SDK（软件开发工具包）： 这是非常通用的原型验证环境（如 iPhone SDK）。其目标是提供“足够的精度”来欺骗应用程序，使其认为运行在最终平台上。开发者通常在高级 API 之上进行编程，代码首先在主机上编译验证，之后再针对目标处理器重新编译。
+FPGA（基于 FPGA 的原型验证）： 在设计流程后期但早于真实硅片可用。它是 SoC、电路板和 I/O 的全功能硬件表示，使用与 SoC 相同的 RTL 代码。其核心优势是运行速度快（可达数十 MIPS）且具有 RTL 级的精度，能够连接真实外部接口进行测试。
+硬件仿真器 (Emulators)： 另一种硬件辅助手段，侧重于自动化映射而非执行性能。它具有更短的编译时间和高度自动化的 RTL 映射流程，但运行速度通常低于 1 MIPS。由于速度慢且成本极其昂贵，它常被视为仿真环境的加速扩展，主要用于短时任务（如 Boot ROM 调试）。
+首片硅片 (First Silicon)： 在真实芯片流片回来后，利用首批样品制作的原型板。虽然它的执行速度最快（实时）且精度 100%，但在设计流程中出现最晚，无法为软件开发提供领先优势。此外，其内部调试可见性非常有限。
+这些方法在可用时间、执行速度、精度、容量、开发成本和调试能力等维度上各有利弊，用户需根据项目优先级进行选择。
+</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-08-07 00:42:59 +0800 +0800'>August 7, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>Logan</span></footer>
+  <a class="entry-link" aria-label="post link to 原型验证方法介绍—1" href="https://maliuping.github.io/posts/book/fpmm/prototype_verification_methods_overview/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">应用特定性与混合信号设计-4
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>fpmm 第 1.6.5 章节的主题是**“应用特定性与混合信号设计 (Application specificity and mixed-signal design)”**。
+该小节的核心内容总结如下：
+市场应用的影响： 芯片所针对的目标应用市场对其开发过程有深远影响。 四大芯片类别： 国际半导体技术路线图 (ITRS) 将芯片设计分为四大类：SoC（片上系统）、MPU（微处理器单元）、混合信号设计和嵌入式存储器。 特定领域的需求： MPU：侧重于在保持芯片面积不变的同时提高性能。 混合信号：核心问题是不断降低的供应电压和相对参数的变化。 SoC：进一步细分为网络应用、便携式消费电子和固定式消费电子，各具子需求。 对原型验证的要求： 由于应用特定性变得更加重要，原型验证需要进行应用特定的分析，并提供应用特定的系统接口。 混合信号与接口速度： 大多数系统接口包含大量的混合信号内容。外部接口的速度决定了原型是能够直接以实时速度运行，还是需要降速运行。 总结，强调了终端应用对芯片设计要求的决定性作用，指出原型验证必须针对不同的应用领域提供定制化的分析和接口支持，特别是要处理复杂的混合信号内容和接口速度匹配问题。
+</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-08-07 00:35:04 +0800 +0800'>August 7, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>Logan</span></footer>
+  <a class="entry-link" aria-label="post link to 应用特定性与混合信号设计-4" href="https://maliuping.github.io/posts/book/fpmm/application_specificity_mixed-signal_design/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">芯片原型验证与软件先行战略-3
     </h2>
   </header>
   <div class="entry-content">
@@ -331,12 +369,12 @@
   <footer class="entry-footer">
 
 <span title='2026-08-04 13:11:39 +0800 +0800'>August 4, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>Logan</span></footer>
-  <a class="entry-link" aria-label="post link to 芯片原型验证与软件先行战略" href="https://maliuping.github.io/posts/book/fpmm/prototype_verification-software_first/"></a>
+  <a class="entry-link" aria-label="post link to 芯片原型验证与软件先行战略-3" href="https://maliuping.github.io/posts/book/fpmm/prototype_verification-software_first/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
-    <h2 class="entry-hint-parent">原型验证的核心价值
+    <h2 class="entry-hint-parent">原型验证的核心价值-2
     </h2>
   </header>
   <div class="entry-content">
@@ -350,7 +388,7 @@ reference FPGA 原型验证方法手册 </p>
   <footer class="entry-footer">
 
 <span title='2026-08-01 11:52:02 +0800 +0800'>August 1, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>Logan</span></footer>
-  <a class="entry-link" aria-label="post link to 原型验证的核心价值" href="https://maliuping.github.io/posts/book/fpmm/the_value_of_prototype_validation/"></a>
+  <a class="entry-link" aria-label="post link to 原型验证的核心价值-2" href="https://maliuping.github.io/posts/book/fpmm/the_value_of_prototype_validation/"></a>
 </article>
     </main>
     
