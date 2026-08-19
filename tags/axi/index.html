@@ -5,11 +5,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
-<title>Categories | Logan&#39;s Lab</title>
+<title>AXI | Logan&#39;s Lab</title>
 <meta name="keywords" content="">
 <meta name="description" content="">
 <meta name="author" content="Logan">
-<link rel="canonical" href="https://maliuping.github.io/categories/">
+<link rel="canonical" href="https://maliuping.github.io/tags/axi/">
 <link crossorigin="anonymous" href="/assets/css/stylesheet.2a8c9da18ecd8f60e3a36cef4c5c02256c41738a2e5a283f1288d4489b487696.css" integrity="sha256-KoydoY7Nj2Djo2zvTFwCJWxBc4ouWig/EojUSJtIdpY=" rel="preload stylesheet" as="style">
 <link rel="icon" href="https://maliuping.github.io/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="https://maliuping.github.io/favicon-16x16.png">
@@ -18,8 +18,8 @@
 <link rel="mask-icon" href="https://maliuping.github.io/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" type="application/rss+xml" href="https://maliuping.github.io/categories/index.xml" title="rss">
-<link rel="alternate" hreflang="en" href="https://maliuping.github.io/categories/">
+<link rel="alternate" type="application/rss+xml" href="https://maliuping.github.io/tags/axi/index.xml" title="rss">
+<link rel="alternate" hreflang="en" href="https://maliuping.github.io/tags/axi/">
 <noscript>
     <style>
         #theme-toggle,
@@ -228,14 +228,14 @@
     });
   }, { once: true });
 </script>
-<meta property="og:url" content="https://maliuping.github.io/categories/">
+<meta property="og:url" content="https://maliuping.github.io/tags/axi/">
   <meta property="og:site_name" content="Logan&#39;s Lab">
-  <meta property="og:title" content="Categories">
+  <meta property="og:title" content="AXI">
   <meta property="og:locale" content="zh_cn">
   <meta property="og:type" content="website">
 
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Categories">
+  <meta name="twitter:title" content="AXI">
 
 </head>
 <body class="list" id="top">
@@ -300,28 +300,41 @@
         </ul>
     </nav>
 </header>
-<main class="main">
-<header class="page-header">
-    <h1>Categories</h1>
+<main class="main"> 
+<header class="page-header"><nav class="breadcrumbs" role="navigation" aria-label="Breadcrumb">
+            <a href="/">Home</a>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+            <a href="/tags/">Tags</a>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+</nav>
+  <h1>
+    AXI
+  </h1>
 </header>
 
-<ul class="terms-tags">
-            <li>
-                <a href="https://maliuping.github.io/categories/book/">Book <sup><strong><sup>4</sup></strong></sup> </a>
-            </li>
-            <li>
-                <a href="https://maliuping.github.io/categories/bus/">Bus <sup><strong><sup>1</sup></strong></sup> </a>
-            </li>
-            <li>
-                <a href="https://maliuping.github.io/categories/display/">Display <sup><strong><sup>3</sup></strong></sup> </a>
-            </li>
-            <li>
-                <a href="https://maliuping.github.io/categories/spi/">SPI <sup><strong><sup>1</sup></strong></sup> </a>
-            </li>
-            <li>
-                <a href="https://maliuping.github.io/categories/tools/">Tools <sup><strong><sup>1</sup></strong></sup> </a>
-            </li>
-</ul>
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">AXI Read Signal 中 Burst 的理解
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>1. Burst 是什么 在 AXI / DDR / DPU 等 SoC 数据通路中，Burst 可以理解为一次连续的数据传输事务。
+一次 Read Transaction 并不一定只读取一个数据，而是可以从某个起始地址开始，连续读取多个数据。
+例如 AXI Data Width 为 128 bit：
+1 2 3 4 5 6 7 8 9 一次 Read Burst ┌─────────────────────────────┐ │ Beat 0 : 16 Bytes │ │ Beat 1 : 16 Bytes │ │ Beat 2 : 16 Bytes │ │ Beat 3 : 16 Bytes │ └─────────────────────────────┘ 总数据量 = 4 × 16 Bytes = 64 Bytes 因此：
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-08-19 20:20:11 +0800 +0800'>August 19, 2026</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>Logan</span></footer>
+  <a class="entry-link" aria-label="post link to AXI Read Signal 中 Burst 的理解" href="https://maliuping.github.io/posts/soc/bus/axi_read_signal_burst/"></a>
+</article>
     </main>
     
 <footer class="footer">
