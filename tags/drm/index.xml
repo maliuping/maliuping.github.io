@@ -10,9 +10,9 @@
     <atom:link href="https://maliuping.github.io/tags/drm/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Drm_atomic_state如何构造</title>
-      <link>https://maliuping.github.io/posts/linux/drm/how_to_construct_drm_atomic_state/</link>
+      <link>https://maliuping.github.io/posts/linux/display/drm/how_to_construct_drm_atomic_state/</link>
       <pubDate>Fri, 26 Jun 2026 17:35:25 +0800</pubDate>
-      <guid>https://maliuping.github.io/posts/linux/drm/how_to_construct_drm_atomic_state/</guid>
+      <guid>https://maliuping.github.io/posts/linux/display/drm/how_to_construct_drm_atomic_state/</guid>
       <description>&lt;h1 id=&#34;1-用户态数据构造&#34;&gt;1. 用户态数据构造&lt;/h1&gt;
 &lt;p&gt;libdrm提供了如下的编程范式：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
