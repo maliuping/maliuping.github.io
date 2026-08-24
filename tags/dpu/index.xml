@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>DPU on Logan&#39;s Lab</title>
+    <link>https://maliuping.github.io/tags/dpu/</link>
+    <description>Recent content in DPU on Logan&#39;s Lab</description>
+    <generator>Hugo</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Sun, 23 Aug 2026 12:14:24 +0800</lastBuildDate>
+    <atom:link href="https://maliuping.github.io/tags/dpu/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>linlon dpu 架构分析</title>
+      <link>https://maliuping.github.io/posts/linux/display/dpu/01-architecture/</link>
+      <pubDate>Sun, 23 Aug 2026 12:14:24 +0800</pubDate>
+      <guid>https://maliuping.github.io/posts/linux/display/dpu/01-architecture/</guid>
+      <description>&lt;h2 id=&#34;1-驱动职责&#34;&gt;1. 驱动职责&lt;/h2&gt;
+&lt;p&gt;该驱动是一个 DRM/KMS atomic display controller 驱动，支持 DT compatible &lt;code&gt;armchina,linlon-d2&lt;/code&gt;、&lt;code&gt;linlon-d6&lt;/code&gt;、&lt;code&gt;linlon-d8&lt;/code&gt;。它承担四类职责：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;通过 Component Framework 等待 pipeline 下游显示 component 就绪，并创建 DRM device。&lt;/li&gt;
+&lt;li&gt;从 DPU 寄存器 block header 枚举硬件能力，而不是把 layer/scaler 数量完全写死。&lt;/li&gt;
+&lt;li&gt;把 DRM plane/CRTC/writeback 请求映射为硬件 component 数据流，并在 atomic state 中完成冲突检测。&lt;/li&gt;
+&lt;li&gt;管理时钟、IOMMU/TBU、IRQ、shadow register flush、vblank/page-flip/writeback completion 和 PM。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;2-软件分层&#34;&gt;2. 软件分层&lt;/h2&gt;
+&lt;pre class=&#34;mermaid&#34;&gt;
+  flowchart LR
+    USER[Userspace KMS client] --&amp;gt; DRM[DRM atomic core]
+    DRM --&amp;gt; KMS[Linlon KMS\nplane CRTC writeback]
+    KMS --&amp;gt; RES[Pipeline resource model\ndrm_private_obj states]
+    RES --&amp;gt; CORE[Generic Linlon core\npipeline component chip ops]
+    CORE --&amp;gt; DP[DP hardware backend\nblock enumeration and register ops]
+    DP --&amp;gt; HW[DPU hardware\nGCU LPU CU DOU]
+
+    COMP[Component Framework] -. binds downstream .-&amp;gt; KMS
+    PM[Runtime PM and clocks] -. powers .-&amp;gt; CORE
+    IOMMU[IOMMU and integrated TBU] -. address translation .-&amp;gt; DP
+&lt;/pre&gt;
+&lt;p&gt;这几层的边界很明确：KMS 层理解 DRM 对象；pipeline 层理解数据流和资源图；&lt;code&gt;hw/dp_*&lt;/code&gt; 理解 block header、寄存器和产品能力。两组函数表是跨层接口：&lt;code&gt;linlondp_dev_funcs&lt;/code&gt; 控制整机，&lt;code&gt;linlondp_component_funcs&lt;/code&gt; 控制单个硬件 block。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

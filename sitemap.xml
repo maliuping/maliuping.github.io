@@ -2,6 +2,30 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://maliuping.github.io/categories/</loc>
+    <lastmod>2026-08-23T12:14:24+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/categories/display/</loc>
+    <lastmod>2026-08-23T12:14:24+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/tags/dpu/</loc>
+    <lastmod>2026-08-23T12:14:24+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/posts/linux/display/dpu/01-architecture/</loc>
+    <lastmod>2026-08-23T12:14:24+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/tags/linux/</loc>
+    <lastmod>2026-08-23T12:14:24+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/</loc>
+    <lastmod>2026-08-23T12:14:24+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/posts/</loc>
+    <lastmod>2026-08-23T12:14:24+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/tags/</loc>
+    <lastmod>2026-08-23T12:14:24+08:00</lastmod>
+  </url><url>
     <loc>https://maliuping.github.io/tags/axi/</loc>
     <lastmod>2026-08-19T20:20:11+08:00</lastmod>
   </url><url>
@@ -9,18 +33,6 @@
     <lastmod>2026-08-19T20:20:11+08:00</lastmod>
   </url><url>
     <loc>https://maliuping.github.io/categories/bus/</loc>
-    <lastmod>2026-08-19T20:20:11+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/categories/</loc>
-    <lastmod>2026-08-19T20:20:11+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/</loc>
-    <lastmod>2026-08-19T20:20:11+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/posts/</loc>
-    <lastmod>2026-08-19T20:20:11+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/tags/</loc>
     <lastmod>2026-08-19T20:20:11+08:00</lastmod>
   </url><url>
     <loc>https://maliuping.github.io/categories/book/</loc>
@@ -65,9 +77,6 @@
     <loc>https://maliuping.github.io/tools/</loc>
     <lastmod>2026-07-15T10:15:14+08:00</lastmod>
   </url><url>
-    <loc>https://maliuping.github.io/categories/display/</loc>
-    <lastmod>2026-07-09T21:44:23+08:00</lastmod>
-  </url><url>
     <loc>https://maliuping.github.io/tags/dsi/</loc>
     <lastmod>2026-07-09T21:44:23+08:00</lastmod>
   </url><url>
@@ -93,9 +102,6 @@
     <lastmod>2026-06-26T17:35:25+08:00</lastmod>
   </url><url>
     <loc>https://maliuping.github.io/posts/linux/drm/how_to_construct_drm_atomic_state/</loc>
-    <lastmod>2026-06-26T17:35:25+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/tags/linux/</loc>
     <lastmod>2026-06-26T17:35:25+08:00</lastmod>
   </url><url>
     <loc>https://maliuping.github.io/tags/ftrace/</loc>

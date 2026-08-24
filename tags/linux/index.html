@@ -320,6 +320,22 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">linlon dpu 架构分析
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>1. 驱动职责 该驱动是一个 DRM/KMS atomic display controller 驱动，支持 DT compatible armchina,linlon-d2、linlon-d6、linlon-d8。它承担四类职责：
+通过 Component Framework 等待 pipeline 下游显示 component 就绪，并创建 DRM device。 从 DPU 寄存器 block header 枚举硬件能力，而不是把 layer/scaler 数量完全写死。 把 DRM plane/CRTC/writeback 请求映射为硬件 component 数据流，并在 atomic state 中完成冲突检测。 管理时钟、IOMMU/TBU、IRQ、shadow register flush、vblank/page-flip/writeback completion 和 PM。 2. 软件分层 flowchart LR USER[Userspace KMS client] --&gt; DRM[DRM atomic core] DRM --&gt; KMS[Linlon KMS\nplane CRTC writeback] KMS --&gt; RES[Pipeline resource model\ndrm_private_obj states] RES --&gt; CORE[Generic Linlon core\npipeline component chip ops] CORE --&gt; DP[DP hardware backend\nblock enumeration and register ops] DP --&gt; HW[DPU hardware\nGCU LPU CU DOU] COMP[Component Framework] -. binds downstream .-&gt; KMS PM[Runtime PM and clocks] -. powers .-&gt; CORE IOMMU[IOMMU and integrated TBU] -. address translation .-&gt; DP 这几层的边界很明确：KMS 层理解 DRM 对象；pipeline 层理解数据流和资源图；hw/dp_* 理解 block header、寄存器和产品能力。两组函数表是跨层接口：linlondp_dev_funcs 控制整机，linlondp_component_funcs 控制单个硬件 block。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-08-23 12:14:24 +0800 +0800'>August 23, 2026</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>Logan</span></footer>
+  <a class="entry-link" aria-label="post link to linlon dpu 架构分析" href="https://maliuping.github.io/posts/linux/display/dpu/01-architecture/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">Drm_atomic_state如何构造
     </h2>
   </header>
