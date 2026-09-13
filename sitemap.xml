@@ -3,7 +3,28 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://maliuping.github.io/categories/</loc>
-    <lastmod>2026-08-23T12:14:24+08:00</lastmod>
+    <lastmod>2026-09-03T16:18:46+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/categories/debug/</loc>
+    <lastmod>2026-09-03T16:18:46+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/tags/debug/</loc>
+    <lastmod>2026-09-03T16:18:46+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/tags/linux/</loc>
+    <lastmod>2026-09-03T16:18:46+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/</loc>
+    <lastmod>2026-09-03T16:18:46+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/posts/</loc>
+    <lastmod>2026-09-03T16:18:46+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/posts/linux/misc/probe_fail/</loc>
+    <lastmod>2026-09-03T16:18:46+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/tags/</loc>
+    <lastmod>2026-09-03T16:18:46+08:00</lastmod>
   </url><url>
     <loc>https://maliuping.github.io/categories/display/</loc>
     <lastmod>2026-08-23T12:14:24+08:00</lastmod>
@@ -12,18 +33,6 @@
     <lastmod>2026-08-23T12:14:24+08:00</lastmod>
   </url><url>
     <loc>https://maliuping.github.io/posts/linux/display/dpu/01-architecture/</loc>
-    <lastmod>2026-08-23T12:14:24+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/tags/linux/</loc>
-    <lastmod>2026-08-23T12:14:24+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/</loc>
-    <lastmod>2026-08-23T12:14:24+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/posts/</loc>
-    <lastmod>2026-08-23T12:14:24+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/tags/</loc>
     <lastmod>2026-08-23T12:14:24+08:00</lastmod>
   </url><url>
     <loc>https://maliuping.github.io/tags/axi/</loc>

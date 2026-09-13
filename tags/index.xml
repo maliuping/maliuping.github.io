@@ -6,20 +6,27 @@
     <description>Recent content in Tags on Logan&#39;s Lab</description>
     <generator>Hugo</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Sun, 23 Aug 2026 12:14:24 +0800</lastBuildDate>
+    <lastBuildDate>Thu, 03 Sep 2026 16:18:46 +0800</lastBuildDate>
     <atom:link href="https://maliuping.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>DPU</title>
-      <link>https://maliuping.github.io/tags/dpu/</link>
-      <pubDate>Sun, 23 Aug 2026 12:14:24 +0800</pubDate>
-      <guid>https://maliuping.github.io/tags/dpu/</guid>
+      <title>Debug</title>
+      <link>https://maliuping.github.io/tags/debug/</link>
+      <pubDate>Thu, 03 Sep 2026 16:18:46 +0800</pubDate>
+      <guid>https://maliuping.github.io/tags/debug/</guid>
       <description></description>
     </item>
     <item>
       <title>Linux</title>
       <link>https://maliuping.github.io/tags/linux/</link>
-      <pubDate>Sun, 23 Aug 2026 12:14:24 +0800</pubDate>
+      <pubDate>Thu, 03 Sep 2026 16:18:46 +0800</pubDate>
       <guid>https://maliuping.github.io/tags/linux/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>DPU</title>
+      <link>https://maliuping.github.io/tags/dpu/</link>
+      <pubDate>Sun, 23 Aug 2026 12:14:24 +0800</pubDate>
+      <guid>https://maliuping.github.io/tags/dpu/</guid>
       <description></description>
     </item>
     <item>
