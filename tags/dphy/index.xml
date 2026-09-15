@@ -6,8 +6,158 @@
     <description>Recent content in DPHY on Logan&#39;s Lab</description>
     <generator>Hugo</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Thu, 09 Jul 2026 15:23:56 +0800</lastBuildDate>
+    <lastBuildDate>Sat, 01 Aug 2026 14:39:17 +0800</lastBuildDate>
     <atom:link href="https://maliuping.github.io/tags/dphy/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>phy protocol interface</title>
+      <link>https://maliuping.github.io/posts/display/dphy/phy_protocol_interface/</link>
+      <pubDate>Sat, 01 Aug 2026 14:39:17 +0800</pubDate>
+      <guid>https://maliuping.github.io/posts/display/dphy/phy_protocol_interface/</guid>
+      <description>&lt;p&gt;ppi(phy protocol interface)用于实现phy lane mode和controller之间的连接。这里描述的接口旨在具有通用性，能够适用于各种情况。&lt;/p&gt;
+&lt;p&gt;下表中定义了ppi中使用的信号，对于具有多个数据通道的phy, 每个通道都是用一组ppi信号。每个信号已被分配到下面六个类别之一：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;1）High-Speed transmit signals&lt;/li&gt;
+&lt;li&gt;2）High-Speed receive signals&lt;/li&gt;
+&lt;li&gt;3）Escape mode transmit signals&lt;/li&gt;
+&lt;li&gt;4）Escape mode receive signals&lt;/li&gt;
+&lt;li&gt;5）control signals&lt;/li&gt;
+&lt;li&gt;6）error signals&lt;/li&gt;
+&lt;/ul&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;symbol&lt;/th&gt;
+					&lt;th&gt;Dir&lt;/th&gt;
+					&lt;th&gt;categories&lt;/th&gt;
+					&lt;th&gt;des&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;High-Speed transmit signals&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;TxDataWidthHS [1:0]&lt;/td&gt;
+					&lt;td&gt;I&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;高速传输数据总线宽度选择&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;TxWordClkHS&lt;/td&gt;
+					&lt;td&gt;O&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;高速传输字时钟。该信号用于同步高速传输时钟域中的 PPI 信号, 建议所有传输Lane 模块共享一个 TxWordClkHS 信号&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;TxDataHS[7:0]&lt;/td&gt;
+					&lt;td&gt;I&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;高速传输数据总线宽度&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;TxWordValidHS[0]&lt;/td&gt;
+					&lt;td&gt;I&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;高速发送字数据有效&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;TxRequestHs&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h1 id=&#34;txwordvalidhs-和-txdatahs的关系&#34;&gt;TxWordValidHS 和 TxDataHS的关系&lt;/h1&gt;
+&lt;p&gt;为啥需要 TxWordValidHS ?&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Dphy clocks overview</title>
       <link>https://maliuping.github.io/posts/display/dphy/dphy_clocks_overview/</link>

@@ -336,6 +336,23 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">phy protocol interface
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>ppi(phy protocol interface)用于实现phy lane mode和controller之间的连接。这里描述的接口旨在具有通用性，能够适用于各种情况。
+下表中定义了ppi中使用的信号，对于具有多个数据通道的phy, 每个通道都是用一组ppi信号。每个信号已被分配到下面六个类别之一：
+1）High-Speed transmit signals 2）High-Speed receive signals 3）Escape mode transmit signals 4）Escape mode receive signals 5）control signals 6）error signals symbol Dir categories des High-Speed transmit signals TxDataWidthHS [1:0] I 高速传输数据总线宽度选择 TxWordClkHS O 高速传输字时钟。该信号用于同步高速传输时钟域中的 PPI 信号, 建议所有传输Lane 模块共享一个 TxWordClkHS 信号 TxDataHS[7:0] I 高速传输数据总线宽度 TxWordValidHS[0] I 高速发送字数据有效 TxRequestHs TxWordValidHS 和 TxDataHS的关系 为啥需要 TxWordValidHS ?
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-08-01 14:39:17 +0800 +0800'>August 1, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>Logan</span></footer>
+  <a class="entry-link" aria-label="post link to phy protocol interface" href="https://maliuping.github.io/posts/display/dphy/phy_protocol_interface/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">Lane mapping
     </h2>
   </header>
