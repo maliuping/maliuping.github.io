@@ -356,6 +356,8 @@ Window 2: blog source edit
 2.3 窗口管理 新建窗口：Ctrl&#43;b c
 切换窗口：Ctrl&#43;b &#43; 数字键
 上/下一个：Ctrl&#43;b p / Ctrl&#43;b n
+重命名窗口：Ctrl&#43;b ,
+关闭窗口：Ctrl&#43;b &amp;
 ...</p>
   </div>
   <footer class="entry-footer">
@@ -376,7 +378,7 @@ Inputs 左侧输入参数
 Pixel Clock (MHz) Bits Per Pixel Lane Number PPI Width Margin (%) Horizontal Timing 单位均为 pixel
 H Active H Sync Width H Back Porch H Front Porch Outputs 右侧实时结果
 Total Throughput 0 Mbps Per Lane Rate 0 Mbps Recommended Lane Rate 0 Mbps DDR Clock 0 MHz Line Byte Clock 0 MHz UI (ns) 0 ns HSA Time 0 cycles HBP Time 0 cycles HACT Time 0 cycles HLINE Time 0 cycles Generated Formulas 下面自动生成公式与代入结果
-...</p>
+TotalThroughput = PixelClock × BPP LaneRate = PixelClock × BPP / Lane RecommendedLaneRate = LaneRate × (1 &#43; Margin / 100) LineByteClock = LaneRate / PPIWidth DDRClock = LaneRate / 2 UI = 1000 / LaneRate HsaTime = floor(HSyncWidth × LineByteClock / PixelClock) HbpTime = floor(HBackPorch × LineByteClock / PixelClock) HactTime = floor(HActive × LineByteClock / PixelClock) HlineTime = ceil((HSyncWidth &#43; HBackPorch &#43; HActive &#43; HFrontPorch) × LineByteClock / PixelClock) 注：DDR Clock、Line Byte Clock 和 UI 按公式使用 Per Lane Rate 计算； HSA/HBP/HACT/HLINE Time 以 Line Byte Clock 换算为 byte clock cycles； DSI D-PHY 下 PPI Width 通常取 8； Recommended Lane Rate 额外用于留出 Margin。 ...</p>
   </div>
   <footer class="entry-footer">
 

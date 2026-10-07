@@ -82,7 +82,15 @@
 &lt;p&gt;切换窗口：Ctrl+b + 数字键&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;上/下一个：Ctrl+b p / Ctrl+b n&lt;/p&gt;</description>
+&lt;p&gt;上/下一个：Ctrl+b p / Ctrl+b n&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;重命名窗口：Ctrl+b ,&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;关闭窗口：Ctrl+b &amp;amp;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;</description>
     </item>
     <item>
       <title>Display Calculator</title>
