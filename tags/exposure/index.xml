@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Exposure on Logan&#39;s Lab</title>
+    <link>https://maliuping.github.io/tags/exposure/</link>
+    <description>Recent content in Exposure on Logan&#39;s Lab</description>
+    <generator>Hugo</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Wed, 07 Oct 2026 22:56:20 +0800</lastBuildDate>
+    <atom:link href="https://maliuping.github.io/tags/exposure/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>01 Exposure 三要素</title>
+      <link>https://maliuping.github.io/posts/photography/01-exposure/</link>
+      <pubDate>Wed, 07 Oct 2026 22:56:20 +0800</pubDate>
+      <guid>https://maliuping.github.io/posts/photography/01-exposure/</guid>
+      <description>&lt;p&gt;&lt;strong&gt;摄影基础：从曝光三要素到视频拍摄参数&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;快门、光圈、ISO 是摄影中最基础的三个曝光参数。
+理解它们之间的关系，是理解相机、视频拍摄、ND 滤镜以及 Log 视频的基础。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h1 id=&#34;1-什么是曝光&#34;&gt;1. 什么是曝光？&lt;/h1&gt;
+&lt;p&gt;&lt;strong&gt;曝光（Exposure）&lt;/strong&gt;，简单来说就是：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;相机传感器最终接收到多少光线。&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;光线太少：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;欠曝 → 画面太暗&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;光线太多：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;过曝 → 画面太亮，高光细节丢失&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;光线合适：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;正确曝光 → 画面亮度合理，同时尽可能保留高光和暗部细节&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;曝光主要由三个参数共同决定：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;快门（Shutter Speed）&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;光圈（Aperture）&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;ISO（感光度）&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;这三个参数通常被称为：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;曝光三要素（Exposure Triangle）&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;可以先用一句话记忆：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;快门管时间，光圈管光量和景深，ISO管增益。&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h1 id=&#34;2-曝光三要素&#34;&gt;2. 曝光三要素&lt;/h1&gt;
+&lt;h2 id=&#34;21-快门-shutter-speed&#34;&gt;2.1 快门 Shutter Speed&lt;/h2&gt;
+&lt;p&gt;快门决定：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;传感器曝光多长时间。&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;例如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;1/30s
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;1/60s
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;1/125s
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;1/500s
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;1/1000s
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;数值越慢：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;1/30s&lt;/code&gt; → 曝光时间长 → 进光多 → 画面更亮&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;数值越快：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;1/1000s&lt;/code&gt; → 曝光时间短 → 进光少 → 画面更暗&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;因此：&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

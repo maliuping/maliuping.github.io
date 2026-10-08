@@ -6,8 +6,15 @@
     <description>Recent content in Categories on Logan&#39;s Lab</description>
     <generator>Hugo</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Thu, 03 Sep 2026 16:18:46 +0800</lastBuildDate>
+    <lastBuildDate>Wed, 07 Oct 2026 22:56:20 +0800</lastBuildDate>
     <atom:link href="https://maliuping.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Photography</title>
+      <link>https://maliuping.github.io/categories/photography/</link>
+      <pubDate>Wed, 07 Oct 2026 22:56:20 +0800</pubDate>
+      <guid>https://maliuping.github.io/categories/photography/</guid>
+      <description></description>
+    </item>
     <item>
       <title>Debug</title>
       <link>https://maliuping.github.io/categories/debug/</link>

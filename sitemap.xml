@@ -2,8 +2,29 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://maliuping.github.io/posts/photography/01-exposure/</loc>
+    <lastmod>2026-10-07T22:56:20+08:00</lastmod>
+  </url><url>
     <loc>https://maliuping.github.io/categories/</loc>
-    <lastmod>2026-09-03T16:18:46+08:00</lastmod>
+    <lastmod>2026-10-07T22:56:20+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/tags/exposure/</loc>
+    <lastmod>2026-10-07T22:56:20+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/</loc>
+    <lastmod>2026-10-07T22:56:20+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/categories/photography/</loc>
+    <lastmod>2026-10-07T22:56:20+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/tags/photography/</loc>
+    <lastmod>2026-10-07T22:56:20+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/posts/</loc>
+    <lastmod>2026-10-07T22:56:20+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/tags/</loc>
+    <lastmod>2026-10-07T22:56:20+08:00</lastmod>
   </url><url>
     <loc>https://maliuping.github.io/categories/debug/</loc>
     <lastmod>2026-09-03T16:18:46+08:00</lastmod>
@@ -14,16 +35,7 @@
     <loc>https://maliuping.github.io/tags/linux/</loc>
     <lastmod>2026-09-03T16:18:46+08:00</lastmod>
   </url><url>
-    <loc>https://maliuping.github.io/</loc>
-    <lastmod>2026-09-03T16:18:46+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/posts/</loc>
-    <lastmod>2026-09-03T16:18:46+08:00</lastmod>
-  </url><url>
     <loc>https://maliuping.github.io/posts/linux/misc/probe_fail/</loc>
-    <lastmod>2026-09-03T16:18:46+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/tags/</loc>
     <lastmod>2026-09-03T16:18:46+08:00</lastmod>
   </url><url>
     <loc>https://maliuping.github.io/categories/display/</loc>

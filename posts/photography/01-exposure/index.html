@@ -1,0 +1,2077 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>01 Exposure 三要素 | Logan&#39;s Lab</title>
+<meta name="keywords" content="Photography, Exposure">
+<meta name="description" content="摄影基础：从曝光三要素到视频拍摄参数
+
+快门、光圈、ISO 是摄影中最基础的三个曝光参数。
+理解它们之间的关系，是理解相机、视频拍摄、ND 滤镜以及 Log 视频的基础。
+
+
+1. 什么是曝光？
+曝光（Exposure），简单来说就是：
+
+相机传感器最终接收到多少光线。
+
+光线太少：
+
+欠曝 → 画面太暗
+
+光线太多：
+
+过曝 → 画面太亮，高光细节丢失
+
+光线合适：
+
+正确曝光 → 画面亮度合理，同时尽可能保留高光和暗部细节
+
+曝光主要由三个参数共同决定：
+
+快门（Shutter Speed）
+光圈（Aperture）
+ISO（感光度）
+
+这三个参数通常被称为：
+
+曝光三要素（Exposure Triangle）
+
+可以先用一句话记忆：
+
+快门管时间，光圈管光量和景深，ISO管增益。
+
+
+2. 曝光三要素
+2.1 快门 Shutter Speed
+快门决定：
+
+传感器曝光多长时间。
+
+例如：
+
+
+1
+2
+3
+4
+5
+
+
+1/30s
+1/60s
+1/125s
+1/500s
+1/1000s
+
+
+数值越慢：
+
+1/30s → 曝光时间长 → 进光多 → 画面更亮
+
+数值越快：
+
+1/1000s → 曝光时间短 → 进光少 → 画面更暗
+
+因此：">
+<meta name="author" content="Logan">
+<link rel="canonical" href="https://maliuping.github.io/posts/photography/01-exposure/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.2a8c9da18ecd8f60e3a36cef4c5c02256c41738a2e5a283f1288d4489b487696.css" integrity="sha256-KoydoY7Nj2Djo2zvTFwCJWxBc4ouWig/EojUSJtIdpY=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://maliuping.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://maliuping.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://maliuping.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://maliuping.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://maliuping.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://maliuping.github.io/posts/photography/01-exposure/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><style>
+  pre.mermaid {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--entry);
+  }
+
+  pre.mermaid svg {
+    display: block;
+    height: auto;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+</style>
+
+<script type="module">
+  const getMermaidThemeConfig = () => {
+    const isDark = document.documentElement.dataset.theme === "dark";
+
+    if (isDark) {
+      return {
+        theme: "base",
+        themeVariables: {
+          background: "#1d1e20",
+          primaryColor: "#2f2521",
+          primaryBorderColor: "#c98a52",
+          primaryTextColor: "#f2e7da",
+          secondaryColor: "#25303a",
+          secondaryBorderColor: "#7aa2c7",
+          secondaryTextColor: "#e8eef5",
+          tertiaryColor: "#2b2b2f",
+          tertiaryBorderColor: "#8b8f98",
+          tertiaryTextColor: "#e4e7eb",
+          lineColor: "#c98a52",
+          arrowheadColor: "#c98a52",
+          edgeLabelBackground: "#1d1e20",
+          clusterBkg: "#232427",
+          clusterBorder: "#5f636b",
+          mainBkg: "#2f2521",
+          nodeBorder: "#c98a52",
+          defaultLinkColor: "#c98a52",
+          titleColor: "#f2e7da",
+          textColor: "#e4e7eb",
+          labelTextColor: "#e4e7eb",
+          actorBorder: "#c98a52",
+          actorBkg: "#2f2521",
+          actorTextColor: "#f2e7da",
+          signalColor: "#d8dde3",
+          signalTextColor: "#d8dde3",
+          noteBkgColor: "#353028",
+          noteBorderColor: "#c98a52",
+          noteTextColor: "#f2e7da",
+          activationBorderColor: "#c98a52",
+          activationBkgColor: "#4a3527",
+        },
+      };
+    }
+
+    return {
+      theme: "base",
+      themeVariables: {
+        background: "#ffffff",
+        primaryColor: "#f5e6d3",
+        primaryBorderColor: "#b86b2f",
+        primaryTextColor: "#2f221b",
+        secondaryColor: "#e7eef5",
+        secondaryBorderColor: "#5f86ad",
+        secondaryTextColor: "#203040",
+        tertiaryColor: "#f3f1ec",
+        tertiaryBorderColor: "#8d8275",
+        tertiaryTextColor: "#2d2924",
+        lineColor: "#b86b2f",
+        arrowheadColor: "#b86b2f",
+        edgeLabelBackground: "#fffaf4",
+        clusterBkg: "#faf6f0",
+        clusterBorder: "#b7aa9a",
+        mainBkg: "#f5e6d3",
+        nodeBorder: "#b86b2f",
+        defaultLinkColor: "#b86b2f",
+        titleColor: "#2f221b",
+        textColor: "#2f2924",
+        labelTextColor: "#2f2924",
+        actorBorder: "#b86b2f",
+        actorBkg: "#f5e6d3",
+        actorTextColor: "#2f221b",
+        signalColor: "#5b4636",
+        signalTextColor: "#5b4636",
+        noteBkgColor: "#fff4dc",
+        noteBorderColor: "#b86b2f",
+        noteTextColor: "#3b2b20",
+        activationBorderColor: "#b86b2f",
+        activationBkgColor: "#efd0af",
+      },
+    };
+  };
+
+  const collectMermaidBlocks = () => {
+    const blocks = new Set(document.querySelectorAll("pre.mermaid"));
+
+    document.querySelectorAll("pre > code.language-mermaid").forEach((code) => {
+      const pre = code.parentElement;
+      if (!pre) {
+        return;
+      }
+
+      if (!pre.dataset.mermaidSource) {
+        pre.dataset.mermaidSource = code.textContent.trim();
+      }
+
+      pre.classList.add("mermaid");
+      pre.textContent = pre.dataset.mermaidSource;
+      blocks.add(pre);
+    });
+
+    return Array.from(blocks);
+  };
+
+  const renderMermaid = async () => {
+    const blocks = collectMermaidBlocks();
+    if (blocks.length === 0) {
+      return;
+    }
+
+    const { default: mermaid } = await import("https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs");
+    const mermaidTheme = getMermaidThemeConfig();
+
+    blocks.forEach((block) => {
+      if (!block.dataset.mermaidSource) {
+        block.dataset.mermaidSource = block.textContent.trim();
+      }
+
+      block.removeAttribute("data-processed");
+      block.textContent = block.dataset.mermaidSource;
+    });
+
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: "loose",
+      ...mermaidTheme,
+    });
+
+    await mermaid.run({ nodes: blocks });
+  };
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    await renderMermaid();
+
+    const themeToggle = document.getElementById("theme-toggle");
+    if (!themeToggle || themeToggle.dataset.mermaidBound === "true") {
+      return;
+    }
+
+    themeToggle.dataset.mermaidBound = "true";
+    themeToggle.addEventListener("click", () => {
+      window.setTimeout(() => {
+        renderMermaid();
+      }, 0);
+    });
+  }, { once: true });
+</script>
+<meta property="og:url" content="https://maliuping.github.io/posts/photography/01-exposure/">
+  <meta property="og:site_name" content="Logan&#39;s Lab">
+  <meta property="og:title" content="01 Exposure 三要素">
+  <meta property="og:description" content="摄影基础：从曝光三要素到视频拍摄参数
+快门、光圈、ISO 是摄影中最基础的三个曝光参数。 理解它们之间的关系，是理解相机、视频拍摄、ND 滤镜以及 Log 视频的基础。
+1. 什么是曝光？ 曝光（Exposure），简单来说就是：
+相机传感器最终接收到多少光线。
+光线太少：
+欠曝 → 画面太暗
+光线太多：
+过曝 → 画面太亮，高光细节丢失
+光线合适：
+正确曝光 → 画面亮度合理，同时尽可能保留高光和暗部细节
+曝光主要由三个参数共同决定：
+快门（Shutter Speed） 光圈（Aperture） ISO（感光度） 这三个参数通常被称为：
+曝光三要素（Exposure Triangle）
+可以先用一句话记忆：
+快门管时间，光圈管光量和景深，ISO管增益。
+2. 曝光三要素 2.1 快门 Shutter Speed 快门决定：
+传感器曝光多长时间。
+例如：
+1 2 3 4 5 1/30s 1/60s 1/125s 1/500s 1/1000s 数值越慢：
+1/30s → 曝光时间长 → 进光多 → 画面更亮
+数值越快：
+1/1000s → 曝光时间短 → 进光少 → 画面更暗
+因此：">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-10-07T22:56:20+08:00">
+    <meta property="article:modified_time" content="2026-10-07T22:56:20+08:00">
+    <meta property="article:tag" content="Photography">
+    <meta property="article:tag" content="Exposure">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="01 Exposure 三要素">
+  <meta name="twitter:description" content="摄影基础：从曝光三要素到视频拍摄参数
+快门、光圈、ISO 是摄影中最基础的三个曝光参数。 理解它们之间的关系，是理解相机、视频拍摄、ND 滤镜以及 Log 视频的基础。
+1. 什么是曝光？ 曝光（Exposure），简单来说就是：
+相机传感器最终接收到多少光线。
+光线太少：
+欠曝 → 画面太暗
+光线太多：
+过曝 → 画面太亮，高光细节丢失
+光线合适：
+正确曝光 → 画面亮度合理，同时尽可能保留高光和暗部细节
+曝光主要由三个参数共同决定：
+快门（Shutter Speed） 光圈（Aperture） ISO（感光度） 这三个参数通常被称为：
+曝光三要素（Exposure Triangle）
+可以先用一句话记忆：
+快门管时间，光圈管光量和景深，ISO管增益。
+2. 曝光三要素 2.1 快门 Shutter Speed 快门决定：
+传感器曝光多长时间。
+例如：
+1 2 3 4 5 1/30s 1/60s 1/125s 1/500s 1/1000s 数值越慢：
+1/30s → 曝光时间长 → 进光多 → 画面更亮
+数值越快：
+1/1000s → 曝光时间短 → 进光少 → 画面更暗
+因此：">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://maliuping.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "01 Exposure 三要素",
+      "item": "https://maliuping.github.io/posts/photography/01-exposure/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "01 Exposure 三要素",
+  "name": "01 Exposure 三要素",
+  "description": "摄影基础：从曝光三要素到视频拍摄参数\n快门、光圈、ISO 是摄影中最基础的三个曝光参数。 理解它们之间的关系，是理解相机、视频拍摄、ND 滤镜以及 Log 视频的基础。\n1. 什么是曝光？ 曝光（Exposure），简单来说就是：\n相机传感器最终接收到多少光线。\n光线太少：\n欠曝 → 画面太暗\n光线太多：\n过曝 → 画面太亮，高光细节丢失\n光线合适：\n正确曝光 → 画面亮度合理，同时尽可能保留高光和暗部细节\n曝光主要由三个参数共同决定：\n快门（Shutter Speed） 光圈（Aperture） ISO（感光度） 这三个参数通常被称为：\n曝光三要素（Exposure Triangle）\n可以先用一句话记忆：\n快门管时间，光圈管光量和景深，ISO管增益。\n2. 曝光三要素 2.1 快门 Shutter Speed 快门决定：\n传感器曝光多长时间。\n例如：\n1 2 3 4 5 1/30s 1/60s 1/125s 1/500s 1/1000s 数值越慢：\n1/30s → 曝光时间长 → 进光多 → 画面更亮\n数值越快：\n1/1000s → 曝光时间短 → 进光少 → 画面更暗\n因此：\n",
+  "keywords": [
+    "Photography", "Exposure"
+  ],
+  "articleBody": "摄影基础：从曝光三要素到视频拍摄参数\n快门、光圈、ISO 是摄影中最基础的三个曝光参数。 理解它们之间的关系，是理解相机、视频拍摄、ND 滤镜以及 Log 视频的基础。\n1. 什么是曝光？ 曝光（Exposure），简单来说就是：\n相机传感器最终接收到多少光线。\n光线太少：\n欠曝 → 画面太暗\n光线太多：\n过曝 → 画面太亮，高光细节丢失\n光线合适：\n正确曝光 → 画面亮度合理，同时尽可能保留高光和暗部细节\n曝光主要由三个参数共同决定：\n快门（Shutter Speed） 光圈（Aperture） ISO（感光度） 这三个参数通常被称为：\n曝光三要素（Exposure Triangle）\n可以先用一句话记忆：\n快门管时间，光圈管光量和景深，ISO管增益。\n2. 曝光三要素 2.1 快门 Shutter Speed 快门决定：\n传感器曝光多长时间。\n例如：\n1 2 3 4 5 1/30s 1/60s 1/125s 1/500s 1/1000s 数值越慢：\n1/30s → 曝光时间长 → 进光多 → 画面更亮\n数值越快：\n1/1000s → 曝光时间短 → 进光少 → 画面更暗\n因此：\n快门速度越快，曝光时间越短。\n2.1.1 快门对运动的影响 快门不仅影响曝光，更重要的是影响：\n运动模糊（Motion Blur）\n例如拍一个正在挥手的人。\n较慢的快门：\n1 2 3 4 1/30s 手臂移动 ████████ 会产生明显的运动拖影。\n较快的快门：\n1 2 3 4 1/1000s 手臂移动 █ █ █ 每一帧都更加清晰，运动被“冻结”。\n因此：\n拍照时，快门经常用来控制运动是否冻结。\n拍视频时，快门还直接决定运动观感。\n2.2 光圈 Aperture 光圈是镜头内部控制进光量的结构。\n光圈通常使用：\nF值（F-number）\n表示，例如：\n1 2 3 4 5 6 7 8 F1.4 F2 F2.8 F4 F5.6 F8 F11 F16 这里有一个非常容易搞反的地方：\nF值越小，实际光圈越大。\n例如：\n1 2 3 4 F1.4 → 大光圈 F2.8 → 较大光圈 F5.6 → 中等 F11 → 小光圈 2.2.1 光圈对曝光的影响 光圈越大：\n进入镜头的光越多 → 画面越亮\n光圈越小：\n进入镜头的光越少 → 画面越暗\n例如：\n1 2 3 F1.8 → 光线多 F4 → 光线少一些 F8 → 光线更少 2.2.2 光圈对景深的影响 光圈除了影响曝光，还影响：\n景深（Depth of Field）\n大光圈：\nF1.8 → 浅景深 → 背景更容易虚化\n小光圈：\nF8 → 深景深 → 前后更多区域清晰\n例如人像：\n1 2 3 4 5 6 7 8 9 F1.8 人物 ● ↓ 清晰 背景 ～～～～～～ 模糊 而：\n1 2 3 4 F8 人物 ● 背景 ███████ 人物和背景都会更加清晰。\n所以可以记忆：\n大光圈 → 更亮 + 更浅景深\n小光圈 → 更暗 + 更深景深\n3. ISO：感光度 ISO 可以简单理解成：\n传感器信号的增益程度。\n常见值：\n1 2 3 4 5 6 ISO 100 ISO 200 ISO 400 ISO 800 ISO 1600 ISO 3200 ISO提高：\n画面看起来更亮\n但ISO并不是“真正增加了光线”。\n它更接近于：\n把传感器获得的信号进行放大。\n因此ISO提高通常会带来：\n更多噪点 更低的画质 暗部更加明显的噪声 动态范围可能下降 所以一般来说：\n在曝光允许的情况下，尽量使用较低ISO。\n4. 三者之间的关系 曝光三要素不是独立工作的。\n假设当前曝光正确：\n1 2 3 快门：1/125s 光圈：F4 ISO：100 如果把快门提高到：\n1 1/500s 曝光时间缩短，画面会变暗。\n这时候可以通过：\n开大光圈\n或者：\n提高ISO\n把曝光补回来。\n例如：\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 原来： 1/125s + F4 + ISO100 ↓ 改变快门： 1/500s + F4 + ISO100 ↓ 画面变暗 ↓ 可以改成： 1/500s + F2 + ISO100 或者：\n1 1/500s + F4 + ISO400 这就是曝光三要素之间的“交换关系”。\n5. 什么是“一档”？ 摄影中经常说：\n增加一档\n或者：\n减少一档\n“一档（Stop）”可以简单理解成：\n进光量增加一倍或减少一半。\n例如快门：\n1 2 3 4 5 6 1/30 1/60 1/125 1/250 1/500 1/1000 每往右一档：\n光线大约减少一半。\n光圈也存在类似关系：\n1 2 3 4 5 6 7 F1.4 F2 F2.8 F4 F5.6 F8 F11 ISO：\n1 2 3 4 5 6 100 200 400 800 1600 3200 每提高一档：\nISO翻倍。\n理解“档”非常重要，因为后面理解ND滤镜会非常容易。\n6. 摄影和视频对快门的思路不同 这是从拍照进入视频时最重要的区别之一。\n拍照时：\n快门主要考虑曝光和冻结运动。\n拍视频时：\n快门除了曝光，还决定整个视频的运动模糊。\n因此视频通常不会为了曝光而随意改变快门。\n7. 视频中的180°快门原则 视频拍摄经常使用：\n180° Shutter Rule\n简单公式：\n快门时间 ≈ 1 ÷（2 × 帧率）\n例如：\n帧率 推荐快门 24fps 1/48s，实际常用1/50s 25fps 1/50s 30fps 1/60s 50fps 1/100s 60fps 1/120s 100fps 1/200s 120fps 1/240s 例如：\n25fps + 1/50s\n通常能够获得比较自然的运动模糊。\n7.1 为什么不能随便使用超高速快门？ 例如：\n25fps + 1/1000s\n虽然可以让画面变暗，但运动会变得非常生硬。\n例如拍一个人走路：\n1 2 3 4 5 正常： 人物移动 → ███ → ███ → ███ 具有自然运动模糊 高速快门：\n1 2 3 人物移动 → █ → █ → █ 每一帧都非常锐利 最终视频可能产生一种：\n卡顿、跳跃、过于锐利的运动观感。\n因此正常视频拍摄通常优先保持合理的快门，而不是通过疯狂提高快门来解决过曝。\n8. 那么大太阳下怎么办？ 这就引出了：\nND滤镜\n假设白天拍摄：\n1 2 3 4 25fps 1/50s ISO100 F1.8 你希望保持：\n1/50s\n因为这是比较自然的视频快门。\n但是太阳非常强：\n画面过曝。\n这时候有一个问题：\n不能继续降低ISO了，因为已经接近最低值。\n也不希望把快门提高到：\n1/500s、1/1000s\n那么怎么办？\n答案：\n使用ND滤镜。\n9. ND滤镜是什么？ ND：\nNeutral Density\n中文：\n中性密度滤镜 / 减光镜\n可以简单理解成：\n给镜头戴了一副不会明显改变颜色的太阳镜。\n它的作用只有一个：\n减少进入镜头的光线。\n例如：\n1 2 3 4 5 太阳 ☀️ ↓↓↓↓↓↓↓ [ ND ] ↓↓ 镜头 10. ND滤镜怎么理解？ 常见ND：\n滤镜 减光 ND2 1档 ND4 2档 ND8 3档 ND16 4档 ND32 5档 ND64 6档 ND128 7档 例如：\nND16\n代表：\n减少约4档光线。\n也就是说，在相同的快门、光圈和ISO下，进入镜头的光线大幅减少。\n11. ND真正解决的问题 假设：\n1 2 3 4 25fps 1/50s ISO100 F1.8 白天过曝。\n可以：\n1 加入 ND16 于是：\n1 2 3 4 5 25fps 1/50s ISO100 F1.8 + ND16 这样既可以：\n保持自然的运动模糊\n又可以：\n使用大光圈\n同时：\n避免过曝。\n所以：\nND滤镜不是为了“美化画面”，而是为了让视频拍摄能够保持合理的快门和光圈。\n12. 白平衡 White Balance 前面的参数主要解决：\n亮不亮\n白平衡解决：\n颜色准不准\n不同光源的颜色温度不同。\n例如：\n1 2 3 4 5 6 7 8 9 10 11 蜡烛/暖光 ≈ 2000~3000K 室内灯 ≈ 3000~4000K 日光 ≈ 5000~6000K 阴天 ≈ 6000~7500K 色温越低：\n画面通常越暖、偏黄\n色温越高：\n画面通常越冷、偏蓝\n13. 为什么视频最好不要Auto White Balance？ 假设你拍摄：\n1 2 3 4 5 室外 ↓ 进入商场 ↓ 走出商场 如果使用自动白平衡：\n1 2 3 4 5 6 7 5500K ↓ 4200K ↓ 6000K ↓ 4800K 相机可能不断改变色温。\n最终视频会出现：\n一会儿偏黄，一会儿偏蓝。\n后期很难统一。\n因此在比较正式的视频拍摄中：\n建议根据环境选择一个固定白平衡。\n例如：\n1 2 3 晴天：约5500K 阴天：约6000~6500K 室内暖光：约3000~4000K 具体数值仍然应该根据现场光源调整。\n14. D-Log2是什么？ 当开始接触DJI等设备的视频拍摄时，会遇到：\nD-Log2\n它不是曝光参数。\n它是一种：\nLog Gamma / Log记录方式\n它的目标是：\n以更适合后期处理的方式记录画面。\n因此D-Log2原片通常会显得：\n灰 淡 低对比度 低饱和度 这是正常的。\n15. 为什么Log画面看起来“灰”？ 普通视频：\n1 2 3 4 5 黑 ↓ 高对比度 ↓ 白 Log：\n1 2 3 4 黑 ───────── 白 ↓ 压缩对比度 保留更多后期调整空间 所以：\nLog原片不是最终成片。\n通常需要经过：\n1 2 3 4 5 6 7 8 9 D-Log2 ↓ 色彩转换 ↓ Rec.709 ↓ 调色 ↓ 最终画面 因此不能直接拿D-Log2原片和手机自动处理后的普通视频比较。\n16. D-Log2拍摄时需要注意什么？ Log拍摄最重要的问题之一是：\n正确曝光。\n不能简单认为：\n“Log就是要故意拍得很暗。”\n如果严重欠曝：\n1 2 3 4 5 暗部 ↓ 后期拉亮 ↓ 噪点被一起放大 最终可能得到：\n脏、噪点多、颜色不好看的画面。\n另一方面，严重过曝也会导致：\n高光细节永久丢失。\n所以Log拍摄需要更加重视：\n直方图 斑马线 高光警告 ISO 动态范围 17. 把所有参数串起来 现在可以把整个逻辑串起来。\n假设使用DJI Pocket系列拍摄D-Log2视频：\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 D-Log2 │ ↓ 选择帧率 │ ↓ 确定快门 │ ↓ ISO尽量保持较低 │ ↓ 光圈决定进光/景深 │ ↓ ┌────── 是否过曝？ ──────┐ │ │ 否 是 │ │ ↓ ↓ 正常拍摄 加ND减光 │ ↓ 保持合理快门 与此同时：\n1 2 3 4 5 白平衡 ↓ 固定合理色温 ↓ 避免视频颜色不断变化 18. 一套最实用的记忆方法 不要死记所有参数，而是记住它们各自负责什么。\n快门 管运动\n问自己：\n“我希望运动看起来是什么样？”\n光圈 管进光和景深\n问自己：\n“我想要背景虚不虚？”\nISO 管增益\n问自己：\n“在当前光线下，需要多少传感器增益？”\n原则：\n能低就低。\nND 管多余的光\n问自己：\n“已经不能再降低ISO，也不想提高快门，但是还是太亮怎么办？”\n答案：\nND。\n白平衡 管颜色\n问自己：\n“现场的白色应该是什么颜色？”\nD-Log2 管记录方式\n问自己：\n“我是不是希望保留更多后期调整空间？”\n19. 一个实际拍摄例子 假设现在：\n晴天 户外 拍人物 25fps D-Log2\n可以先这样设置：\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 视频格式： D-Log2 帧率： 25fps 快门： 1/50s ISO： 尽量低 白平衡： 约5500K，根据现场调整 光圈： 根据想要的景深设置 ND： 根据环境亮度选择 如果画面过曝：\n先考虑ND，而不是疯狂提高快门。\n如果画面太暗：\n检查ISO、光圈和ND。\n如果人物运动太生硬：\n检查快门是不是过高。\n如果画面颜色不断变化：\n检查白平衡是不是Auto。\n如果D-Log2看起来灰：\n不要直接判断曝光错误。\n先经过正确的：\nD-Log2 → Rec.709\n转换，再判断最终效果。\n20. 最终总结 可以用下面这张“脑内地图”理解摄影和视频：\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 曝光 │ ┌──────────┼──────────┐ │ │ │ 快门 光圈 ISO │ │ │ 时间 光量/景深 增益 │ │ │ 运动 背景虚化 噪点 │ │ │ └──────────┼──────────┘ │ 曝光 │ 强光环境怎么办？ │ ND │ 减少进光 ───────────────────── 白平衡 │ 色温 │ 控制画面颜色 ───────────────────── D-Log2 │ 记录方式 │ 保留后期空间 │ DaVinci Resolve │ 色彩转换 + 调色 │ 成片 最值得记住的六句话：\n快门管运动。\n光圈管进光和景深。\nISO管传感器增益，能低就低。\nND管强光减光。\n白平衡管颜色，视频尽量固定。\nD-Log2管记录方式，原片灰是正常的，最终需要后期转换和调色。\n掌握这六句话之后，再去学习具体相机的菜单和参数，就不会变成“背参数”，而是知道每个参数为什么要这么设置。\n",
+  "wordCount" : "1011",
+  "inLanguage": "en",
+  "datePublished": "2026-10-07T22:56:20+08:00",
+  "dateModified": "2026-10-07T22:56:20+08:00",
+  "author":{
+    "@type": "Person",
+    "name": "Logan"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://maliuping.github.io/posts/photography/01-exposure/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Logan's Lab",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://maliuping.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="header-nav">
+        <div class="logo">
+            <a href="https://maliuping.github.io/" accesskey="h" title="Logan&#39;s Lab (Alt + H)">Logan&#39;s Lab</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu" class="menu">
+            <li>
+                <a href="https://maliuping.github.io/tools/" title="工具">
+                    <span>工具</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://maliuping.github.io/posts/" title="文章">
+                    <span>文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://maliuping.github.io/archives/" title="归档">
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://maliuping.github.io/search/" title="搜索 (Alt &#43; /)" accesskey=/>
+                    <span>搜索</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://maliuping.github.io/tags/" title="标签">
+                    <span>标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://maliuping.github.io/categories/" title="分类">
+                    <span>分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://maliuping.github.io/about/" title="关于">
+                    <span>关于</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <nav class="breadcrumbs" role="navigation" aria-label="Breadcrumb">
+            <a href="/">Home</a>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+            <a href="/posts/">Posts</a>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+</nav>
+    <h1 class="post-title entry-hint-parent">
+      01 Exposure 三要素
+    </h1>
+    <div class="post-meta">
+
+<span title='2026-10-07 22:56:20 +0800 +0800'>October 7, 2026</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>Logan</span>
+
+</div>
+  </header> <details class="toc"  open>
+    <summary accesskey="c" title="(Alt + C)">
+        <span class="title">Table of Contents</span>
+    </summary>
+
+    <div class="inner"><ul>
+            <li>
+                <a href="#1-%e4%bb%80%e4%b9%88%e6%98%af%e6%9b%9d%e5%85%89" aria-label="1. 什么是曝光？">1. 什么是曝光？</a></li>
+            <li>
+                <a href="#2-%e6%9b%9d%e5%85%89%e4%b8%89%e8%a6%81%e7%b4%a0" aria-label="2. 曝光三要素">2. 曝光三要素</a><ul>
+                    
+            <li>
+                <a href="#21-%e5%bf%ab%e9%97%a8-shutter-speed" aria-label="2.1 快门 Shutter Speed">2.1 快门 Shutter Speed</a><ul>
+                    
+            <li>
+                <a href="#211-%e5%bf%ab%e9%97%a8%e5%af%b9%e8%bf%90%e5%8a%a8%e7%9a%84%e5%bd%b1%e5%93%8d" aria-label="2.1.1 快门对运动的影响">2.1.1 快门对运动的影响</a></li></ul>
+            </li>
+            <li>
+                <a href="#22-%e5%85%89%e5%9c%88-aperture" aria-label="2.2 光圈 Aperture">2.2 光圈 Aperture</a><ul>
+                    
+            <li>
+                <a href="#221-%e5%85%89%e5%9c%88%e5%af%b9%e6%9b%9d%e5%85%89%e7%9a%84%e5%bd%b1%e5%93%8d" aria-label="2.2.1 光圈对曝光的影响">2.2.1 光圈对曝光的影响</a></li>
+            <li>
+                <a href="#222-%e5%85%89%e5%9c%88%e5%af%b9%e6%99%af%e6%b7%b1%e7%9a%84%e5%bd%b1%e5%93%8d" aria-label="2.2.2 光圈对景深的影响">2.2.2 光圈对景深的影响</a></li></ul>
+            </li></ul>
+            </li>
+            <li>
+                <a href="#3-iso%e6%84%9f%e5%85%89%e5%ba%a6" aria-label="3. ISO：感光度">3. ISO：感光度</a></li>
+            <li>
+                <a href="#4-%e4%b8%89%e8%80%85%e4%b9%8b%e9%97%b4%e7%9a%84%e5%85%b3%e7%b3%bb" aria-label="4. 三者之间的关系">4. 三者之间的关系</a></li>
+            <li>
+                <a href="#5-%e4%bb%80%e4%b9%88%e6%98%af%e4%b8%80%e6%a1%a3" aria-label="5. 什么是“一档”？">5. 什么是“一档”？</a></li>
+            <li>
+                <a href="#6-%e6%91%84%e5%bd%b1%e5%92%8c%e8%a7%86%e9%a2%91%e5%af%b9%e5%bf%ab%e9%97%a8%e7%9a%84%e6%80%9d%e8%b7%af%e4%b8%8d%e5%90%8c" aria-label="6. 摄影和视频对快门的思路不同">6. 摄影和视频对快门的思路不同</a></li>
+            <li>
+                <a href="#7-%e8%a7%86%e9%a2%91%e4%b8%ad%e7%9a%84180%e5%bf%ab%e9%97%a8%e5%8e%9f%e5%88%99" aria-label="7. 视频中的180°快门原则">7. 视频中的180°快门原则</a><ul>
+                    
+            <li>
+                <a href="#71-%e4%b8%ba%e4%bb%80%e4%b9%88%e4%b8%8d%e8%83%bd%e9%9a%8f%e4%be%bf%e4%bd%bf%e7%94%a8%e8%b6%85%e9%ab%98%e9%80%9f%e5%bf%ab%e9%97%a8" aria-label="7.1 为什么不能随便使用超高速快门？">7.1 为什么不能随便使用超高速快门？</a></li></ul>
+            </li>
+            <li>
+                <a href="#8-%e9%82%a3%e4%b9%88%e5%a4%a7%e5%a4%aa%e9%98%b3%e4%b8%8b%e6%80%8e%e4%b9%88%e5%8a%9e" aria-label="8. 那么大太阳下怎么办？">8. 那么大太阳下怎么办？</a></li>
+            <li>
+                <a href="#9-nd%e6%bb%a4%e9%95%9c%e6%98%af%e4%bb%80%e4%b9%88" aria-label="9. ND滤镜是什么？">9. ND滤镜是什么？</a></li>
+            <li>
+                <a href="#10-nd%e6%bb%a4%e9%95%9c%e6%80%8e%e4%b9%88%e7%90%86%e8%a7%a3" aria-label="10. ND滤镜怎么理解？">10. ND滤镜怎么理解？</a></li>
+            <li>
+                <a href="#11-nd%e7%9c%9f%e6%ad%a3%e8%a7%a3%e5%86%b3%e7%9a%84%e9%97%ae%e9%a2%98" aria-label="11. ND真正解决的问题">11. ND真正解决的问题</a></li>
+            <li>
+                <a href="#12-%e7%99%bd%e5%b9%b3%e8%a1%a1-white-balance" aria-label="12. 白平衡 White Balance">12. 白平衡 White Balance</a></li>
+            <li>
+                <a href="#13-%e4%b8%ba%e4%bb%80%e4%b9%88%e8%a7%86%e9%a2%91%e6%9c%80%e5%a5%bd%e4%b8%8d%e8%a6%81auto-white-balance" aria-label="13. 为什么视频最好不要Auto White Balance？">13. 为什么视频最好不要Auto White Balance？</a></li>
+            <li>
+                <a href="#14-d-log2%e6%98%af%e4%bb%80%e4%b9%88" aria-label="14. D-Log2是什么？">14. D-Log2是什么？</a></li>
+            <li>
+                <a href="#15-%e4%b8%ba%e4%bb%80%e4%b9%88log%e7%94%bb%e9%9d%a2%e7%9c%8b%e8%b5%b7%e6%9d%a5%e7%81%b0" aria-label="15. 为什么Log画面看起来“灰”？">15. 为什么Log画面看起来“灰”？</a></li>
+            <li>
+                <a href="#16-d-log2%e6%8b%8d%e6%91%84%e6%97%b6%e9%9c%80%e8%a6%81%e6%b3%a8%e6%84%8f%e4%bb%80%e4%b9%88" aria-label="16. D-Log2拍摄时需要注意什么？">16. D-Log2拍摄时需要注意什么？</a></li>
+            <li>
+                <a href="#17-%e6%8a%8a%e6%89%80%e6%9c%89%e5%8f%82%e6%95%b0%e4%b8%b2%e8%b5%b7%e6%9d%a5" aria-label="17. 把所有参数串起来">17. 把所有参数串起来</a></li>
+            <li>
+                <a href="#18-%e4%b8%80%e5%a5%97%e6%9c%80%e5%ae%9e%e7%94%a8%e7%9a%84%e8%ae%b0%e5%bf%86%e6%96%b9%e6%b3%95" aria-label="18. 一套最实用的记忆方法">18. 一套最实用的记忆方法</a><ul>
+                    <ul>
+                    
+            <li>
+                <a href="#%e5%bf%ab%e9%97%a8" aria-label="快门">快门</a></li>
+            <li>
+                <a href="#%e5%85%89%e5%9c%88" aria-label="光圈">光圈</a></li>
+            <li>
+                <a href="#iso" aria-label="ISO">ISO</a></li>
+            <li>
+                <a href="#nd" aria-label="ND">ND</a></li>
+            <li>
+                <a href="#%e7%99%bd%e5%b9%b3%e8%a1%a1" aria-label="白平衡">白平衡</a></li>
+            <li>
+                <a href="#d-log2" aria-label="D-Log2">D-Log2</a></li></ul>
+                </ul>
+            </li>
+            <li>
+                <a href="#19-%e4%b8%80%e4%b8%aa%e5%ae%9e%e9%99%85%e6%8b%8d%e6%91%84%e4%be%8b%e5%ad%90" aria-label="19. 一个实际拍摄例子">19. 一个实际拍摄例子</a></li>
+            <li>
+                <a href="#20-%e6%9c%80%e7%bb%88%e6%80%bb%e7%bb%93" aria-label="20. 最终总结">20. 最终总结</a>
+            </li>
+        </ul>
+    </div>
+</details>
+
+  <div class="post-content md-content"><p><strong>摄影基础：从曝光三要素到视频拍摄参数</strong></p>
+<blockquote>
+<p>快门、光圈、ISO 是摄影中最基础的三个曝光参数。
+理解它们之间的关系，是理解相机、视频拍摄、ND 滤镜以及 Log 视频的基础。</p>
+</blockquote>
+<hr>
+<h1 id="1-什么是曝光">1. 什么是曝光？<a hidden class="anchor" aria-hidden="true" href="#1-什么是曝光">#</a></h1>
+<p><strong>曝光（Exposure）</strong>，简单来说就是：</p>
+<blockquote>
+<p><strong>相机传感器最终接收到多少光线。</strong></p>
+</blockquote>
+<p>光线太少：</p>
+<blockquote>
+<p>欠曝 → 画面太暗</p>
+</blockquote>
+<p>光线太多：</p>
+<blockquote>
+<p>过曝 → 画面太亮，高光细节丢失</p>
+</blockquote>
+<p>光线合适：</p>
+<blockquote>
+<p>正确曝光 → 画面亮度合理，同时尽可能保留高光和暗部细节</p>
+</blockquote>
+<p>曝光主要由三个参数共同决定：</p>
+<ol>
+<li><strong>快门（Shutter Speed）</strong></li>
+<li><strong>光圈（Aperture）</strong></li>
+<li><strong>ISO（感光度）</strong></li>
+</ol>
+<p>这三个参数通常被称为：</p>
+<blockquote>
+<p><strong>曝光三要素（Exposure Triangle）</strong></p>
+</blockquote>
+<p>可以先用一句话记忆：</p>
+<blockquote>
+<p><strong>快门管时间，光圈管光量和景深，ISO管增益。</strong></p>
+</blockquote>
+<hr>
+<h1 id="2-曝光三要素">2. 曝光三要素<a hidden class="anchor" aria-hidden="true" href="#2-曝光三要素">#</a></h1>
+<h2 id="21-快门-shutter-speed">2.1 快门 Shutter Speed<a hidden class="anchor" aria-hidden="true" href="#21-快门-shutter-speed">#</a></h2>
+<p>快门决定：</p>
+<blockquote>
+<p><strong>传感器曝光多长时间。</strong></p>
+</blockquote>
+<p>例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">1/30s
+</span></span><span class="line"><span class="cl">1/60s
+</span></span><span class="line"><span class="cl">1/125s
+</span></span><span class="line"><span class="cl">1/500s
+</span></span><span class="line"><span class="cl">1/1000s
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>数值越慢：</p>
+<blockquote>
+<p><code>1/30s</code> → 曝光时间长 → 进光多 → 画面更亮</p>
+</blockquote>
+<p>数值越快：</p>
+<blockquote>
+<p><code>1/1000s</code> → 曝光时间短 → 进光少 → 画面更暗</p>
+</blockquote>
+<p>因此：</p>
+<blockquote>
+<p><strong>快门速度越快，曝光时间越短。</strong></p>
+</blockquote>
+<hr>
+<h3 id="211-快门对运动的影响">2.1.1 快门对运动的影响<a hidden class="anchor" aria-hidden="true" href="#211-快门对运动的影响">#</a></h3>
+<p>快门不仅影响曝光，更重要的是影响：</p>
+<blockquote>
+<p><strong>运动模糊（Motion Blur）</strong></p>
+</blockquote>
+<p>例如拍一个正在挥手的人。</p>
+<p>较慢的快门：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">1/30s
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">手臂移动
+</span></span><span class="line"><span class="cl">████████
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>会产生明显的运动拖影。</p>
+<p>较快的快门：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">1/1000s
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">手臂移动
+</span></span><span class="line"><span class="cl">█   █   █
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>每一帧都更加清晰，运动被“冻结”。</p>
+<p>因此：</p>
+<blockquote>
+<p><strong>拍照时，快门经常用来控制运动是否冻结。</strong></p>
+</blockquote>
+<blockquote>
+<p><strong>拍视频时，快门还直接决定运动观感。</strong></p>
+</blockquote>
+<hr>
+<h2 id="22-光圈-aperture">2.2 光圈 Aperture<a hidden class="anchor" aria-hidden="true" href="#22-光圈-aperture">#</a></h2>
+<p>光圈是镜头内部控制进光量的结构。</p>
+<p>光圈通常使用：</p>
+<blockquote>
+<p><strong>F值（F-number）</strong></p>
+</blockquote>
+<p>表示，例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">F1.4
+</span></span><span class="line"><span class="cl">F2
+</span></span><span class="line"><span class="cl">F2.8
+</span></span><span class="line"><span class="cl">F4
+</span></span><span class="line"><span class="cl">F5.6
+</span></span><span class="line"><span class="cl">F8
+</span></span><span class="line"><span class="cl">F11
+</span></span><span class="line"><span class="cl">F16
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这里有一个非常容易搞反的地方：</p>
+<blockquote>
+<p><strong>F值越小，实际光圈越大。</strong></p>
+</blockquote>
+<p>例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">F1.4 → 大光圈
+</span></span><span class="line"><span class="cl">F2.8 → 较大光圈
+</span></span><span class="line"><span class="cl">F5.6 → 中等
+</span></span><span class="line"><span class="cl">F11  → 小光圈
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="221-光圈对曝光的影响">2.2.1 光圈对曝光的影响<a hidden class="anchor" aria-hidden="true" href="#221-光圈对曝光的影响">#</a></h3>
+<p>光圈越大：</p>
+<blockquote>
+<p>进入镜头的光越多 → 画面越亮</p>
+</blockquote>
+<p>光圈越小：</p>
+<blockquote>
+<p>进入镜头的光越少 → 画面越暗</p>
+</blockquote>
+<p>例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">F1.8 → 光线多
+</span></span><span class="line"><span class="cl">F4   → 光线少一些
+</span></span><span class="line"><span class="cl">F8   → 光线更少
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h3 id="222-光圈对景深的影响">2.2.2 光圈对景深的影响<a hidden class="anchor" aria-hidden="true" href="#222-光圈对景深的影响">#</a></h3>
+<p>光圈除了影响曝光，还影响：</p>
+<blockquote>
+<p><strong>景深（Depth of Field）</strong></p>
+</blockquote>
+<p>大光圈：</p>
+<blockquote>
+<p>F1.8 → 浅景深 → 背景更容易虚化</p>
+</blockquote>
+<p>小光圈：</p>
+<blockquote>
+<p>F8 → 深景深 → 前后更多区域清晰</p>
+</blockquote>
+<p>例如人像：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">F1.8
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">人物 ●
+</span></span><span class="line"><span class="cl">     ↓
+</span></span><span class="line"><span class="cl">   清晰
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">背景
+</span></span><span class="line"><span class="cl">～～～～～～
+</span></span><span class="line"><span class="cl">   模糊
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>而：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">F8
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">人物 ●
+</span></span><span class="line"><span class="cl">背景 ███████
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>人物和背景都会更加清晰。</p>
+<p>所以可以记忆：</p>
+<blockquote>
+<p><strong>大光圈 → 更亮 + 更浅景深</strong></p>
+</blockquote>
+<blockquote>
+<p><strong>小光圈 → 更暗 + 更深景深</strong></p>
+</blockquote>
+<hr>
+<h1 id="3-iso感光度">3. ISO：感光度<a hidden class="anchor" aria-hidden="true" href="#3-iso感光度">#</a></h1>
+<p>ISO 可以简单理解成：</p>
+<blockquote>
+<p><strong>传感器信号的增益程度。</strong></p>
+</blockquote>
+<p>常见值：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">ISO 100
+</span></span><span class="line"><span class="cl">ISO 200
+</span></span><span class="line"><span class="cl">ISO 400
+</span></span><span class="line"><span class="cl">ISO 800
+</span></span><span class="line"><span class="cl">ISO 1600
+</span></span><span class="line"><span class="cl">ISO 3200
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>ISO提高：</p>
+<blockquote>
+<p>画面看起来更亮</p>
+</blockquote>
+<p>但ISO并不是“真正增加了光线”。</p>
+<p>它更接近于：</p>
+<blockquote>
+<p><strong>把传感器获得的信号进行放大。</strong></p>
+</blockquote>
+<p>因此ISO提高通常会带来：</p>
+<ul>
+<li>更多噪点</li>
+<li>更低的画质</li>
+<li>暗部更加明显的噪声</li>
+<li>动态范围可能下降</li>
+</ul>
+<p>所以一般来说：</p>
+<blockquote>
+<p><strong>在曝光允许的情况下，尽量使用较低ISO。</strong></p>
+</blockquote>
+<hr>
+<h1 id="4-三者之间的关系">4. 三者之间的关系<a hidden class="anchor" aria-hidden="true" href="#4-三者之间的关系">#</a></h1>
+<p>曝光三要素不是独立工作的。</p>
+<p>假设当前曝光正确：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">快门：1/125s
+</span></span><span class="line"><span class="cl">光圈：F4
+</span></span><span class="line"><span class="cl">ISO：100
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>如果把快门提高到：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">1/500s
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>曝光时间缩短，画面会变暗。</p>
+<p>这时候可以通过：</p>
+<blockquote>
+<p>开大光圈</p>
+</blockquote>
+<p>或者：</p>
+<blockquote>
+<p>提高ISO</p>
+</blockquote>
+<p>把曝光补回来。</p>
+<p>例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">原来：
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">1/125s + F4 + ISO100
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">↓
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">改变快门：
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">1/500s + F4 + ISO100
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">↓
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">画面变暗
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">↓
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">可以改成：
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">1/500s + F2 + ISO100
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>或者：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">1/500s + F4 + ISO400
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这就是曝光三要素之间的“交换关系”。</p>
+<hr>
+<h1 id="5-什么是一档">5. 什么是“一档”？<a hidden class="anchor" aria-hidden="true" href="#5-什么是一档">#</a></h1>
+<p>摄影中经常说：</p>
+<blockquote>
+<p>增加一档</p>
+</blockquote>
+<p>或者：</p>
+<blockquote>
+<p>减少一档</p>
+</blockquote>
+<p>“一档（Stop）”可以简单理解成：</p>
+<blockquote>
+<p><strong>进光量增加一倍或减少一半。</strong></p>
+</blockquote>
+<p>例如快门：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">1/30
+</span></span><span class="line"><span class="cl">1/60
+</span></span><span class="line"><span class="cl">1/125
+</span></span><span class="line"><span class="cl">1/250
+</span></span><span class="line"><span class="cl">1/500
+</span></span><span class="line"><span class="cl">1/1000
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>每往右一档：</p>
+<blockquote>
+<p>光线大约减少一半。</p>
+</blockquote>
+<p>光圈也存在类似关系：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">F1.4
+</span></span><span class="line"><span class="cl">F2
+</span></span><span class="line"><span class="cl">F2.8
+</span></span><span class="line"><span class="cl">F4
+</span></span><span class="line"><span class="cl">F5.6
+</span></span><span class="line"><span class="cl">F8
+</span></span><span class="line"><span class="cl">F11
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>ISO：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">100
+</span></span><span class="line"><span class="cl">200
+</span></span><span class="line"><span class="cl">400
+</span></span><span class="line"><span class="cl">800
+</span></span><span class="line"><span class="cl">1600
+</span></span><span class="line"><span class="cl">3200
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>每提高一档：</p>
+<blockquote>
+<p>ISO翻倍。</p>
+</blockquote>
+<p>理解“档”非常重要，因为后面理解ND滤镜会非常容易。</p>
+<hr>
+<h1 id="6-摄影和视频对快门的思路不同">6. 摄影和视频对快门的思路不同<a hidden class="anchor" aria-hidden="true" href="#6-摄影和视频对快门的思路不同">#</a></h1>
+<p>这是从拍照进入视频时最重要的区别之一。</p>
+<p>拍照时：</p>
+<blockquote>
+<p>快门主要考虑曝光和冻结运动。</p>
+</blockquote>
+<p>拍视频时：</p>
+<blockquote>
+<p><strong>快门除了曝光，还决定整个视频的运动模糊。</strong></p>
+</blockquote>
+<p>因此视频通常不会为了曝光而随意改变快门。</p>
+<hr>
+<h1 id="7-视频中的180快门原则">7. 视频中的180°快门原则<a hidden class="anchor" aria-hidden="true" href="#7-视频中的180快门原则">#</a></h1>
+<p>视频拍摄经常使用：</p>
+<blockquote>
+<p><strong>180° Shutter Rule</strong></p>
+</blockquote>
+<p>简单公式：</p>
+<blockquote>
+<p><strong>快门时间 ≈ 1 ÷（2 × 帧率）</strong></p>
+</blockquote>
+<p>例如：</p>
+<table>
+	<thead>
+			<tr>
+					<th style="text-align: right">帧率</th>
+					<th style="text-align: right">推荐快门</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: right">24fps</td>
+					<td style="text-align: right">1/48s，实际常用1/50s</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">25fps</td>
+					<td style="text-align: right">1/50s</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">30fps</td>
+					<td style="text-align: right">1/60s</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">50fps</td>
+					<td style="text-align: right">1/100s</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">60fps</td>
+					<td style="text-align: right">1/120s</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">100fps</td>
+					<td style="text-align: right">1/200s</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">120fps</td>
+					<td style="text-align: right">1/240s</td>
+			</tr>
+	</tbody>
+</table>
+<p>例如：</p>
+<blockquote>
+<p>25fps + 1/50s</p>
+</blockquote>
+<p>通常能够获得比较自然的运动模糊。</p>
+<hr>
+<h2 id="71-为什么不能随便使用超高速快门">7.1 为什么不能随便使用超高速快门？<a hidden class="anchor" aria-hidden="true" href="#71-为什么不能随便使用超高速快门">#</a></h2>
+<p>例如：</p>
+<blockquote>
+<p>25fps + 1/1000s</p>
+</blockquote>
+<p>虽然可以让画面变暗，但运动会变得非常生硬。</p>
+<p>例如拍一个人走路：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">正常：
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">人物移动
+</span></span><span class="line"><span class="cl">→ ███ → ███ → ███
+</span></span><span class="line"><span class="cl">具有自然运动模糊
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>高速快门：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">人物移动
+</span></span><span class="line"><span class="cl">→ █ → █ → █
+</span></span><span class="line"><span class="cl">每一帧都非常锐利
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>最终视频可能产生一种：</p>
+<blockquote>
+<p><strong>卡顿、跳跃、过于锐利的运动观感。</strong></p>
+</blockquote>
+<p>因此正常视频拍摄通常优先保持合理的快门，而不是通过疯狂提高快门来解决过曝。</p>
+<hr>
+<h1 id="8-那么大太阳下怎么办">8. 那么大太阳下怎么办？<a hidden class="anchor" aria-hidden="true" href="#8-那么大太阳下怎么办">#</a></h1>
+<p>这就引出了：</p>
+<blockquote>
+<p><strong>ND滤镜</strong></p>
+</blockquote>
+<p>假设白天拍摄：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">25fps
+</span></span><span class="line"><span class="cl">1/50s
+</span></span><span class="line"><span class="cl">ISO100
+</span></span><span class="line"><span class="cl">F1.8
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>你希望保持：</p>
+<blockquote>
+<p>1/50s</p>
+</blockquote>
+<p>因为这是比较自然的视频快门。</p>
+<p>但是太阳非常强：</p>
+<blockquote>
+<p><strong>画面过曝。</strong></p>
+</blockquote>
+<p>这时候有一个问题：</p>
+<p>不能继续降低ISO了，因为已经接近最低值。</p>
+<p>也不希望把快门提高到：</p>
+<blockquote>
+<p>1/500s、1/1000s</p>
+</blockquote>
+<p>那么怎么办？</p>
+<p>答案：</p>
+<blockquote>
+<p><strong>使用ND滤镜。</strong></p>
+</blockquote>
+<hr>
+<h1 id="9-nd滤镜是什么">9. ND滤镜是什么？<a hidden class="anchor" aria-hidden="true" href="#9-nd滤镜是什么">#</a></h1>
+<p>ND：</p>
+<blockquote>
+<p><strong>Neutral Density</strong></p>
+</blockquote>
+<p>中文：</p>
+<blockquote>
+<p><strong>中性密度滤镜 / 减光镜</strong></p>
+</blockquote>
+<p>可以简单理解成：</p>
+<blockquote>
+<p><strong>给镜头戴了一副不会明显改变颜色的太阳镜。</strong></p>
+</blockquote>
+<p>它的作用只有一个：</p>
+<blockquote>
+<p><strong>减少进入镜头的光线。</strong></p>
+</blockquote>
+<p>例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">太阳 ☀️
+</span></span><span class="line"><span class="cl"> ↓↓↓↓↓↓↓
+</span></span><span class="line"><span class="cl"> [ ND ]
+</span></span><span class="line"><span class="cl"> ↓↓
+</span></span><span class="line"><span class="cl"> 镜头
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h1 id="10-nd滤镜怎么理解">10. ND滤镜怎么理解？<a hidden class="anchor" aria-hidden="true" href="#10-nd滤镜怎么理解">#</a></h1>
+<p>常见ND：</p>
+<table>
+	<thead>
+			<tr>
+					<th>滤镜</th>
+					<th style="text-align: right">减光</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>ND2</td>
+					<td style="text-align: right">1档</td>
+			</tr>
+			<tr>
+					<td>ND4</td>
+					<td style="text-align: right">2档</td>
+			</tr>
+			<tr>
+					<td>ND8</td>
+					<td style="text-align: right">3档</td>
+			</tr>
+			<tr>
+					<td>ND16</td>
+					<td style="text-align: right">4档</td>
+			</tr>
+			<tr>
+					<td>ND32</td>
+					<td style="text-align: right">5档</td>
+			</tr>
+			<tr>
+					<td>ND64</td>
+					<td style="text-align: right">6档</td>
+			</tr>
+			<tr>
+					<td>ND128</td>
+					<td style="text-align: right">7档</td>
+			</tr>
+	</tbody>
+</table>
+<p>例如：</p>
+<blockquote>
+<p>ND16</p>
+</blockquote>
+<p>代表：</p>
+<blockquote>
+<p><strong>减少约4档光线。</strong></p>
+</blockquote>
+<p>也就是说，在相同的快门、光圈和ISO下，进入镜头的光线大幅减少。</p>
+<hr>
+<h1 id="11-nd真正解决的问题">11. ND真正解决的问题<a hidden class="anchor" aria-hidden="true" href="#11-nd真正解决的问题">#</a></h1>
+<p>假设：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">25fps
+</span></span><span class="line"><span class="cl">1/50s
+</span></span><span class="line"><span class="cl">ISO100
+</span></span><span class="line"><span class="cl">F1.8
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>白天过曝。</p>
+<p>可以：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">加入 ND16
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>于是：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">25fps
+</span></span><span class="line"><span class="cl">1/50s
+</span></span><span class="line"><span class="cl">ISO100
+</span></span><span class="line"><span class="cl">F1.8
+</span></span><span class="line"><span class="cl">+ ND16
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这样既可以：</p>
+<blockquote>
+<p>保持自然的运动模糊</p>
+</blockquote>
+<p>又可以：</p>
+<blockquote>
+<p>使用大光圈</p>
+</blockquote>
+<p>同时：</p>
+<blockquote>
+<p>避免过曝。</p>
+</blockquote>
+<p>所以：</p>
+<blockquote>
+<p><strong>ND滤镜不是为了“美化画面”，而是为了让视频拍摄能够保持合理的快门和光圈。</strong></p>
+</blockquote>
+<hr>
+<h1 id="12-白平衡-white-balance">12. 白平衡 White Balance<a hidden class="anchor" aria-hidden="true" href="#12-白平衡-white-balance">#</a></h1>
+<p>前面的参数主要解决：</p>
+<blockquote>
+<p><strong>亮不亮</strong></p>
+</blockquote>
+<p>白平衡解决：</p>
+<blockquote>
+<p><strong>颜色准不准</strong></p>
+</blockquote>
+<p>不同光源的颜色温度不同。</p>
+<p>例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">蜡烛/暖光
+</span></span><span class="line"><span class="cl">≈ 2000~3000K
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">室内灯
+</span></span><span class="line"><span class="cl">≈ 3000~4000K
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">日光
+</span></span><span class="line"><span class="cl">≈ 5000~6000K
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">阴天
+</span></span><span class="line"><span class="cl">≈ 6000~7500K
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>色温越低：</p>
+<blockquote>
+<p>画面通常越暖、偏黄</p>
+</blockquote>
+<p>色温越高：</p>
+<blockquote>
+<p>画面通常越冷、偏蓝</p>
+</blockquote>
+<hr>
+<h1 id="13-为什么视频最好不要auto-white-balance">13. 为什么视频最好不要Auto White Balance？<a hidden class="anchor" aria-hidden="true" href="#13-为什么视频最好不要auto-white-balance">#</a></h1>
+<p>假设你拍摄：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">室外
+</span></span><span class="line"><span class="cl"> ↓
+</span></span><span class="line"><span class="cl">进入商场
+</span></span><span class="line"><span class="cl"> ↓
+</span></span><span class="line"><span class="cl">走出商场
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>如果使用自动白平衡：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">5500K
+</span></span><span class="line"><span class="cl"> ↓
+</span></span><span class="line"><span class="cl">4200K
+</span></span><span class="line"><span class="cl"> ↓
+</span></span><span class="line"><span class="cl">6000K
+</span></span><span class="line"><span class="cl"> ↓
+</span></span><span class="line"><span class="cl">4800K
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>相机可能不断改变色温。</p>
+<p>最终视频会出现：</p>
+<blockquote>
+<p>一会儿偏黄，一会儿偏蓝。</p>
+</blockquote>
+<p>后期很难统一。</p>
+<p>因此在比较正式的视频拍摄中：</p>
+<blockquote>
+<p><strong>建议根据环境选择一个固定白平衡。</strong></p>
+</blockquote>
+<p>例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">晴天：约5500K
+</span></span><span class="line"><span class="cl">阴天：约6000~6500K
+</span></span><span class="line"><span class="cl">室内暖光：约3000~4000K
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>具体数值仍然应该根据现场光源调整。</p>
+<hr>
+<h1 id="14-d-log2是什么">14. D-Log2是什么？<a hidden class="anchor" aria-hidden="true" href="#14-d-log2是什么">#</a></h1>
+<p>当开始接触DJI等设备的视频拍摄时，会遇到：</p>
+<blockquote>
+<p><strong>D-Log2</strong></p>
+</blockquote>
+<p>它不是曝光参数。</p>
+<p>它是一种：</p>
+<blockquote>
+<p><strong>Log Gamma / Log记录方式</strong></p>
+</blockquote>
+<p>它的目标是：</p>
+<blockquote>
+<p><strong>以更适合后期处理的方式记录画面。</strong></p>
+</blockquote>
+<p>因此D-Log2原片通常会显得：</p>
+<ul>
+<li>灰</li>
+<li>淡</li>
+<li>低对比度</li>
+<li>低饱和度</li>
+</ul>
+<p>这是正常的。</p>
+<hr>
+<h1 id="15-为什么log画面看起来灰">15. 为什么Log画面看起来“灰”？<a hidden class="anchor" aria-hidden="true" href="#15-为什么log画面看起来灰">#</a></h1>
+<p>普通视频：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">黑
+</span></span><span class="line"><span class="cl"> ↓
+</span></span><span class="line"><span class="cl">高对比度
+</span></span><span class="line"><span class="cl"> ↓
+</span></span><span class="line"><span class="cl">白
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Log：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">黑 ───────── 白
+</span></span><span class="line"><span class="cl">       ↓
+</span></span><span class="line"><span class="cl">压缩对比度
+</span></span><span class="line"><span class="cl">保留更多后期调整空间
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>所以：</p>
+<blockquote>
+<p><strong>Log原片不是最终成片。</strong></p>
+</blockquote>
+<p>通常需要经过：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">D-Log2
+</span></span><span class="line"><span class="cl">   ↓
+</span></span><span class="line"><span class="cl">色彩转换
+</span></span><span class="line"><span class="cl">   ↓
+</span></span><span class="line"><span class="cl">Rec.709
+</span></span><span class="line"><span class="cl">   ↓
+</span></span><span class="line"><span class="cl">调色
+</span></span><span class="line"><span class="cl">   ↓
+</span></span><span class="line"><span class="cl">最终画面
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>因此不能直接拿D-Log2原片和手机自动处理后的普通视频比较。</p>
+<hr>
+<h1 id="16-d-log2拍摄时需要注意什么">16. D-Log2拍摄时需要注意什么？<a hidden class="anchor" aria-hidden="true" href="#16-d-log2拍摄时需要注意什么">#</a></h1>
+<p>Log拍摄最重要的问题之一是：</p>
+<blockquote>
+<p><strong>正确曝光。</strong></p>
+</blockquote>
+<p>不能简单认为：</p>
+<blockquote>
+<p>“Log就是要故意拍得很暗。”</p>
+</blockquote>
+<p>如果严重欠曝：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">暗部
+</span></span><span class="line"><span class="cl"> ↓
+</span></span><span class="line"><span class="cl">后期拉亮
+</span></span><span class="line"><span class="cl"> ↓
+</span></span><span class="line"><span class="cl">噪点被一起放大
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>最终可能得到：</p>
+<blockquote>
+<p>脏、噪点多、颜色不好看的画面。</p>
+</blockquote>
+<p>另一方面，严重过曝也会导致：</p>
+<blockquote>
+<p>高光细节永久丢失。</p>
+</blockquote>
+<p>所以Log拍摄需要更加重视：</p>
+<ul>
+<li>直方图</li>
+<li>斑马线</li>
+<li>高光警告</li>
+<li>ISO</li>
+<li>动态范围</li>
+</ul>
+<hr>
+<h1 id="17-把所有参数串起来">17. 把所有参数串起来<a hidden class="anchor" aria-hidden="true" href="#17-把所有参数串起来">#</a></h1>
+<p>现在可以把整个逻辑串起来。</p>
+<p>假设使用DJI Pocket系列拍摄D-Log2视频：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">              D-Log2
+</span></span><span class="line"><span class="cl">                 │
+</span></span><span class="line"><span class="cl">                 ↓
+</span></span><span class="line"><span class="cl">             选择帧率
+</span></span><span class="line"><span class="cl">                 │
+</span></span><span class="line"><span class="cl">                 ↓
+</span></span><span class="line"><span class="cl">            确定快门
+</span></span><span class="line"><span class="cl">                 │
+</span></span><span class="line"><span class="cl">                 ↓
+</span></span><span class="line"><span class="cl">          ISO尽量保持较低
+</span></span><span class="line"><span class="cl">                 │
+</span></span><span class="line"><span class="cl">                 ↓
+</span></span><span class="line"><span class="cl">          光圈决定进光/景深
+</span></span><span class="line"><span class="cl">                 │
+</span></span><span class="line"><span class="cl">                 ↓
+</span></span><span class="line"><span class="cl">       ┌────── 是否过曝？ ──────┐
+</span></span><span class="line"><span class="cl">       │                        │
+</span></span><span class="line"><span class="cl">      否                        是
+</span></span><span class="line"><span class="cl">       │                        │
+</span></span><span class="line"><span class="cl">       ↓                        ↓
+</span></span><span class="line"><span class="cl">    正常拍摄                  加ND减光
+</span></span><span class="line"><span class="cl">                                │
+</span></span><span class="line"><span class="cl">                                ↓
+</span></span><span class="line"><span class="cl">                         保持合理快门
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>与此同时：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">白平衡
+</span></span><span class="line"><span class="cl">  ↓
+</span></span><span class="line"><span class="cl">固定合理色温
+</span></span><span class="line"><span class="cl">  ↓
+</span></span><span class="line"><span class="cl">避免视频颜色不断变化
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h1 id="18-一套最实用的记忆方法">18. 一套最实用的记忆方法<a hidden class="anchor" aria-hidden="true" href="#18-一套最实用的记忆方法">#</a></h1>
+<p>不要死记所有参数，而是记住它们各自负责什么。</p>
+<h3 id="快门">快门<a hidden class="anchor" aria-hidden="true" href="#快门">#</a></h3>
+<blockquote>
+<p><strong>管运动</strong></p>
+</blockquote>
+<p>问自己：</p>
+<blockquote>
+<p>“我希望运动看起来是什么样？”</p>
+</blockquote>
+<hr>
+<h3 id="光圈">光圈<a hidden class="anchor" aria-hidden="true" href="#光圈">#</a></h3>
+<blockquote>
+<p><strong>管进光和景深</strong></p>
+</blockquote>
+<p>问自己：</p>
+<blockquote>
+<p>“我想要背景虚不虚？”</p>
+</blockquote>
+<hr>
+<h3 id="iso">ISO<a hidden class="anchor" aria-hidden="true" href="#iso">#</a></h3>
+<blockquote>
+<p><strong>管增益</strong></p>
+</blockquote>
+<p>问自己：</p>
+<blockquote>
+<p>“在当前光线下，需要多少传感器增益？”</p>
+</blockquote>
+<p>原则：</p>
+<blockquote>
+<p><strong>能低就低。</strong></p>
+</blockquote>
+<hr>
+<h3 id="nd">ND<a hidden class="anchor" aria-hidden="true" href="#nd">#</a></h3>
+<blockquote>
+<p><strong>管多余的光</strong></p>
+</blockquote>
+<p>问自己：</p>
+<blockquote>
+<p>“已经不能再降低ISO，也不想提高快门，但是还是太亮怎么办？”</p>
+</blockquote>
+<p>答案：</p>
+<blockquote>
+<p><strong>ND。</strong></p>
+</blockquote>
+<hr>
+<h3 id="白平衡">白平衡<a hidden class="anchor" aria-hidden="true" href="#白平衡">#</a></h3>
+<blockquote>
+<p><strong>管颜色</strong></p>
+</blockquote>
+<p>问自己：</p>
+<blockquote>
+<p>“现场的白色应该是什么颜色？”</p>
+</blockquote>
+<hr>
+<h3 id="d-log2">D-Log2<a hidden class="anchor" aria-hidden="true" href="#d-log2">#</a></h3>
+<blockquote>
+<p><strong>管记录方式</strong></p>
+</blockquote>
+<p>问自己：</p>
+<blockquote>
+<p>“我是不是希望保留更多后期调整空间？”</p>
+</blockquote>
+<hr>
+<h1 id="19-一个实际拍摄例子">19. 一个实际拍摄例子<a hidden class="anchor" aria-hidden="true" href="#19-一个实际拍摄例子">#</a></h1>
+<p>假设现在：</p>
+<blockquote>
+<p>晴天
+户外
+拍人物
+25fps
+D-Log2</p>
+</blockquote>
+<p>可以先这样设置：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">视频格式：
+</span></span><span class="line"><span class="cl">D-Log2
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">帧率：
+</span></span><span class="line"><span class="cl">25fps
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">快门：
+</span></span><span class="line"><span class="cl">1/50s
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">ISO：
+</span></span><span class="line"><span class="cl">尽量低
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">白平衡：
+</span></span><span class="line"><span class="cl">约5500K，根据现场调整
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">光圈：
+</span></span><span class="line"><span class="cl">根据想要的景深设置
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">ND：
+</span></span><span class="line"><span class="cl">根据环境亮度选择
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>如果画面过曝：</p>
+<blockquote>
+<p><strong>先考虑ND，而不是疯狂提高快门。</strong></p>
+</blockquote>
+<p>如果画面太暗：</p>
+<blockquote>
+<p>检查ISO、光圈和ND。</p>
+</blockquote>
+<p>如果人物运动太生硬：</p>
+<blockquote>
+<p>检查快门是不是过高。</p>
+</blockquote>
+<p>如果画面颜色不断变化：</p>
+<blockquote>
+<p>检查白平衡是不是Auto。</p>
+</blockquote>
+<p>如果D-Log2看起来灰：</p>
+<blockquote>
+<p><strong>不要直接判断曝光错误。</strong></p>
+</blockquote>
+<p>先经过正确的：</p>
+<blockquote>
+<p>D-Log2 → Rec.709</p>
+</blockquote>
+<p>转换，再判断最终效果。</p>
+<hr>
+<h1 id="20-最终总结">20. 最终总结<a hidden class="anchor" aria-hidden="true" href="#20-最终总结">#</a></h1>
+<p>可以用下面这张“脑内地图”理解摄影和视频：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">                    曝光
+</span></span><span class="line"><span class="cl">                     │
+</span></span><span class="line"><span class="cl">          ┌──────────┼──────────┐
+</span></span><span class="line"><span class="cl">          │          │          │
+</span></span><span class="line"><span class="cl">        快门        光圈        ISO
+</span></span><span class="line"><span class="cl">          │          │          │
+</span></span><span class="line"><span class="cl">        时间       光量/景深     增益
+</span></span><span class="line"><span class="cl">          │          │          │
+</span></span><span class="line"><span class="cl">        运动       背景虚化      噪点
+</span></span><span class="line"><span class="cl">          │          │          │
+</span></span><span class="line"><span class="cl">          └──────────┼──────────┘
+</span></span><span class="line"><span class="cl">                     │
+</span></span><span class="line"><span class="cl">                   曝光
+</span></span><span class="line"><span class="cl">                     │
+</span></span><span class="line"><span class="cl">              强光环境怎么办？
+</span></span><span class="line"><span class="cl">                     │
+</span></span><span class="line"><span class="cl">                    ND
+</span></span><span class="line"><span class="cl">                     │
+</span></span><span class="line"><span class="cl">                 减少进光
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        ─────────────────────
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                  白平衡
+</span></span><span class="line"><span class="cl">                     │
+</span></span><span class="line"><span class="cl">                   色温
+</span></span><span class="line"><span class="cl">                     │
+</span></span><span class="line"><span class="cl">               控制画面颜色
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        ─────────────────────
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                  D-Log2
+</span></span><span class="line"><span class="cl">                     │
+</span></span><span class="line"><span class="cl">                 记录方式
+</span></span><span class="line"><span class="cl">                     │
+</span></span><span class="line"><span class="cl">               保留后期空间
+</span></span><span class="line"><span class="cl">                     │
+</span></span><span class="line"><span class="cl">             DaVinci Resolve
+</span></span><span class="line"><span class="cl">                     │
+</span></span><span class="line"><span class="cl">             色彩转换 + 调色
+</span></span><span class="line"><span class="cl">                     │
+</span></span><span class="line"><span class="cl">                  成片
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>最值得记住的六句话：</p>
+<blockquote>
+<p><strong>快门管运动。</strong></p>
+</blockquote>
+<blockquote>
+<p><strong>光圈管进光和景深。</strong></p>
+</blockquote>
+<blockquote>
+<p><strong>ISO管传感器增益，能低就低。</strong></p>
+</blockquote>
+<blockquote>
+<p><strong>ND管强光减光。</strong></p>
+</blockquote>
+<blockquote>
+<p><strong>白平衡管颜色，视频尽量固定。</strong></p>
+</blockquote>
+<blockquote>
+<p><strong>D-Log2管记录方式，原片灰是正常的，最终需要后期转换和调色。</strong></p>
+</blockquote>
+<p>掌握这六句话之后，再去学习具体相机的菜单和参数，就不会变成“背参数”，而是知道<strong>每个参数为什么要这么设置</strong>。</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://maliuping.github.io/tags/photography/">Photography</a></li>
+      <li><a href="https://maliuping.github.io/tags/exposure/">Exposure</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="next" href="https://maliuping.github.io/posts/linux/misc/probe_fail/">
+    <span class="title">Next »</span>
+    <span>Probe fail 排查思路</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://maliuping.github.io/">Logan&#39;s Lab</a></span> · 
+
+    
+    
+    <span>
+        Powered by
+        <a href="https://gohugo.io/?utm_source=papermod" rel="noopener" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" id="top-link" class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up">
+        <polyline points="17 11 12 6 7 11"></polyline>
+        <polyline points="17 18 12 13 7 18"></polyline>
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var toplink = document.getElementById("top-link");
+    window.onscroll = function () {
+        const scrollThreshold = window.innerHeight;
+        if (document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold) {
+            toplink.classList.remove("hidden");
+        } else {
+            toplink.classList.add("hidden");
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
