@@ -6,8 +6,52 @@
     <description>Recent content on Logan&#39;s Lab</description>
     <generator>Hugo</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Wed, 07 Oct 2026 22:56:20 +0800</lastBuildDate>
+    <lastBuildDate>Mon, 12 Oct 2026 11:46:13 +0800</lastBuildDate>
     <atom:link href="https://maliuping.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Linlon q-channel</title>
+      <link>https://maliuping.github.io/posts/display/dpu/linlon_q-channel/</link>
+      <pubDate>Mon, 12 Oct 2026 11:46:13 +0800</pubDate>
+      <guid>https://maliuping.github.io/posts/display/dpu/linlon_q-channel/</guid>
+      <description>&lt;p&gt;在linlon-d6 显示处理器中，&lt;strong&gt;Q-Channel&lt;/strong&gt; 是遵循 AMBA 标准的硬件低功耗握手接口协议。它用于 DPU 与 SOC 外部的时钟/电源控制器之间进行自动化、安全的**外部时钟门控（Clock Gating）&lt;strong&gt;与&lt;/strong&gt;电源门控（Power Gating）**握手，确保 DPU 在空闲时能切断时钟或电源以降低功耗，而在有总线访问或显示任务时能被安全唤醒。&lt;/p&gt;
+&lt;p&gt;在linlon-d6 中，全局控制单元（GCU）实现了两个独立的 Q-Channel 接口：&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;1-两个-q-channel-接口&#34;&gt;1. 两个 Q-Channel 接口&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;ACLK&lt;/code&gt; 时钟 Q-Channel（External Clock Gating Interface）&lt;/strong&gt;：
+用于管理 DPU 主处理时钟 &lt;code&gt;ACLK&lt;/code&gt; 树的外部门控。当 DPU 所有模块处于空闲状态且所有图层数据已取完时，可关停外部 ACLK 时钟树以节省动态功耗。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;电源 Q-Channel（Power Gating Interface）&lt;/strong&gt;：
+用于管理 DPU 全局电源域（&lt;code&gt;PWRGLB&lt;/code&gt;）的上电与下电序列。当 DPU 彻底进入 INACTIVE 状态且从 SMMU 转换缓冲区（TBU）断开后，可通过此接口关闭 DPU 电源。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;2-核心-4-信号握手机制4-wire-handshake-protocol&#34;&gt;2. 核心 4 信号握手机制（4-Wire Handshake Protocol）&lt;/h2&gt;
+&lt;p&gt;每个 Q-Channel 接口均包含以下 4 个标准信号：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;QACTIVE&lt;/code&gt;&lt;/strong&gt;（DPU -&amp;gt; 控制器，高有效）：&lt;strong&gt;活动状态/唤醒指示&lt;/strong&gt;。
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;1&lt;/code&gt;：DPU 内部有任务正在运行或有总线唤醒请求，无法关闭时钟/电源。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;0&lt;/code&gt;：DPU 已进入完全空闲状态，允许进入低功耗模式。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;QREQn&lt;/code&gt;&lt;/strong&gt;（控制器 -&amp;gt; DPU，低有效）：&lt;strong&gt;低功耗请求信号&lt;/strong&gt;。
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;1&lt;/code&gt;：正常工作模式（时钟/电源开启）。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;0&lt;/code&gt;：控制器向 DPU 发起进入低功耗模式（关时钟或断电）的请求。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;QACCEPTn&lt;/code&gt;&lt;/strong&gt;（DPU -&amp;gt; 控制器，低有效）：&lt;strong&gt;请求接受应答&lt;/strong&gt;。
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;0&lt;/code&gt;：DPU 确认已处于空闲状态，同意进入低功耗模式。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;QDENY&lt;/code&gt;&lt;/strong&gt;（DPU -&amp;gt; 控制器，高有效）：&lt;strong&gt;请求拒绝应答&lt;/strong&gt;。
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;1&lt;/code&gt;：DPU 拒绝低功耗请求（例如握手期间收到了新的 APB 访问或预取请求），阻止系统切断电源/时钟。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;em&gt;(注：信号名前缀根据接口类型分为 &lt;code&gt;ACLK&lt;/code&gt; 或 &lt;code&gt;PWR&lt;/code&gt;，如 &lt;code&gt;ACLKQREQn&lt;/code&gt; / &lt;code&gt;PWRQREQn&lt;/code&gt;)。&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
     <item>
       <title>01 Exposure 三要素</title>
       <link>https://maliuping.github.io/posts/photography/01-exposure/</link>
@@ -83,6 +127,276 @@
 &lt;p&gt;&lt;code&gt;1/1000s&lt;/code&gt; → 曝光时间短 → 进光少 → 画面更暗&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;因此：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Linlon DPU hw blocks description</title>
+      <link>https://maliuping.github.io/posts/display/dpu/linlon_block/</link>
+      <pubDate>Wed, 23 Sep 2026 11:15:14 +0800</pubDate>
+      <guid>https://maliuping.github.io/posts/display/dpu/linlon_block/</guid>
+      <description>&lt;p&gt;Linlon-D6 显示处理器（DPU）在 &lt;strong&gt;&lt;code&gt;GLB_CORE_INFO&lt;/code&gt;&lt;/strong&gt; 寄存器的 &lt;strong&gt;&lt;code&gt;NUM_BLOCKS&lt;/code&gt;&lt;/strong&gt; 字段中定义了总共有 &lt;strong&gt;&lt;code&gt;0x23&lt;/code&gt;（即 35 个）&lt;/strong&gt; 基础寄存器块。&lt;/p&gt;
+&lt;p&gt;这些寄存器块按照 &lt;code&gt;0x00200&lt;/code&gt;（512 字节）的步长，连续分布在偏移地址 &lt;code&gt;0x00000&lt;/code&gt; 到 &lt;code&gt;0x045FF&lt;/code&gt; 的内存空间中。具体清单如下：&lt;/p&gt;
+&lt;h1 id=&#34;35-个基础寄存器块清单block-0x00--block-0x22&#34;&gt;35 个基础寄存器块清单（Block 0x00 ~ Block 0x22）&lt;/h1&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th style=&#34;text-align: center&#34;&gt;块编号 (Index)&lt;/th&gt;
+					&lt;th style=&#34;text-align: center&#34;&gt;偏移地址 (Offset Range)&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;寄存器块名称 (Block Name)&lt;/th&gt;
+					&lt;th style=&#34;text-align: center&#34;&gt;&lt;strong&gt;BLOCK_TYPE&lt;/strong&gt;&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;块类型说明 (Block Type Description)&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x00 (0)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x00000 - 0x001FF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;GCU&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x00&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;全局控制单元 (Global Control Unit)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x01 (1)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x00200 - 0x003FF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;LPU0&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x01&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;LPU 控制块 (LPU Control)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x02 (2)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x00400 - 0x005FF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;LPU0_LAYER0&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x10&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;输入图层块 (Rich Layer 0)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x03 (3)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x00600 - 0x007FF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;LPU0_LAYER1&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x10&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;输入图层块 (Simple Layer 1)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x04 (4)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x00800 - 0x009FF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;LPU0_LAYER2&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x10&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;输入图层块 (Rich Layer 2)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x05 (5)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x00A00 - 0x00BFF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;LPU0_LAYER3&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x10&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;输入图层块 (Simple Layer 3)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x06 (6)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x00C00 - 0x00DFF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;LPU0_LAYER_WR&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x11&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;内存回写图层块 (Write-back Layer)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x07 (7)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x00E00 - 0x00FFF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;CU0&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x02&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;CU 合成单元控制块 (Composition Unit)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x08 (8)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x01000 - 0x011FF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;CU0_LINE_SPLITTER&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x20&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;行拆分器块 (Line Splitter)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x09 (9)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x01200 - 0x013FF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;CU0_SCALER0&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x21&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;缩放引擎块 (Scaler Engine 0)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x0A (10)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x01400 - 0x015FF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;CU0_SCALER1&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x21&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;缩放引擎块 (Scaler Engine 1)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x0B (11)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x01600 - 0x017FF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;CU0_LINE_MERGER&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x22&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;行合并器块 (Line Merger)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x0C (12)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x01800 - 0x019FF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;DOU0&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x03&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;DOU 显示输出单元控制块&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x0D (13)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x01A00 - 0x01BFF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;DOU0_IPS&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x30&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;图像处理子系统 (IPS)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x0E (14)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x01C00 - 0x01DFF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;DOU0_IPS_FCOEFF&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x32&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;前向变换 LUT 系数表 (FT Coeff)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x0F (15)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x01E00 - 0x01FFF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;DOU0_BS&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x31&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;后端子系统 (Backend Subsystem)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x10 (16)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x02000 - 0x021FF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;RESERVED&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0xFF&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;系统保留块 (Reserved Block)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x11 (17)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x02200 - 0x023FF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;LPU1&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x01&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;LPU 控制块 (LPU Control)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x12 (18)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x02400 - 0x025FF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;LPU1_LAYER0&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x10&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;输入图层块 (Rich Layer 0)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x13 (19)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x02600 - 0x027FF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;LPU1_LAYER1&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x10&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;输入图层块 (Simple Layer 1)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x14 (20)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x02800 - 0x029FF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;LPU1_LAYER2&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x10&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;输入图层块 (Rich Layer 2)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x15 (21)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x02A00 - 0x02BFF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;LPU1_LAYER3&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x10&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;输入图层块 (Simple Layer 3)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x16 (22)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x02C00 - 0x02DFF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;LPU1_LAYER_WR&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x11&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;内存回写图层块 (Write-back Layer)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x17 (23)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x02E00 - 0x02FFF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;CU1&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x02&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;CU 合成单元控制块 (Composition Unit)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x18 (24)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x03000 - 0x031FF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;CU1_LINE_SPLITTER&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x20&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;行拆分器块 (Line Splitter)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x19 (25)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x03200 - 0x033FF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;CU1_SCALER0&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x21&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;缩放引擎块 (Scaler Engine 0)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x1A (26)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x03400 - 0x035FF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;CU1_SCALER1&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x21&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;缩放引擎块 (Scaler Engine 1)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x1B (27)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x03600 - 0x037FF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;CU1_LINE_MERGER&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x22&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;行合并器块 (Line Merger)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x1C (28)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x03800 - 0x039FF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;DOU1&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x03&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;DOU 显示输出单元控制块&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x1D (29)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x03A00 - 0x03BFF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;DOU1_IPS&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x30&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;图像处理子系统 (IPS)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x1E (30)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x03C00 - 0x03DFF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;DOU1_IPS_FCOEFF&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x32&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;前向变换 LUT 系数表 (FT Coeff)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x1F (31)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x03E00 - 0x03FFF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;DOU1_BS&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x31&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;后端子系统 (Backend Subsystem)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x20 (32)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x04000 - 0x041FF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;GLB_LT_COEFF0&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x05&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;全局图层变换 LUT 系数表 0&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x21 (33)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x04200 - 0x043FF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;GLB_LT_COEFF1&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x05&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;全局图层变换 LUT 系数表 1&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;0x22 (34)&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;code&gt;0x04400 - 0x045FF&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;GLB_LT_COEFF2&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;&lt;strong&gt;&lt;code&gt;0x05&lt;/code&gt;&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;全局图层变换 LUT 系数表 2&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;hr&gt;
+&lt;h1 id=&#34;额外高地址块special--secure-register-pages&#34;&gt;额外高地址块（Special / Secure Register Pages）&lt;/h1&gt;
+&lt;p&gt;除了上述 35 个基础 Block 外，手册在更位高地址空间还单独定义了以下扩展/安全块：&lt;/p&gt;</description>
     </item>
     <item>
       <title>Probe fail 排查思路</title>
