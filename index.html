@@ -339,6 +339,25 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">Linlon q-channel 软件配合说明
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>1. 概述 DPU 的 Q-Channel 是 DPU 与外部电源控制器之间的低功耗握手接口。它不是一个单独的“Q-Channel 驱动”，而是由显示驱动、Linux runtime PM/genpd 框架和 PMCTRL 驱动共同配合完成：
+DPU/linlondp 驱动：负责让 DPU 停止工作，进入 INACTIVE，断开 TBU，关闭中断和时钟。 PMCTRL/genpd 驱动：负责发起 Q-Channel 请求，等待 DPU 应答，然后完成时钟、隔离、复位和电源开关控制。 DPU 硬件：输出 PWRQACTIVE、PWRQACCEPTn、PWRQDENY，表示自身是否已经可以下电。 简而言之：
+DPU 驱动负责“我可以断电了”，PMCTRL 驱动负责“开始执行断电握手”。
+2. Q-Channel 信号和寄存器 2.1 信号语义 Soc VO 电源域使用 DPU 的 PWR Q-Channel：
+信号 方向 含义 PWRQREQn PMCTRL -&gt; DPU 电源请求，低有效。1 请求上电，0 请求下电 PWRQACCEPTn DPU -&gt; PMCTRL 请求应答，低有效。1 表示未接受下电，0 表示接受下电 PWRQDENY DPU -&gt; PMCTRL DPU 拒绝下电请求 PWRQACTIVE DPU -&gt; PMCTRL DPU 是否仍然活跃。只有为 0 时才允许下电 2.2 SOC 寄存器 PMCTRL 中对应寄存器为 DPU_PWR_HS，物理地址为：0x14000000
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-10-24 01:02:13 +0800 +0800'>October 24, 2026</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>Logan</span></footer>
+  <a class="entry-link" aria-label="post link to Linlon q-channel 软件配合说明" href="https://maliuping.github.io/posts/linux/display/dpu/dpu_q-chanel_software/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">Linlon q-channel
     </h2>
   </header>
@@ -514,23 +533,6 @@ FPGA（基于 FPGA 的原型验证）： 在设计流程后期但早于真实硅
 
 <span title='2026-08-04 13:11:39 +0800 +0800'>August 4, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>Logan</span></footer>
   <a class="entry-link" aria-label="post link to 芯片原型验证与软件先行战略-3" href="https://maliuping.github.io/posts/book/fpmm/prototype_verification-software_first/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">phy protocol interface
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>ppi(phy protocol interface)用于实现phy lane mode和controller之间的连接。这里描述的接口旨在具有通用性，能够适用于各种情况。
-下表中定义了ppi中使用的信号，对于具有多个数据通道的phy, 每个通道都是用一组ppi信号。每个信号已被分配到下面六个类别之一：
-1）High-Speed transmit signals 2）High-Speed receive signals 3）Escape mode transmit signals 4）Escape mode receive signals 5）control signals 6）error signals symbol Dir categories des High-Speed transmit signals TxDataWidthHS [1:0] I 高速传输数据总线宽度选择 TxWordClkHS O 高速传输字时钟。该信号用于同步高速传输时钟域中的 PPI 信号, 建议所有传输Lane 模块共享一个 TxWordClkHS 信号 TxDataHS[7:0] I 高速传输数据总线宽度 TxWordValidHS[0] I 高速发送字数据有效 TxRequestHs TxWordValidHS 和 TxDataHS的关系 为啥需要 TxWordValidHS ?
-...</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-08-01 14:39:17 +0800 +0800'>August 1, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>Logan</span></footer>
-  <a class="entry-link" aria-label="post link to phy protocol interface" href="https://maliuping.github.io/posts/display/dphy/phy_protocol_interface/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

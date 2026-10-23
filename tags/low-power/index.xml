@@ -6,8 +6,61 @@
     <description>Recent content in Low Power on Logan&#39;s Lab</description>
     <generator>Hugo</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Mon, 12 Oct 2026 11:46:13 +0800</lastBuildDate>
+    <lastBuildDate>Sat, 24 Oct 2026 01:02:13 +0800</lastBuildDate>
     <atom:link href="https://maliuping.github.io/tags/low-power/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Linlon q-channel 软件配合说明</title>
+      <link>https://maliuping.github.io/posts/linux/display/dpu/dpu_q-chanel_software/</link>
+      <pubDate>Sat, 24 Oct 2026 01:02:13 +0800</pubDate>
+      <guid>https://maliuping.github.io/posts/linux/display/dpu/dpu_q-chanel_software/</guid>
+      <description>&lt;h2 id=&#34;1-概述&#34;&gt;1. 概述&lt;/h2&gt;
+&lt;p&gt;DPU 的 Q-Channel 是 DPU 与外部电源控制器之间的低功耗握手接口。它不是一个单独的“Q-Channel 驱动”，而是由显示驱动、Linux runtime PM/genpd 框架和 PMCTRL 驱动共同配合完成：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;DPU/linlondp 驱动：负责让 DPU 停止工作，进入 &lt;code&gt;INACTIVE&lt;/code&gt;，断开 TBU，关闭中断和时钟。&lt;/li&gt;
+&lt;li&gt;PMCTRL/genpd 驱动：负责发起 Q-Channel 请求，等待 DPU 应答，然后完成时钟、隔离、复位和电源开关控制。&lt;/li&gt;
+&lt;li&gt;DPU 硬件：输出 &lt;code&gt;PWRQACTIVE&lt;/code&gt;、&lt;code&gt;PWRQACCEPTn&lt;/code&gt;、&lt;code&gt;PWRQDENY&lt;/code&gt;，表示自身是否已经可以下电。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;简而言之：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;DPU 驱动负责“我可以断电了”，PMCTRL 驱动负责“开始执行断电握手”。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;2-q-channel-信号和寄存器&#34;&gt;2. Q-Channel 信号和寄存器&lt;/h2&gt;
+&lt;h3 id=&#34;21-信号语义&#34;&gt;2.1 信号语义&lt;/h3&gt;
+&lt;p&gt;Soc VO 电源域使用 DPU 的 PWR Q-Channel：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;信号&lt;/th&gt;
+					&lt;th&gt;方向&lt;/th&gt;
+					&lt;th&gt;含义&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;PWRQREQn&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;PMCTRL -&amp;gt; DPU&lt;/td&gt;
+					&lt;td&gt;电源请求，低有效。&lt;code&gt;1&lt;/code&gt; 请求上电，&lt;code&gt;0&lt;/code&gt; 请求下电&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;PWRQACCEPTn&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;DPU -&amp;gt; PMCTRL&lt;/td&gt;
+					&lt;td&gt;请求应答，低有效。&lt;code&gt;1&lt;/code&gt; 表示未接受下电，&lt;code&gt;0&lt;/code&gt; 表示接受下电&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;PWRQDENY&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;DPU -&amp;gt; PMCTRL&lt;/td&gt;
+					&lt;td&gt;DPU 拒绝下电请求&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;PWRQACTIVE&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;DPU -&amp;gt; PMCTRL&lt;/td&gt;
+					&lt;td&gt;DPU 是否仍然活跃。只有为 &lt;code&gt;0&lt;/code&gt; 时才允许下电&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;22-soc-寄存器&#34;&gt;2.2 SOC 寄存器&lt;/h3&gt;
+&lt;p&gt;PMCTRL 中对应寄存器为 &lt;code&gt;DPU_PWR_HS&lt;/code&gt;，物理地址为：0x14000000&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Linlon q-channel</title>
       <link>https://maliuping.github.io/posts/display/dpu/linlon_q-channel/</link>
