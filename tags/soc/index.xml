@@ -6,52 +6,8 @@
     <description>Recent content in SOC on Logan&#39;s Lab</description>
     <generator>Hugo</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Mon, 12 Oct 2026 11:46:13 +0800</lastBuildDate>
+    <lastBuildDate>Wed, 23 Sep 2026 11:15:14 +0800</lastBuildDate>
     <atom:link href="https://maliuping.github.io/tags/soc/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Linlon q-channel</title>
-      <link>https://maliuping.github.io/posts/display/dpu/linlon_q-channel/</link>
-      <pubDate>Mon, 12 Oct 2026 11:46:13 +0800</pubDate>
-      <guid>https://maliuping.github.io/posts/display/dpu/linlon_q-channel/</guid>
-      <description>&lt;p&gt;在linlon-d6 显示处理器中，&lt;strong&gt;Q-Channel&lt;/strong&gt; 是遵循 AMBA 标准的硬件低功耗握手接口协议。它用于 DPU 与 SOC 外部的时钟/电源控制器之间进行自动化、安全的**外部时钟门控（Clock Gating）&lt;strong&gt;与&lt;/strong&gt;电源门控（Power Gating）**握手，确保 DPU 在空闲时能切断时钟或电源以降低功耗，而在有总线访问或显示任务时能被安全唤醒。&lt;/p&gt;
-&lt;p&gt;在linlon-d6 中，全局控制单元（GCU）实现了两个独立的 Q-Channel 接口：&lt;/p&gt;
-&lt;hr&gt;
-&lt;h2 id=&#34;1-两个-q-channel-接口&#34;&gt;1. 两个 Q-Channel 接口&lt;/h2&gt;
-&lt;ol&gt;
-&lt;li&gt;&lt;strong&gt;&lt;code&gt;ACLK&lt;/code&gt; 时钟 Q-Channel（External Clock Gating Interface）&lt;/strong&gt;：
-用于管理 DPU 主处理时钟 &lt;code&gt;ACLK&lt;/code&gt; 树的外部门控。当 DPU 所有模块处于空闲状态且所有图层数据已取完时，可关停外部 ACLK 时钟树以节省动态功耗。&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;电源 Q-Channel（Power Gating Interface）&lt;/strong&gt;：
-用于管理 DPU 全局电源域（&lt;code&gt;PWRGLB&lt;/code&gt;）的上电与下电序列。当 DPU 彻底进入 INACTIVE 状态且从 SMMU 转换缓冲区（TBU）断开后，可通过此接口关闭 DPU 电源。&lt;/li&gt;
-&lt;/ol&gt;
-&lt;hr&gt;
-&lt;h2 id=&#34;2-核心-4-信号握手机制4-wire-handshake-protocol&#34;&gt;2. 核心 4 信号握手机制（4-Wire Handshake Protocol）&lt;/h2&gt;
-&lt;p&gt;每个 Q-Channel 接口均包含以下 4 个标准信号：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;&lt;code&gt;QACTIVE&lt;/code&gt;&lt;/strong&gt;（DPU -&amp;gt; 控制器，高有效）：&lt;strong&gt;活动状态/唤醒指示&lt;/strong&gt;。
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;1&lt;/code&gt;：DPU 内部有任务正在运行或有总线唤醒请求，无法关闭时钟/电源。&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;0&lt;/code&gt;：DPU 已进入完全空闲状态，允许进入低功耗模式。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;&lt;code&gt;QREQn&lt;/code&gt;&lt;/strong&gt;（控制器 -&amp;gt; DPU，低有效）：&lt;strong&gt;低功耗请求信号&lt;/strong&gt;。
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;1&lt;/code&gt;：正常工作模式（时钟/电源开启）。&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;0&lt;/code&gt;：控制器向 DPU 发起进入低功耗模式（关时钟或断电）的请求。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;&lt;code&gt;QACCEPTn&lt;/code&gt;&lt;/strong&gt;（DPU -&amp;gt; 控制器，低有效）：&lt;strong&gt;请求接受应答&lt;/strong&gt;。
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;0&lt;/code&gt;：DPU 确认已处于空闲状态，同意进入低功耗模式。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;&lt;code&gt;QDENY&lt;/code&gt;&lt;/strong&gt;（DPU -&amp;gt; 控制器，高有效）：&lt;strong&gt;请求拒绝应答&lt;/strong&gt;。
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;1&lt;/code&gt;：DPU 拒绝低功耗请求（例如握手期间收到了新的 APB 访问或预取请求），阻止系统切断电源/时钟。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;em&gt;(注：信号名前缀根据接口类型分为 &lt;code&gt;ACLK&lt;/code&gt; 或 &lt;code&gt;PWR&lt;/code&gt;，如 &lt;code&gt;ACLKQREQn&lt;/code&gt; / &lt;code&gt;PWRQREQn&lt;/code&gt;)。&lt;/em&gt;&lt;/p&gt;</description>
-    </item>
     <item>
       <title>Linlon DPU hw blocks description</title>
       <link>https://maliuping.github.io/posts/display/dpu/linlon_block/</link>
