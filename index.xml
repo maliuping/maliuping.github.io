@@ -6,8 +6,27 @@
     <description>Recent content on Logan&#39;s Lab</description>
     <generator>Hugo</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Sat, 24 Oct 2026 01:02:13 +0800</lastBuildDate>
+    <lastBuildDate>Fri, 20 Nov 2026 11:07:17 +0800</lastBuildDate>
     <atom:link href="https://maliuping.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Dumb Buffer 从 DRM Core 到 Display Driver 的完整处理流程</title>
+      <link>https://maliuping.github.io/posts/linux/display/drm/dumb_buffer/</link>
+      <pubDate>Fri, 20 Nov 2026 11:07:17 +0800</pubDate>
+      <guid>https://maliuping.github.io/posts/linux/display/drm/dumb_buffer/</guid>
+      <description>&lt;h2 id=&#34;1-概述&#34;&gt;1. 概述&lt;/h2&gt;
+&lt;p&gt;在 Linux DRM（Direct Rendering Manager）框架中，Dumb Buffer 是 DRM 提供的一种简单 Buffer 分配机制，主要用于显示场景下的基础图像缓冲区管理。&lt;/p&gt;
+&lt;p&gt;用户态可以通过 libdrm 提供的 &lt;code&gt;drmModeCreateDumb()&lt;/code&gt; 创建 Buffer，通过 &lt;code&gt;mmap()&lt;/code&gt; 映射到用户空间，完成图像数据填充，最后通过 &lt;code&gt;drmModeAddFB2()&lt;/code&gt; 将 Buffer 封装为 Framebuffer，再通过 DRM KMS 的 Plane、CRTC 等对象完成显示。&lt;/p&gt;
+&lt;p&gt;整个过程涉及三个重要概念：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Dumb Buffer&lt;/strong&gt;：DRM UAPI 提供的基础 Buffer 分配接口。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;GEM Object&lt;/strong&gt;：DRM 内核中的通用图形内存管理对象。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Framebuffer&lt;/strong&gt;：KMS 中描述图像数据格式、尺寸、Stride 以及底层 GEM Object 的对象。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;需要特别注意：Dumb Buffer 并不是一种独立的内存管理机制，它通常建立在 GEM 内存管理框架之上。&lt;/p&gt;
+&lt;p&gt;DRM Core 负责通用的 UAPI、对象管理和调用流程，具体的内存分配、DMA 地址管理以及显示硬件配置则由 DRM Driver 负责。&lt;/p&gt;
+&lt;h2 id=&#34;2-dumb-buffer-整体处理流程&#34;&gt;2. Dumb Buffer 整体处理流程&lt;/h2&gt;
+&lt;p&gt;以用户态通过 libdrm 的 &lt;code&gt;drmModeCreateDumb()&lt;/code&gt; 创建一个 XRGB8888 Buffer 为例，完整调用流程如下：&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Linlon q-channel 软件配合说明</title>
       <link>https://maliuping.github.io/posts/linux/display/dpu/dpu_q-chanel_software/</link>

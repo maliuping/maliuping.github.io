@@ -6,8 +6,22 @@
     <description>Recent content in Tags on Logan&#39;s Lab</description>
     <generator>Hugo</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Sat, 24 Oct 2026 01:02:13 +0800</lastBuildDate>
+    <lastBuildDate>Fri, 20 Nov 2026 11:07:17 +0800</lastBuildDate>
     <atom:link href="https://maliuping.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>DRM</title>
+      <link>https://maliuping.github.io/tags/drm/</link>
+      <pubDate>Fri, 20 Nov 2026 11:07:17 +0800</pubDate>
+      <guid>https://maliuping.github.io/tags/drm/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Linux</title>
+      <link>https://maliuping.github.io/tags/linux/</link>
+      <pubDate>Fri, 20 Nov 2026 11:07:17 +0800</pubDate>
+      <guid>https://maliuping.github.io/tags/linux/</guid>
+      <description></description>
+    </item>
     <item>
       <title>DPU</title>
       <link>https://maliuping.github.io/tags/dpu/</link>
@@ -48,13 +62,6 @@
       <link>https://maliuping.github.io/tags/debug/</link>
       <pubDate>Thu, 03 Sep 2026 16:18:46 +0800</pubDate>
       <guid>https://maliuping.github.io/tags/debug/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Linux</title>
-      <link>https://maliuping.github.io/tags/linux/</link>
-      <pubDate>Thu, 03 Sep 2026 16:18:46 +0800</pubDate>
-      <guid>https://maliuping.github.io/tags/linux/</guid>
       <description></description>
     </item>
     <item>
@@ -111,13 +118,6 @@
       <link>https://maliuping.github.io/tags/ulps/</link>
       <pubDate>Tue, 30 Jun 2026 23:46:46 +0800</pubDate>
       <guid>https://maliuping.github.io/tags/ulps/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>DRM</title>
-      <link>https://maliuping.github.io/tags/drm/</link>
-      <pubDate>Fri, 26 Jun 2026 17:35:25 +0800</pubDate>
-      <guid>https://maliuping.github.io/tags/drm/</guid>
       <description></description>
     </item>
     <item>

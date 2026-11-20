@@ -325,6 +325,26 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">Dumb Buffer 从 DRM Core 到 Display Driver 的完整处理流程
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>1. 概述 在 Linux DRM（Direct Rendering Manager）框架中，Dumb Buffer 是 DRM 提供的一种简单 Buffer 分配机制，主要用于显示场景下的基础图像缓冲区管理。
+用户态可以通过 libdrm 提供的 drmModeCreateDumb() 创建 Buffer，通过 mmap() 映射到用户空间，完成图像数据填充，最后通过 drmModeAddFB2() 将 Buffer 封装为 Framebuffer，再通过 DRM KMS 的 Plane、CRTC 等对象完成显示。
+整个过程涉及三个重要概念：
+Dumb Buffer：DRM UAPI 提供的基础 Buffer 分配接口。 GEM Object：DRM 内核中的通用图形内存管理对象。 Framebuffer：KMS 中描述图像数据格式、尺寸、Stride 以及底层 GEM Object 的对象。 需要特别注意：Dumb Buffer 并不是一种独立的内存管理机制，它通常建立在 GEM 内存管理框架之上。
+DRM Core 负责通用的 UAPI、对象管理和调用流程，具体的内存分配、DMA 地址管理以及显示硬件配置则由 DRM Driver 负责。
+2. Dumb Buffer 整体处理流程 以用户态通过 libdrm 的 drmModeCreateDumb() 创建一个 XRGB8888 Buffer 为例，完整调用流程如下：
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-11-20 11:07:17 +0800 +0800'>November 20, 2026</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>Logan</span></footer>
+  <a class="entry-link" aria-label="post link to Dumb Buffer 从 DRM Core 到 Display Driver 的完整处理流程" href="https://maliuping.github.io/posts/linux/display/drm/dumb_buffer/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">Drm_atomic_state如何构造
     </h2>
   </header>
