@@ -325,6 +325,22 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">Linlon DPU 数据结构与对象模型
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Linlon DPU 数据结构与对象模型 1. 三类对象 驱动的数据结构可分为三层：设备/硬件能力对象、DRM 公共对象、atomic 私有资源对象。
+classDiagram class linlondp_drv { mdev kms resume_wq resume_done } class linlondp_dev { reg_base aclk irq dpmode struct linlondp_pipeline pipelines[] funcs chip_data iommu } class dp_dev { gcu_addr struct dp_pipeline pipes[] capability fields coefficient managers } class linlondp_kms_dev { drm_device base crtcs[] } class linlondp_pipeline { drm_private_obj obj layers[] scalers[] compiz improc ctrlr } class linlondp_component { drm_private_obj obj supported_inputs supported_outputs funcs } linlondp_drv *-- linlondp_dev linlondp_drv *-- linlondp_kms_dev linlondp_dev *-- linlondp_pipeline linlondp_dev *-- dp_dev : chip_data linlondp_kms_dev *-- drm_device linlondp_pipeline *-- linlondp_component dp_dev o-- linlondp_pipeline : hardware subclass 2. 顶层所有权 linlondp_drv 它是 platform device 的 driver data，协调两个主要子系统：
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-11-24 12:14:24 +0800 +0800'>November 24, 2026</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>Logan</span></footer>
+  <a class="entry-link" aria-label="post link to Linlon DPU 数据结构与对象模型" href="https://maliuping.github.io/posts/linux/display/dpu/02-data-structures/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">Linlon q-channel 软件配合说明
     </h2>
   </header>

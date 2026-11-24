@@ -2,29 +2,35 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://maliuping.github.io/categories/</loc>
+    <lastmod>2026-11-24T12:14:24+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/categories/display/</loc>
+    <lastmod>2026-11-24T12:14:24+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/tags/dpu/</loc>
+    <lastmod>2026-11-24T12:14:24+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/posts/linux/display/dpu/02-data-structures/</loc>
+    <lastmod>2026-11-24T12:14:24+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/tags/linux/</loc>
+    <lastmod>2026-11-24T12:14:24+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/</loc>
+    <lastmod>2026-11-24T12:14:24+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/posts/</loc>
+    <lastmod>2026-11-24T12:14:24+08:00</lastmod>
+  </url><url>
+    <loc>https://maliuping.github.io/tags/</loc>
+    <lastmod>2026-11-24T12:14:24+08:00</lastmod>
+  </url><url>
     <loc>https://maliuping.github.io/tags/drm/</loc>
     <lastmod>2026-11-20T11:07:17+08:00</lastmod>
   </url><url>
     <loc>https://maliuping.github.io/posts/linux/display/drm/dumb_buffer/</loc>
     <lastmod>2026-11-20T11:07:17+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/tags/linux/</loc>
-    <lastmod>2026-11-20T11:07:17+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/</loc>
-    <lastmod>2026-11-20T11:07:17+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/posts/</loc>
-    <lastmod>2026-11-20T11:07:17+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/tags/</loc>
-    <lastmod>2026-11-20T11:07:17+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/categories/</loc>
-    <lastmod>2026-10-24T01:02:13+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/tags/dpu/</loc>
-    <lastmod>2026-10-24T01:02:13+08:00</lastmod>
   </url><url>
     <loc>https://maliuping.github.io/posts/linux/display/dpu/dpu_q-chanel_software/</loc>
     <lastmod>2026-10-24T01:02:13+08:00</lastmod>
@@ -67,9 +73,6 @@
   </url><url>
     <loc>https://maliuping.github.io/posts/linux/misc/probe_fail/</loc>
     <lastmod>2026-09-03T16:18:46+08:00</lastmod>
-  </url><url>
-    <loc>https://maliuping.github.io/categories/display/</loc>
-    <lastmod>2026-08-23T12:14:24+08:00</lastmod>
   </url><url>
     <loc>https://maliuping.github.io/posts/linux/display/dpu/01-architecture/</loc>
     <lastmod>2026-08-23T12:14:24+08:00</lastmod>
