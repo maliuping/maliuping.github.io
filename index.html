@@ -339,6 +339,26 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">Strides
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>STRIDE（内存跨步 / 行跨步）本质上就是告诉 DPU 硬件（DMA 读写模块）在内存中读/写完当前行之后，需要偏移（跳过）多少个字节才能到达下一行的起始地址。
+要直观理解 STRIDE 的作用，可以从以下几个角度来看：
+1. 为什么需要 STRIDE？（二维图像 vs 一维内存） 画面是二维的（宽 × 高）：屏幕上显示的是有行、有列的矩形图像。 内存是一维的（Flat Address）：DDR 内存空间是一条连续的物理字节地址线。 当 DMA 在内存中顺序读完第一行的像素数据（共 HSIZE 个像素）后，硬件不能盲目地紧接着读下一个字节作为第二行的开头。因为在实际工程中，存在以下三种常见情况：
+① 内存对齐（Alignment / Padding） 为了提升总线传输效率，内存分配器（如 Linux DRM/DMA-BUF）要求每行的起始地址必须满足特定的物理对齐。
+例如：图像一行有效数据只有 768 字节，但内存分配按 1024 字节对齐。此时每行末尾有 256 字节的空填充（Padding）。 硬件读完 768 字节后，必须通过 STRIDE = 1024 才知道要跳过这 256 字节的无用数据，去正确的位置读取下一行。 ② 大图裁剪/小图抠取（Sub-surface / ROI） 假设内存里有一张 1920×1080 的大背景图，你只想读取其中左上角 256×256 的区域作为一个图层：
+此时 LS_IN_SIZE 告诉 IP 每次只读 256 个像素。 但读完第一行的 256 个像素后，下一行开头的像素在内存里隔着整张大图一行的距离（1920 像素的字节数）。 此时把 STRIDE 配置为大图的行字节数（1920 × bpp），IP 就能顺畅地在大图内存里把这 256×256 的小块“抠”出来。 ③ 图像垂直翻转（VFLIP / 负 Stride） dpu 支持将 STRIDE 配置为负数（补码形式）。
+...</p>
+  </div>
+  <footer class="entry-footer">
+
+<span title='2026-11-27 13:46:46 +0800 +0800'>November 27, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>Logan</span></footer>
+  <a class="entry-link" aria-label="post link to Strides" href="https://maliuping.github.io/posts/disp-fundamentals/strides/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">Linlon DPU 数据结构与对象模型
     </h2>
   </header>
@@ -515,27 +535,6 @@ QACTIVE（DPU -&gt; 控制器，高有效）：活动状态/唤醒指示。 1：
 
 <span title='2026-08-19 20:20:11 +0800 +0800'>August 19, 2026</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>Logan</span></footer>
   <a class="entry-link" aria-label="post link to AXI Read Signal 中 Burst 的理解" href="https://maliuping.github.io/posts/soc/bus/axi_read_signal_burst/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">原型验证方法介绍—1
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>fpmm 总共介绍了 5 种 具体的原型验证方法：
-虚拟平台 (Virtual Platforms)： 这是在项目最早阶段即可使用的原型。它们是 SoC、电路板、虚拟 I/O 和用户界面的全功能但时序松散（loosely-timed）的软件模型，运行在主机仿真环境中。其优势在于极高的系统可见性和控制力，且易于分发给多位用户。
-SDK（软件开发工具包）： 这是非常通用的原型验证环境（如 iPhone SDK）。其目标是提供“足够的精度”来欺骗应用程序，使其认为运行在最终平台上。开发者通常在高级 API 之上进行编程，代码首先在主机上编译验证，之后再针对目标处理器重新编译。
-FPGA（基于 FPGA 的原型验证）： 在设计流程后期但早于真实硅片可用。它是 SoC、电路板和 I/O 的全功能硬件表示，使用与 SoC 相同的 RTL 代码。其核心优势是运行速度快（可达数十 MIPS）且具有 RTL 级的精度，能够连接真实外部接口进行测试。
-硬件仿真器 (Emulators)： 另一种硬件辅助手段，侧重于自动化映射而非执行性能。它具有更短的编译时间和高度自动化的 RTL 映射流程，但运行速度通常低于 1 MIPS。由于速度慢且成本极其昂贵，它常被视为仿真环境的加速扩展，主要用于短时任务（如 Boot ROM 调试）。
-首片硅片 (First Silicon)： 在真实芯片流片回来后，利用首批样品制作的原型板。虽然它的执行速度最快（实时）且精度 100%，但在设计流程中出现最晚，无法为软件开发提供领先优势。此外，其内部调试可见性非常有限。
-这些方法在可用时间、执行速度、精度、容量、开发成本和调试能力等维度上各有利弊，用户需根据项目优先级进行选择。
-</p>
-  </div>
-  <footer class="entry-footer">
-
-<span title='2026-08-07 00:42:59 +0800 +0800'>August 7, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>Logan</span></footer>
-  <a class="entry-link" aria-label="post link to 原型验证方法介绍—1" href="https://maliuping.github.io/posts/book/fpmm/prototype_verification_methods_overview/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

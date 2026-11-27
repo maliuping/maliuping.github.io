@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Strides on Logan&#39;s Lab</title>
+    <link>https://maliuping.github.io/tags/strides/</link>
+    <description>Recent content in Strides on Logan&#39;s Lab</description>
+    <generator>Hugo</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Fri, 27 Nov 2026 13:46:46 +0800</lastBuildDate>
+    <atom:link href="https://maliuping.github.io/tags/strides/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Strides</title>
+      <link>https://maliuping.github.io/posts/disp-fundamentals/strides/</link>
+      <pubDate>Fri, 27 Nov 2026 13:46:46 +0800</pubDate>
+      <guid>https://maliuping.github.io/posts/disp-fundamentals/strides/</guid>
+      <description>&lt;p&gt;&lt;code&gt;STRIDE&lt;/code&gt;（内存跨步 / 行跨步）本质上就是&lt;strong&gt;告诉 DPU 硬件（DMA 读写模块）在内存中读/写完当前行之后，需要偏移（跳过）多少个字节才能到达下一行的起始地址&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;要直观理解 &lt;code&gt;STRIDE&lt;/code&gt; 的作用，可以从以下几个角度来看：&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;1-为什么需要-stride二维图像-vs-一维内存&#34;&gt;1. 为什么需要 &lt;code&gt;STRIDE&lt;/code&gt;？（二维图像 vs 一维内存）&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;画面是二维的（宽 × 高）&lt;/strong&gt;：屏幕上显示的是有行、有列的矩形图像。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;内存是一维的（Flat Address）&lt;/strong&gt;：DDR 内存空间是一条连续的物理字节地址线。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;当 DMA 在内存中顺序读完第一行的像素数据（共 &lt;code&gt;HSIZE&lt;/code&gt; 个像素）后，硬件不能盲目地紧接着读下一个字节作为第二行的开头。因为在实际工程中，存在以下三种常见情况：&lt;/p&gt;
+&lt;h4 id=&#34;-内存对齐alignment--padding&#34;&gt;① 内存对齐（Alignment / Padding）&lt;/h4&gt;
+&lt;p&gt;为了提升总线传输效率，内存分配器（如 Linux DRM/DMA-BUF）要求每行的起始地址必须满足特定的物理对齐。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;em&gt;例如&lt;/em&gt;：图像一行有效数据只有 768 字节，但内存分配按 1024 字节对齐。此时每行末尾有 256 字节的空填充（Padding）。&lt;/li&gt;
+&lt;li&gt;硬件读完 768 字节后，必须通过 &lt;code&gt;STRIDE = 1024&lt;/code&gt; 才知道要&lt;strong&gt;跳过这 256 字节的无用数据&lt;/strong&gt;，去正确的位置读取下一行。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;-大图裁剪小图抠取sub-surface--roi&#34;&gt;② 大图裁剪/小图抠取（Sub-surface / ROI）&lt;/h4&gt;
+&lt;p&gt;假设内存里有一张 &lt;strong&gt;1920×1080&lt;/strong&gt; 的大背景图，你只想读取其中左上角 &lt;strong&gt;256×256&lt;/strong&gt; 的区域作为一个图层：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;此时 &lt;code&gt;LS_IN_SIZE&lt;/code&gt; 告诉 IP 每次只读 &lt;strong&gt;256&lt;/strong&gt; 个像素。&lt;/li&gt;
+&lt;li&gt;但读完第一行的 256 个像素后，下一行开头的像素在内存里隔着整张大图一行的距离（1920 像素的字节数）。&lt;/li&gt;
+&lt;li&gt;此时把 &lt;code&gt;STRIDE&lt;/code&gt; 配置为大图的行字节数（&lt;code&gt;1920 × bpp&lt;/code&gt;），IP 就能顺畅地在大图内存里把这 256×256 的小块“抠”出来。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;-图像垂直翻转vflip--负-stride&#34;&gt;③ 图像垂直翻转（VFLIP / 负 Stride）&lt;/h4&gt;
+&lt;p&gt;dpu 支持将 &lt;code&gt;STRIDE&lt;/code&gt; 配置为&lt;strong&gt;负数（补码形式）&lt;/strong&gt;。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
